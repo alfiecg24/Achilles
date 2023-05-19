@@ -13,18 +13,21 @@
 
 #define LOG(logLevel, ...) loaderLog(logLevel, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
-typedef enum {
+typedef enum
+{
     FLAG_BOOL,
     FLAG_INT
 } flag_type_t;
-typedef struct {
+typedef struct
+{
     char *name;
     char *shortOpt;
     char *longOpt;
     char *description;
     char *examples;
     flag_type_t type;
-    union {
+    union
+    {
         bool boolVal;
         int intVal;
     };
