@@ -9,6 +9,19 @@ arg_t args[] = {
     {"Help", "-h", "--help", "Show this help message", NULL, FLAG_BOOL, false},
     {"Version", "-V", "--version", "Show version information", NULL, FLAG_BOOL, false}};
 
+arg_t *getArgByName(char *name)
+{
+    // Get an argument by its name
+    for (int i = 0; i < sizeof(args) / sizeof(arg_t); i++)
+    {
+        if (strcmp(args[i].name, name) == 0)
+        {
+            return &args[i];
+        }
+    }
+    return (arg_t *){NULL};
+}
+
 void printHelp()
 {
     // Print help information
@@ -74,15 +87,16 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (args[0].intVal == 0)
+    arg_t *verbosityArg = getArgByName("Verbosity");
+    if (verbosityArg->intVal == 0)
     {
         LOG(LOG_DEBUG, "Verbosity not set, defaulting to 1");
-        args[i].intVal = 1;
+        verbosityArg->intVal = 1;
     }
-    else if (args[0].intVal > 3)
+    else if (verbosityArg->intVal > 3)
     {
-        LOG(LOG_DEBUG, "Verbosity set to %d, max is 3", args[0].intVal);
-        args[i].intVal = 3;
+        LOG(LOG_DEBUG, "Verbosity set to %d, max is 3", verbosityArg->intVal);
+        verbosityArg->intVal = 3;
     }
 
     for (int i = 0; i < sizeof(args) / sizeof(arg_t); i++)
@@ -97,13 +111,13 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (args[2].boolVal)
+    if (getArgByName("Help")->boolVal)
     {
         printHelp();
         return 0;
     }
 
-    if (args[3].boolVal)
+    if (getArgByName("Version")->boolVal)
     {
         printVersion();
         return 0;

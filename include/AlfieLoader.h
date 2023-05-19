@@ -33,6 +33,8 @@ typedef struct
     };
 } arg_t;
 
+arg_t *getArgByName(char *name);
+
 extern arg_t args[];
 
 #endif // ALFIELOADER_H
