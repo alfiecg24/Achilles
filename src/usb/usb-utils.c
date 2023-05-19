@@ -1,7 +1,5 @@
 #include <usb/usb-utils.h>
 
-extern int verbosity;
-
 char *getDeviceSerialNumber(io_service_t device) {
     // get the serial number
     CFTypeRef serialNumber = IORegistryEntryCreateCFProperty(device, CFSTR("USB Serial Number"), kCFAllocatorDefault, 0);
@@ -59,41 +57,4 @@ io_service_t findDevice() {
     }
     LOG(LOG_FATAL, "ERROR: Failed to find device in DFU mode!");
     return -1;
-}
-
-struct dfu_device_t initDevice(io_service_t device)
-{
-    dfu_device_t dfuDevice;
-    dfuDevice.service = device;
-    dfuDevice.serial = parseSerialNumber(getDeviceSerialNumber(device));
-    return dfuDevice;
-}
-
-struct pwndfu_device_t initPwnedDevice(io_service_t device)
-{
-    pwndfu_device_t pwnedDevice;
-    pwnedDevice.service = device;
-    pwnedDevice.serial = parseSerialNumberPwned(getDeviceSerialNumber(device));
-    return pwnedDevice;
-}
-
-int isPwned(char *serialNumber) {
-    if (strncmp(serialNumber, "PWND", 4) != 0) {
-        LOG(LOG_DEBUG, "Serial number: %s", serialNumber);
-        return 1;
-    }
-
-    return 0;
-}
-
-int isSupported(int cpid) {
-    // check if CPID is supported
-	if (
-		cpid == 0x8960 || cpid == 0x7000 || cpid == 0x7001
-		|| cpid == 0x8000 || cpid == 0x8001 || cpid == 0x8003
-		|| cpid == 0x8010 || cpid == 0x8011 || cpid == 0x8012
-		|| cpid == 0x8015
-	
-	) return 0;
-	return 1;
 }

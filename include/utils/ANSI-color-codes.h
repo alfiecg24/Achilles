@@ -4,8 +4,6 @@
  * For more information, please refer to <https://unlicense.org>
  */
 
-// taken from https://github.com/palera1n/palera1n-c - thanks!
-
 #ifndef ANSI_COLOR_CODES_H
 #define ANSI_COLOR_CODES_H
 

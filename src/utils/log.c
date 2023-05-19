@@ -10,7 +10,7 @@
 
 // mostly taken from https://github.com/palera1n/palera1n-c - thanks!
 
-int loaderLog(log_level_t loglevel, int verbosity, const char *fname, int lineno, const char *fxname, const char *__restrict format, ...)
+int loaderLog(log_level_t loglevel, const char *fname, int lineno, const char *fxname, const char *__restrict format, ...)
 {
     pthread_mutex_t log_mutex;
     pthread_mutex_init(&log_mutex, NULL);
@@ -18,8 +18,8 @@ int loaderLog(log_level_t loglevel, int verbosity, const char *fname, int lineno
 	char type[0x10];
 	char colour[0x10];
 	char colour_bold[0x10];
-	va_list args;
-	va_start(args, format);
+	va_list logArgs;
+	va_start(logArgs, format);
 	switch (loglevel) {
 	case LOG_FATAL:
 		snprintf(type, 0x10, "%s", "Fatal");
@@ -47,6 +47,10 @@ int loaderLog(log_level_t loglevel, int verbosity, const char *fname, int lineno
         snprintf(colour_bold, 0x10, "%s", BGRN);
         break;
 	case LOG_DEBUG:
+		// check if debug is enabled
+		if (args[1].intVal == 0) {
+			return 0;
+		}
 		snprintf(type, 0x10, "%s", "Debug");
 		snprintf(colour, 0x10, "%s", MAG);
 		snprintf(colour_bold, 0x10, "%s", BMAG);
@@ -65,16 +69,16 @@ int loaderLog(log_level_t loglevel, int verbosity, const char *fname, int lineno
 		time(&curtime);
 		struct tm* timeinfo = localtime(&curtime);
 		snprintf(timestring, 0x80, "%s[%s%02d/%02d/%d %02d:%02d:%02d%s]", CRESET, HBLK, timeinfo->tm_mon + 1, timeinfo->tm_mday, timeinfo->tm_year - 100, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, CRESET);
-		if (verbosity == 3) {
+		if (args[0].intVal == 3) {
 			printf("%s%s%s <%s> " CRESET "%s" HBLU "%s"  CRESET ":" RED "%d" CRESET ":" BGRN "%s()" CRESET ":%s ", colour_bold, timestring, colour_bold, type, WHT, fname, lineno, fxname, colour_bold);
-		} else if (verbosity == 2) {
+		} else if (args[0].intVal == 2) {
 			printf("%s%s%s <%s>" CRESET ":%s ", colour_bold, timestring, colour_bold, type, colour_bold);
 		} else {
 			printf("%s<%s>%s: ", colour_bold, type, CRESET);
 		}
 		printf("%s", colour);
-		ret = vprintf(format, args);
-		va_end(args);
+		ret = vprintf(format, logArgs);
+		va_end(logArgs);
         printf(CRESET "\n");
 		fflush(stdout);
 	}

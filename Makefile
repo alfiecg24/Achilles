@@ -1,11 +1,16 @@
 CC=gcc
 SOURCES=src/main.c src/exploit/exploit.c src/exploit/dfu.c src/utils/log.c src/usb/usb-utils.c
 FRAMEWORKS=-framework IOKit -framework CoreFoundation
-# Search for header files in include/
 CFLAGS=-Iinclude
+OUTPUT=build/AlfieLoader
 
-all: exploit
+all: dirs AlfieLoader
 
-exploit: $(SOURCES)
+dirs:
 	@mkdir -p build
-	@$(CC) $(FRAMEWORKS) $(CFLAGS) -o build/AlfieLoader $(SOURCES)
+
+clean:
+	@rm -rf build
+
+AlfieLoader: $(SOURCES)
+	@$(CC) $(FRAMEWORKS) $(CFLAGS) -o $(OUTPUT) $(SOURCES)
