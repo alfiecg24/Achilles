@@ -1,5 +1,5 @@
 CC=gcc
-SOURCES=src/main.c src/exploit/exploit.c src/exploit/dfu.c src/utils/log.c src/usb/usb-utils.c
+SOURCES=src/main.c src/exploit/exploit.c src/exploit/dfu.c src/utils/log.c src/usb/usb.c
 FRAMEWORKS=-framework IOKit -framework CoreFoundation
 CFLAGS=-Iinclude
 OUTPUT=build/AlfieLoader

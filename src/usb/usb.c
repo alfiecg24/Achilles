@@ -1,4 +1,4 @@
-#include <usb/usb-utils.h>
+#include <usb/usb.h>
 
 char *getDeviceSerialNumber(io_service_t device)
 {

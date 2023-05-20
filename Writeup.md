@@ -35,3 +35,5 @@ In addition to this, I added a Makefile so all I have to do is type `make` and i
 This gave me the foundations to build the project on and saved a lot of time that wouldv'e been spent cleaning up the project later on.
 
 ## USB
+
+First of all, I had to write the initial functions to find the device, connect to it and read it's serial number. You can see the relevant functions in `src/usb.c`. I then wrote some necessary code for the basic handling of DFU mode devices - such as parsing the serial number and created structures to hold the device information. This can be seen in `src/exploit/dfu.c`.

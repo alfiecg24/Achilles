@@ -5,7 +5,7 @@ A pre-boot execution environment for Apple mobile devices vulnerable to checkm8 
 
 ## What does it do?
 In its current state, this project does the following things:
-* Nothing - work has not begun yet and so far I have implemented a barebones project system. It has an organised project structure, a Makefile system and a logging system.
+* Nothing - work has not really begun yet, so far I have implemented a barebones project system. It has an organised project structure, a Makefile system and a logging system.
 
 ## What are the current limitations?
 * I can only test this on an iPad Pro 10.5" (T8010)
@@ -20,3 +20,6 @@ In its current state, this project does the following things:
 * A full userland jailbreak for all versions
 * SEP exploitation with blackbird
 * Support for downgrades/dualboots from the main AlfieLoader environment
+
+## Disclaimer
+You may find that there are similarities in here to other projects like this - and that is true. This was just a personal project for me to learn more about the BootROM and iOS bootchain. As a result, I relied a lot on open-source solutions such as [ipwndfu](https://github.com/axi0mX), [gaster](https://github.com/0x7ff/gaster) and [PongoOS](https://github.com/checkra1n/PongoOS) to help me along the way.
