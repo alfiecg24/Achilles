@@ -99,17 +99,17 @@ int main(int argc, char *argv[])
         verbosityArg->intVal = 3;
     }
 
-    for (int i = 0; i < sizeof(args) / sizeof(arg_t); i++)
-    {
-        if (args[i].type == FLAG_BOOL)
-        {
-            LOG(LOG_DEBUG, "%s: %s", args[i].name, args[i].boolVal ? "true" : "false");
-        }
-        else if (args[i].type == FLAG_INT)
-        {
-            LOG(LOG_DEBUG, "%s: %d", args[i].name, args[i].intVal);
-        }
-    }
+    // for (int i = 0; i < sizeof(args) / sizeof(arg_t); i++)
+    // {
+    //     if (args[i].type == FLAG_BOOL)
+    //     {
+    //         LOG(LOG_DEBUG, "%s: %s", args[i].name, args[i].boolVal ? "true" : "false");
+    //     }
+    //     else if (args[i].type == FLAG_INT)
+    //     {
+    //         LOG(LOG_DEBUG, "%s: %d", args[i].name, args[i].intVal);
+    //     }
+    // }
 
     if (getArgByName("Help")->boolVal)
     {

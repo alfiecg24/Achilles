@@ -1,6 +1,6 @@
 CC=gcc
-SOURCES=src/main.c src/exploit/exploit.c src/exploit/dfu.c src/utils/log.c src/usb/usb.c
-FRAMEWORKS=-framework IOKit -framework CoreFoundation
+SOURCES=src/main.c src/exploit/*.c src/usb/*.c src/utils/*.c
+FRAMEWORKS=-framework IOKit -framework CoreFoundation -limobiledevice-1.0.6
 CFLAGS=-Iinclude
 OUTPUT=build/AlfieLoader
 
