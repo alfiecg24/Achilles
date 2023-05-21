@@ -4,7 +4,7 @@
 
 arg_t args[] = {
     // Name, short option, long option, description, examples, type, value
-    {"Verbosity", "-v", "--verbosity", "Set verbosity level", "-vvv, --verbosity 3", FLAG_INT, 0},
+    {"Verbosity", "-v", "--verbosity", "Set verbosity level, maximum level is 2", "-vv, --verbosity 2", FLAG_INT, 0},
     {"Debug", "-d", "--debug", "Enable debug mode", NULL, FLAG_BOOL, false},
     {"Help", "-h", "--help", "Show this help message", NULL, FLAG_BOOL, false},
     {"Version", "-V", "--version", "Show version information", NULL, FLAG_BOOL, false}};
@@ -50,9 +50,8 @@ int main(int argc, char *argv[])
 {
     for (int i = 0; i < sizeof(args) / sizeof(arg_t); i++)
     {
-        // Check if the argument is a boolean
         if (args[i].type == FLAG_BOOL)
-        {
+        { // Check if the argument is a boolean
             for (int j = 0; j < argc; j++)
             {
                 if (strcmp(argv[j], args[i].shortOpt) == 0 || strcmp(argv[j], args[i].longOpt) == 0)
@@ -88,28 +87,26 @@ int main(int argc, char *argv[])
     }
 
     arg_t *verbosityArg = getArgByName("Verbosity");
-    if (verbosityArg->intVal == 0)
+    if (verbosityArg->intVal > 2)
     {
-        LOG(LOG_DEBUG, "Verbosity not set, defaulting to 1");
-        verbosityArg->intVal = 1;
-    }
-    else if (verbosityArg->intVal > 3)
-    {
-        LOG(LOG_DEBUG, "Verbosity set to %d, max is 3", verbosityArg->intVal);
+        LOG(LOG_DEBUG, "Verbosity set to %d, max is 2 - automatically updating to 2", verbosityArg->intVal);
         verbosityArg->intVal = 3;
     }
-
-    // for (int i = 0; i < sizeof(args) / sizeof(arg_t); i++)
-    // {
-    //     if (args[i].type == FLAG_BOOL)
-    //     {
-    //         LOG(LOG_DEBUG, "%s: %s", args[i].name, args[i].boolVal ? "true" : "false");
-    //     }
-    //     else if (args[i].type == FLAG_INT)
-    //     {
-    //         LOG(LOG_DEBUG, "%s: %d", args[i].name, args[i].intVal);
-    //     }
-    // }
+    
+    char argList[1024];
+    memset(argList, 0, sizeof(argList));
+    for (int i = 0; i < sizeof(args) / sizeof(arg_t); i++)
+    {
+        if (args[i].type == FLAG_BOOL)
+        {
+            sprintf(argList, "%s%s: %s, ", argList, args[i].name, args[i].boolVal ? "true" : "false");
+        }
+        else if (args[i].type == FLAG_INT)
+        {
+            sprintf(argList, "%s%s: %d, ", argList, args[i].name, args[i].intVal);
+        }
+    }
+    LOG(LOG_DEBUG, "Arguments - %s", argList);
 
     if (getArgByName("Help")->boolVal)
     {
@@ -121,6 +118,38 @@ int main(int argc, char *argv[])
     {
         printVersion();
         return 0;
+    }
+
+    char **devices;
+    int deviceCount;
+    int i = 0;
+    while (i < 5)
+    {
+        idevice_error_t ideviceError = idevice_get_device_list(&devices, &deviceCount);
+        if (ideviceError != IDEVICE_E_SUCCESS)
+        {
+            LOG(LOG_ERROR, "Failed to get device list: %s", ideviceError);
+            return 1;
+        }
+        if (deviceCount > 1)
+        {
+            LOG(LOG_FATAL, "ERROR: At the moment, only one device at a time is supported. Please disconnect any additional iOS devices and try again.");
+            return -1;
+        }
+        if (deviceCount == 0)
+        {
+            sleep(1);
+            i++;
+        }
+        else
+        {
+            break;
+        }
+    }
+    if (deviceCount == 0)
+    {
+        LOG(LOG_FATAL, "ERROR: No device found after 5 seconds. Please connect an iOS device and try again.");
+        return -1;
     }
 
     exploit();

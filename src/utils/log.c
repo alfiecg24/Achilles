@@ -70,13 +70,12 @@ int loaderLog(log_level_t loglevel, const char *fname, int lineno, const char *f
 		time(&curtime);
 		struct tm *timeinfo = localtime(&curtime);
 		snprintf(timestring, 0x80, "%s[%s%02d/%02d/%d %02d:%02d:%02d%s]", CRESET, HBLK, timeinfo->tm_mon + 1, timeinfo->tm_mday, timeinfo->tm_year - 100, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, CRESET);
-		// Control the output based on verbosity
 		arg_t *verbosityArg = getArgByName("Verbosity");
-		if (verbosityArg->intVal == 3)
+		if (verbosityArg->intVal == 2)
 		{
 			printf("%s%s%s <%s> " CRESET "%s" HBLU "%s" CRESET ":" RED "%d" CRESET ":" BGRN "%s()" CRESET ":%s ", colour_bold, timestring, colour_bold, type, WHT, fname, lineno, fxname, colour_bold);
 		}
-		else if (verbosityArg->intVal == 2)
+		else if (verbosityArg->intVal == 1)
 		{
 			printf("%s%s%s <%s>" CRESET ":%s ", colour_bold, timestring, colour_bold, type, colour_bold);
 		}
