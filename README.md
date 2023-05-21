@@ -21,5 +21,10 @@ In its current state, this project does the following things:
 * SEP exploitation with blackbird
 * Support for downgrades/dualboots from the main AlfieLoader environment
 
+## Dependencies
+* [libimobiledevice](https://github.com/libimobiledevice/libimobiledevice)
+
+You will need to specify the path to your libimobiledevice installation path and version in `Makefile`, in the `FRAMEWORKS` arguments. The default path is `usr/local/lib` and version `1.0.6`.
+
 ## Disclaimer
 You may find that there are similarities in here to other projects like this - and that is true. This was just a personal project for me to learn more about the BootROM and iOS bootchain. As a result, I relied a lot on open-source solutions such as [ipwndfu](https://github.com/axi0mX), [gaster](https://github.com/0x7ff/gaster) and [PongoOS](https://github.com/checkra1n/PongoOS) to help me along the way.
