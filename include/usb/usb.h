@@ -6,6 +6,8 @@
 #include <usb/device.h>
 #include <utils/log.h>
 #include <IOKit/IOKitLib.h>
+#include <IOKit/usb/IOUSBLib.h>
+#include <IOKit/IOCFPlugIn.h>
 #include <CoreFoundation/CoreFoundation.h>
 
 char *getDeviceSerialNumber(io_service_t device);
