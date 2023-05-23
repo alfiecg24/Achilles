@@ -152,15 +152,34 @@ void initUSBHandle(usb_handle_t *handle, uint16_t vid, uint16_t pid) {
 	handle->device = NULL;
 }
 
+char *getCPIDFromSerialNumber(char *serial) {
+	if (strstr(serial, "CPID:")) {
+		// return strdup(strstr(serial, "CPID:") + 5);
+		// Cut off after 4 characters
+		char *cpid = strdup(strstr(serial, "CPID:") + 5);
+		cpid[4] = '\0';
+		return cpid;
+	}
+	return NULL;
+}
+
 uint16_t cpid;
 size_t config_hole, ttbr0_vrom_off, ttbr0_sram_off, config_large_leak, config_overwrite_pad;
 uint64_t tlbi, nop_gadget, ret_gadget, patch_addr, ttbr0_addr, func_gadget, write_ttbr0, memcpy_addr, aes_crypto_cmd, boot_tramp_end, gUSBSerialNumber, dfu_handle_request, usb_core_do_transfer, dfu_handle_bus_reset, insecure_memory_base, handle_interface_request, usb_create_string_descriptor, usb_serial_number_string_descriptor;
 
-bool checkm8CheckUSBDevice(usb_handle_t *handle, void *pwned) {
+bool checkm8CheckUSBDevice(usb_handle_t *handle, bool *pwned) {
 	char *usbSerialNumber = getDeviceSerialNumber(handle);
 	bool ret = false;
 
 	if(usbSerialNumber != NULL) {
+		char *stringCPID = getCPIDFromSerialNumber(usbSerialNumber);
+		if (stringCPID == NULL) {
+			LOG(LOG_ERROR, "Failed to get CPID from serial number");
+			return false;
+		}
+		int cpidNum = (int)strtol(stringCPID, NULL, 16);
+		cpid = (uint16_t)cpidNum;
+
 		if(strstr(usbSerialNumber, " SRTG:[iBoot-3135.0.0.2.3]") != NULL) {
 			cpid = 0x8011;
 			config_hole = 6;
@@ -186,11 +205,12 @@ bool checkm8CheckUSBDevice(usb_handle_t *handle, void *pwned) {
 			usb_create_string_descriptor = 0x10000D234;
 			usb_serial_number_string_descriptor = 0x18008062A;
 		} else {
-            LOG(LOG_ERROR, "ERROR: AlfieLoader does not support CPID %d at this time", cpid);
+            LOG(LOG_FATAL, "ERROR: AlfieLoader does not support CPID 0x%X at this time", cpid);
             return false;
         }
+		
 		if(cpid != 0) {
-			*(bool *)pwned = strstr(usbSerialNumber, "PWND") != NULL;
+			*pwned = strstr(usbSerialNumber, "PWND") != NULL;
 			ret = true;
 		}
 		free(usbSerialNumber);

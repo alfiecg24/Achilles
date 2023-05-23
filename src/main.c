@@ -123,33 +123,38 @@ int main(int argc, char *argv[])
     char **devices;
     int deviceCount;
     int i = 0;
-    while (i < 5)
-    {
-        idevice_error_t ideviceError = idevice_get_device_list(&devices, &deviceCount);
-        if (ideviceError != IDEVICE_E_SUCCESS)
+    device_t device;
+    if (findDevice(&device, false) == -1) {
+        while (i < 5)
         {
-            LOG(LOG_ERROR, "Failed to get device list: %s", ideviceError);
-            return 1;
-        }
-        if (deviceCount > 1)
-        {
-            LOG(LOG_FATAL, "ERROR: At the moment, only one device at a time is supported. Please disconnect any additional iOS devices and try again.");
-            return -1;
+            idevice_error_t ideviceError = idevice_get_device_list(&devices, &deviceCount);
+            if (ideviceError != IDEVICE_E_SUCCESS)
+            {
+                LOG(LOG_ERROR, "Failed to get device list: %s", ideviceError);
+                return 1;
+            }
+            if (deviceCount > 1)
+            {
+                LOG(LOG_FATAL, "ERROR: At the moment, only one device at a time is supported. Please disconnect any additional iOS devices and try again.");
+                return -1;
+            }
+            if (deviceCount == 0)
+            {
+                sleep(1);
+                i++;
+            }
+            else
+            {
+                break;
+            }
         }
         if (deviceCount == 0)
         {
-            sleep(1);
-            i++;
+            LOG(LOG_FATAL, "ERROR: No iOS device found after 5 seconds - please connect a device.");
+            return -1;
         }
-        else
-        {
-            break;
-        }
-    }
-    if (deviceCount == 0)
-    {
-        LOG(LOG_FATAL, "ERROR: No device found after 5 seconds. Please connect an iOS device and try again.");
-        return -1;
+    } else {
+        LOG(LOG_INFO, "Detected device in DFU mode!");
     }
 
     exploit();
