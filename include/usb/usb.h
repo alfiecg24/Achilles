@@ -2,14 +2,37 @@
 #define USB_UTILS_H
 
 #include <AlfieLoader.h>
-#include <exploit/dfu.h>
-#include <usb/device.h>
 #include <utils/log.h>
 #include <IOKit/IOKitLib.h>
 #include <IOKit/usb/IOUSBLib.h>
 #include <IOKit/IOCFPlugIn.h>
 #include <CoreFoundation/CoreFoundation.h>
+#include <CommonCrypto/CommonCrypto.h>
 
-char *getDeviceSerialNumber(io_service_t device);
+#define USB_TIMEOUT 5
+
+typedef struct {
+	uint16_t vid, pid;
+	io_service_t service;
+	IOUSBDeviceInterface320 **device;
+	CFRunLoopSourceRef async_event_source;
+} usb_handle_t;
+
+enum usb_transfer {
+	USB_TRANSFER_OK,
+	USB_TRANSFER_ERROR,
+	USB_TRANSFER_STALL
+};
+
+typedef struct {
+	enum usb_transfer ret;
+	uint32_t sz;
+} transfer_ret_t;
+
+typedef bool (*usb_check_cb_t)(usb_handle_t *, void *);
+
+char *getDeviceSerialNumber(usb_handle_t *handle);
+
+bool checkm8CheckUSBDevice(usb_handle_t *handle, void *pwned);
 
 #endif // USB_UTILS_H

@@ -1,11 +1,8 @@
 #ifndef DEVICE_H
 #define DEVICE_H
 
-// #include <AlfieLoader.h>
-// #include <usb/usb.h>
-// #include <utils/log.h>
-
 #include <AlfieLoader.h>
+#include <usb/usb.h>
 #include <exploit/dfu.h>
 #include <utils/log.h>
 #include <IOKit/IOKitLib.h>
@@ -18,16 +15,15 @@ enum DeviceMode {
 
 typedef enum DeviceMode DeviceMode;
 
-struct device_t
+typedef struct
 {
-    io_service_t service;
+    usb_handle_t handle;
     char *serialNumber;
     DeviceMode mode;
-};
+} device_t;
 
-typedef struct device_t device_t;
 
-device_t initDevice(io_service_t device, char *serialNumber, DeviceMode mode);
+device_t initDevice(io_service_t device, char *serialNumber, DeviceMode mode, int vid, int pid);
 int findDevice(device_t *device, bool isWaiting);
 int waitForDeviceInMode(device_t *device, DeviceMode mode, int timeout);
 

@@ -1,9 +1,15 @@
 #include <usb/device.h>
 
-device_t initDevice(io_service_t device, char *serialNumber, DeviceMode mode)
+device_t initDevice(io_service_t device, char *serialNumber, DeviceMode mode, int vid, int pid)
 {
     device_t dev;
-    dev.service = device;
+    usb_handle_t handle;
+    handle.service = device;
+    handle.vid = vid;
+    handle.pid = pid;
+    handle.device = NULL;
+    handle.async_event_source = NULL;
+    dev.handle = handle;
     dev.serialNumber = serialNumber;
     dev.mode = mode;
     return dev;
@@ -50,19 +56,21 @@ int findDevice(device_t *device, bool isWaitingForDevice)
         // convert CFNumber to int
         CFNumberGetValue(vendorID, kCFNumberIntType, &vendorIDInt);
         CFNumberGetValue(productID, kCFNumberIntType, &productIDInt);
+        usb_handle_t handle;
+        handle.service = service;
         if (vendorIDInt == 0x5ac && productIDInt == 0x1227)
         {
-            *device = initDevice(service, getDeviceSerialNumber(service), MODE_DFU);
+            *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_DFU, vendorIDInt, productIDInt);
             return 0;
         }
         if (vendorIDInt == 0x5ac && productIDInt == 0x1281)
         {
-            *device = initDevice(service, getDeviceSerialNumber(service), MODE_RECOVERY);
+            *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_RECOVERY, vendorIDInt, productIDInt);
             return 0;
         }
         if (vendorIDInt == 0x5ac && productIDInt == 0x12ab)
         {
-            *device = initDevice(service, getDeviceSerialNumber(service), MODE_NORMAL);
+            *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_NORMAL, vendorIDInt, productIDInt);
             return 0;
         }
     }
