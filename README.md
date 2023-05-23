@@ -8,7 +8,7 @@ In its current state, this project does the following things:
 * Nothing - work has not really begun yet, so far I have implemented a barebones project system. It has an organised project structure, a Makefile system and a logging system.
 
 ## What are the current limitations?
-* I can only test this on an iPad Pro 10.5" (T8010)
+* I can only test this on an iPad Pro 10.5" (T8011)
 * Only planned support is for A7-A11 devices
 * A12+ devices cannot be supported unless a BootROM vulnerability is found and publicised
 
