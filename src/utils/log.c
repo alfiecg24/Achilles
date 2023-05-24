@@ -10,7 +10,7 @@
 
 // mostly taken from https://github.com/palera1n/palera1n-c - thanks!
 
-int loaderLog(log_level_t loglevel, const char *fname, int lineno, const char *fxname, const char *__restrict format, ...)
+int loaderLog(log_level_t loglevel, bool newline, const char *fname, int lineno, const char *fxname, const char *__restrict format, ...)
 {
 	pthread_mutex_t log_mutex;
 	pthread_mutex_init(&log_mutex, NULL);
@@ -86,7 +86,12 @@ int loaderLog(log_level_t loglevel, const char *fname, int lineno, const char *f
 		printf("%s", colour);
 		ret = vprintf(format, logArgs);
 		va_end(logArgs);
-		printf(CRESET "\n");
+		if (newline)
+		{
+			printf(CRESET "\n");
+		} else {
+			printf(CRESET);
+		}
 		fflush(stdout);
 	}
 	pthread_mutex_unlock(&log_mutex);
