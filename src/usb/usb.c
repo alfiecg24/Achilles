@@ -213,7 +213,6 @@ bool checkm8CheckUSBDevice(usb_handle_t *handle, bool *pwned) {
 			*pwned = strstr(usbSerialNumber, "PWND") != NULL;
 			ret = true;
 		}
-		//free(usbSerialNumber);
 	}
 	return ret;
 }
