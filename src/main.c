@@ -153,8 +153,6 @@ int main(int argc, char *argv[])
             LOG(LOG_FATAL, "ERROR: No iOS device found after 5 seconds - please connect a device.");
             return -1;
         }
-    } else {
-        LOG(LOG_INFO, "Detected device in DFU mode!");
     }
 
     exploit();

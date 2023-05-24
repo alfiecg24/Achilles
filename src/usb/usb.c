@@ -213,7 +213,7 @@ bool checkm8CheckUSBDevice(usb_handle_t *handle, bool *pwned) {
 			*pwned = strstr(usbSerialNumber, "PWND") != NULL;
 			ret = true;
 		}
-		free(usbSerialNumber);
+		//free(usbSerialNumber);
 	}
 	return ret;
 }
@@ -234,14 +234,14 @@ bool sendUSBControlRequestNoData(const usb_handle_t *handle, uint8_t bmRequestTy
 
 bool sendUSBControlRequestAsyncNoData(const usb_handle_t *handle, uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, size_t wLength, unsigned USBAbortTimeout, transfer_ret_t *transferRet) {
 	bool ret = false;
-	void *p_data;
+	void *pData;
 
 	if(wLength == 0) {
 		ret = sendUSBControlRequestAsync(handle, bmRequestType, bRequest, wValue, wIndex, NULL, 0, USBAbortTimeout, transferRet);
-	} else if((p_data = malloc(wLength)) != NULL) {
-		memset(p_data, '\0', wLength);
-		ret = sendUSBControlRequestAsync(handle, bmRequestType, bRequest, wValue, wIndex, p_data, wLength, USBAbortTimeout, transferRet);
-		free(p_data);
+	} else if((pData = malloc(wLength)) != NULL) {
+		memset(pData, '\0', wLength);
+		ret = sendUSBControlRequestAsync(handle, bmRequestType, bRequest, wValue, wIndex, pData, wLength, USBAbortTimeout, transferRet);
+		free(pData);
 	}
 	return ret;
 }
