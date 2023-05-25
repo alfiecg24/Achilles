@@ -29,7 +29,7 @@ typedef struct {
 	uint32_t sz;
 } transfer_ret_t;
 
-typedef bool (*usb_check_cb_t)(usb_handle_t *, void *);
+typedef bool (*usb_check_cb_t)(usb_handle_t *, bool *);
 
 char *getDeviceSerialNumber(usb_handle_t *handle);
 
@@ -39,5 +39,8 @@ bool sendUSBControlRequest(const usb_handle_t *handle, uint8_t bmRequestType, ui
 
 bool sendUSBControlRequestNoData(const usb_handle_t *handle, uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, size_t wLength, transfer_ret_t *transferRet);
 bool sendUSBControlRequestAsyncNoData(const usb_handle_t *handle, uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, size_t wLength, unsigned USBAbortTimeout, transfer_ret_t *transferRet);
+
+void closeUSBDevice(usb_handle_t *handle);
+bool waitUSBHandle(usb_handle_t *handle, usb_check_cb_t usb_check_cb, void *arg);
 
 #endif // USB_UTILS_H

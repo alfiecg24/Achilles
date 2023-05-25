@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
             {
                 if (strcmp(argv[j], args[i].shortOpt) == 0 || strcmp(argv[j], args[i].longOpt) == 0)
                 {
+                    // Set the boolean value to true if the argument is found
                     args[i].boolVal = true;
                 }
             }
@@ -71,6 +72,7 @@ int main(int argc, char *argv[])
                     { // Loop through the short option (e.g. -vvv)
                         if (argv[j][k] == args[i].shortOpt[1])
                         {
+                            // Increment the integer value for each time the short option is repeated
                             args[i].intVal++;
                         }
                     }
@@ -79,7 +81,8 @@ int main(int argc, char *argv[])
                 {
                     if (j + 1 < argc)
                     {
-                        args[i].intVal = atoi(argv[j + 1]); // Set the value of the integer to the next argument
+                        // Set the value of the integer to the next argument
+                        args[i].intVal = atoi(argv[j + 1]);
                     }
                 }
             }

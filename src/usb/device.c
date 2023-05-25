@@ -61,21 +61,24 @@ int findDevice(device_t *device, bool isWaitingForDevice)
         if (vendorIDInt == 0x5ac && productIDInt == 0x1227)
         {
             *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_DFU, vendorIDInt, productIDInt);
+            LOG(LOG_DEBUG, "Initialized device in DFU mode");
             return 0;
         }
         if (vendorIDInt == 0x5ac && productIDInt == 0x1281)
         {
             *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_RECOVERY, vendorIDInt, productIDInt);
+            LOG(LOG_DEBUG, "Initialized device in recovery mode");
             return 0;
         }
         if (vendorIDInt == 0x5ac && productIDInt == 0x12ab)
         {
             *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_NORMAL, vendorIDInt, productIDInt);
+            LOG(LOG_DEBUG, "Initialized device in normal mode");
             return 0;
         }
     }
     if (isWaitingForDevice == false) {
-        LOG(LOG_FATAL, "ERROR: Failed to find device in DFU mode!");
+        //LOG(LOG_FATAL, "ERROR: Failed to find device in DFU mode!");
     }
     return -1;
 }

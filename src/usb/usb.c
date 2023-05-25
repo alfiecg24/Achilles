@@ -78,6 +78,35 @@ bool openUSBDevice(io_service_t service, usb_handle_t *handle) {
 	return ret;
 }
 
+bool waitUSBHandle(usb_handle_t *handle, usb_check_cb_t usb_check_cb, void *arg) {
+	CFMutableDictionaryRef matching_dict;
+	const char *darwin_device_class;
+	io_iterator_t iter;
+	io_service_t serv;
+	bool ret = false;
+	while((matching_dict = IOServiceMatching(kIOUSBDeviceClassName)) != NULL) {
+		cfDictionarySetInt16(matching_dict, CFSTR(kUSBVendorID), handle->vid);
+		cfDictionarySetInt16(matching_dict, CFSTR(kUSBProductID), handle->pid);
+		if(IOServiceGetMatchingServices(0, matching_dict, &iter) == kIOReturnSuccess) {
+			while((serv = IOIteratorNext(iter)) != IO_OBJECT_NULL) {
+				if(openUSBDevice(serv, handle)) {
+					if(usb_check_cb == NULL || usb_check_cb(handle, arg)) {
+						ret = true;
+						break;
+					}
+					closeUSBDevice(handle);
+				}
+			}
+			IOObjectRelease(iter);
+			if(ret) {
+				break;
+			}
+			sleep_ms(USB_TIMEOUT);
+		}
+	}
+	return ret;
+}
+
 void resetUSBHandle(usb_handle_t *handle) {
 	(*handle->device)->ResetDevice(handle->device);
 	(*handle->device)->USBDeviceReEnumerate(handle->device, 0);
@@ -102,6 +131,8 @@ void USBAsyncCallback(void *refcon, IOReturn ret, void *arg) {
 bool sendUSBControlRequest(const usb_handle_t *handle, uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, void *pData, size_t wLength, transfer_ret_t *transferRet) {
 	IOUSBDevRequestTO req;
 	IOReturn ret;
+
+	LOG(LOG_DEBUG, "sendUSBControlRequest: bmRequestType = 0x%02x, bRequest = 0x%02x, wValue = 0x%04x, wIndex = 0x%04x, wLength = %d, pData = %p", bmRequestType, bRequest, wValue, wIndex, wLength, pData);
 
 	req.wLenDone = 0;
 	req.pData = pData;
@@ -154,8 +185,6 @@ void initUSBHandle(usb_handle_t *handle, uint16_t vid, uint16_t pid) {
 
 char *getCPIDFromSerialNumber(char *serial) {
 	if (strstr(serial, "CPID:")) {
-		// return strdup(strstr(serial, "CPID:") + 5);
-		// Cut off after 4 characters
 		char *cpid = strdup(strstr(serial, "CPID:") + 5);
 		cpid[4] = '\0';
 		return cpid;
