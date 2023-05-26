@@ -15,7 +15,7 @@ device_t initDevice(io_service_t device, char *serialNumber, DeviceMode mode, in
     return dev;
 }
 
-int findDevice(device_t *device, bool isWaitingForDevice)
+int findDevice(device_t *device)
 {
     // get all USB devices
     io_iterator_t iterator;
@@ -77,16 +77,13 @@ int findDevice(device_t *device, bool isWaitingForDevice)
             return 0;
         }
     }
-    if (isWaitingForDevice == false) {
-        //LOG(LOG_FATAL, "ERROR: Failed to find device in DFU mode!");
-    }
     return -1;
 }
 
 int waitForDeviceInMode(device_t *device, DeviceMode mode, int timeout) {
     int i = 0;
     while (1) {
-        if (findDevice(device, true) == 0 && device->mode == mode) {
+        if (findDevice(device) == 0 && device->mode == mode) {
             return 0;
         }
         if (i >= timeout) {

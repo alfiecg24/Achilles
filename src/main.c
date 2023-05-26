@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
     int deviceCount;
     int i = 0;
     device_t device;
-    if (findDevice(&device, false) == -1) {
+    if (findDevice(&device) == -1) {
         while (i < 5)
         {
             idevice_error_t ideviceError = idevice_get_device_list(&devices, &deviceCount);

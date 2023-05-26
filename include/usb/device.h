@@ -24,7 +24,7 @@ typedef struct
 
 
 device_t initDevice(io_service_t device, char *serialNumber, DeviceMode mode, int vid, int pid);
-int findDevice(device_t *device, bool isWaiting);
+int findDevice(device_t *device);
 int waitForDeviceInMode(device_t *device, DeviceMode mode, int timeout);
 
 #endif // DEVICE_H
