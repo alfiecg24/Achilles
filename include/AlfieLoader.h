@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <sys/utsname.h>
 
 #define NAME "AlfieLoader"
 #define VERSION "0.1.0"

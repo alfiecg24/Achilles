@@ -2,6 +2,8 @@
 #include <string.h>
 #include <exploit/exploit.h>
 
+bool isARM64Host = false;
+
 arg_t args[] = {
     // Name, short option, long option, description, examples, type, value
     {"Verbosity", "-v", "--verbosity", "Set verbosity level, maximum level is 2", "-vv, --verbosity 2", FLAG_INT, 0},
@@ -123,6 +125,20 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    struct utsname buffer;
+    uname(&buffer);
+    LOG(LOG_DEBUG, "Host OS: %s", buffer.sysname);
+    LOG(LOG_DEBUG, "Host architecture: %s", buffer.machine);
+    if (strcmp(buffer.sysname, "Darwin") != 0)
+    {
+        LOG(LOG_FATAL, "ERROR: This tool is only supported on macOS");
+        return -1;
+    }
+    if (strcmp(buffer.machine, "arm64") == 0)
+    {
+        isARM64Host = true;
+    }
+
     char **devices;
     int deviceCount;
     int i = 0;
@@ -157,6 +173,8 @@ int main(int argc, char *argv[])
             return -1;
         }
     }
+
+    
 
     exploit();
 
