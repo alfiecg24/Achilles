@@ -273,3 +273,10 @@ bool sendUSBControlRequestAsyncNoData(const usb_handle_t *handle, uint8_t bmRequ
 	}
 	return ret;
 }
+
+void resetUSBDevice(device_t *device)
+{
+    usb_handle_t *handle = &device->handle;
+    (*handle->device)->ResetDevice(handle->device);
+    (*handle->device)->USBDeviceReEnumerate(handle->device, 0);
+}

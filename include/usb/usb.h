@@ -42,5 +42,5 @@ bool sendUSBControlRequestAsyncNoData(const usb_handle_t *handle, uint8_t bmRequ
 
 void closeUSBDevice(usb_handle_t *handle);
 bool waitUSBHandle(usb_handle_t *handle, usb_check_cb_t usb_check_cb, void *arg);
-
+void resetUSBDevice(device_t *device);
 #endif // USB_UTILS_H
