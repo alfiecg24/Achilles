@@ -37,3 +37,7 @@ This gave me the foundations to build the project on and saved a lot of time tha
 ## USB
 
 First of all, I had to write the initial functions to find the device, connect to it and read it's serial number. You can see the relevant functions in `src/usb.c`. I then wrote some necessary code for the basic handling of DFU mode devices - such as parsing the serial number and created structures to hold the device information. This can be seen in `src/exploit/dfu.c`.
+
+These DFU-specific structures were deprecated when I created the `device_t` structure (seen in `include/usb/device.h`) which could be used to handle devices in normal, recovery and DFU mode with a single structure type. After finishing the implementation of device classes, I decided to setup the actual USB transfer system. For this, I used a lot of the functions in [gaster](https://github.com/0x7FF/gaster) as it would have taken me too long to figure out how to get USB working correctly.
+
+After this, it was time to begin the actual implementation of checkm8. I began by analysing the ARM assembly used by gaster and ipwndfu in order to get an idea of what the payloads do once executed on device. This was also helpful for my understanding of ARM assembly itself.
