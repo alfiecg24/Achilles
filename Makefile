@@ -8,7 +8,7 @@ all: dirs AlfieLoader
 
 dirs:
 	@mkdir -p build
-
+	
 clean:
 	@rm -rf build
 
