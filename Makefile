@@ -8,6 +8,8 @@ all: dirs AlfieLoader
 
 dirs:
 	@mkdir -p build
+
+# TODO: Add `make docs` to generate PDFs from single Makefile
 	
 clean:
 	@rm -rf build

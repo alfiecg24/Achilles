@@ -8,7 +8,7 @@ endif
 
 all: pdf
 
-pdf: $(MDS)
+docs: $(MDS)
 	@for file in $(MDS); do \
 		echo "Generating PDF for $$file"; \
 		mdpdf $$file; \
