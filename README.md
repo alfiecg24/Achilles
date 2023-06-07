@@ -5,7 +5,8 @@ A pre-boot execution environment for Apple mobile devices vulnerable to checkm8 
 
 ## What does it do?
 In its current state, this project does the following things:
-* Nothing - work has not really begun yet, so far I have implemented a barebones project system. It has an organised project structure, a Makefile system and a logging system.
+* Has a USB/device handling system in place
+* Not much more
 
 ## What are the current limitations?
 * I can only test this on an iPad Pro 10.5" (T8011)
