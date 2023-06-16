@@ -9,6 +9,7 @@ When the device is stalled in checkm8, I believe it is a state where it is 'stal
 
 In ipwndfu, the device is stalled using `libusb1_async_ctrl_transfer(device, 0x80, 6, 0x304, 0x40A, 'A' * 0xC0, 0.00001`. The use of the very short timeout indicates that one is trying to cancel the request mid-way through the transfer. The bmRequestType of 0x80 indicates a device to host transfer. The wValue of 0x304 indicates the following: the wValueHigh value of 0x3 defines the type of descriptor to fetch (USB_DT_STRING) and the wValueLow value of 0x4 provides the index of the string descriptor (which will be the USB serial number here).
 
+## Exploit analysis
 Simplified version of ipwndfu checkm8 for T8011
 ```python
 # Initial setup of exploit

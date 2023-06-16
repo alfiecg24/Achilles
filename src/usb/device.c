@@ -1,5 +1,20 @@
 #include <usb/device.h>
 
+// ******************************************************
+// Function: initDevice()
+//
+// Purpose: Initializes a device_t struct
+//
+// Parameters:
+//      io_service_t device: the device to initialize
+//      char *serialNumber: the serial number of the device
+//      DeviceMode mode: the mode of the device
+//      int vid: the vendor ID of the device
+//      int pid: the product ID of the device
+//
+// Returns:
+//      device_t: the initialized device
+// ******************************************************
 device_t initDevice(io_service_t device, char *serialNumber, DeviceMode mode, int vid, int pid)
 {
     device_t dev;
@@ -15,6 +30,17 @@ device_t initDevice(io_service_t device, char *serialNumber, DeviceMode mode, in
     return dev;
 }
 
+// ******************************************************
+// Function: findDevice()
+//
+// Purpose: Find a device
+//
+// Parameters:
+//      device_t *device: the device struct to return
+//
+// Returns:
+//      int: 0 if the device was found, 1 otherwise
+// ******************************************************
 int findDevice(device_t *device)
 {
     // get all USB devices
@@ -80,6 +106,19 @@ int findDevice(device_t *device)
     return -1;
 }
 
+// ******************************************************
+// Function: waitForDeviceInMode()
+//
+// Purpose: Wait for a device to be in a certain mode
+//
+// Parameters:
+//      device_t *device: the device to wait for
+//      DeviceMode mode: the mode to wait for
+//      int timeout: the timeout in seconds
+//
+// Returns:
+//      int: 0 if the device was found, 1 otherwise
+// ******************************************************
 int waitForDeviceInMode(device_t *device, DeviceMode mode, int timeout) {
     int i = 0;
     while (1) {

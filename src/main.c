@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    exploit();
+    checkm8();
 
     return 0;
 }

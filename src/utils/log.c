@@ -4,17 +4,30 @@
 #include <stddef.h>
 #include <pthread.h>
 #include <assert.h>
-
 #include <utils/log.h>
 #include <utils/ANSI-color-codes.h>
 
-// mostly taken from https://github.com/palera1n/palera1n-c - thanks!
 
-int loaderLog(log_level_t loglevel, bool newline, const char *fname, int lineno, const char *fxname, const char *__restrict format, ...)
+// ******************************************************
+// Function: loaderLog()
+//
+// Purpose: Log a message to stdout formatted with ANSI colour codes
+//
+// Parameters:
+//      log_level_t loglevel: the log level of the message
+//      bool newline: whether or not to print a newline
+//      const char *fname: the name of the file the message is from
+//      int lineno: the line number the message is from
+//      const char *fxname: the name of the function the message is from
+//      const char *__restrict format: the format string of the message
+//      ...: the arguments to the format string
+//
+// mostly taken from https://github.com/palera1n/palera1n-c - thanks!
+// ******************************************************
+void loaderLog(log_level_t loglevel, bool newline, const char *fname, int lineno, const char *fxname, const char *__restrict format, ...)
 {
 	pthread_mutex_t log_mutex;
 	pthread_mutex_init(&log_mutex, NULL);
-	int ret = 0;
 	char type[0x10];
 	char colour[0x10];
 	char colour_bold[0x10];
@@ -50,7 +63,7 @@ int loaderLog(log_level_t loglevel, bool newline, const char *fname, int lineno,
 		break;
 	case LOG_DEBUG:
 		if (debugArg == 0 || debugArg == NULL || debugArg->boolVal == false) {
-			return 0;
+			return;
 		}
 		snprintf(type, 0x10, "%s", "Debug");
 		snprintf(colour, 0x10, "%s", MAG);
@@ -84,7 +97,6 @@ int loaderLog(log_level_t loglevel, bool newline, const char *fname, int lineno,
 			printf("%s<%s>%s: ", colour_bold, type, CRESET);
 		}
 		printf("%s", colour);
-		ret = vprintf(format, logArgs);
 		va_end(logArgs);
 		if (newline)
 		{
@@ -95,5 +107,4 @@ int loaderLog(log_level_t loglevel, bool newline, const char *fname, int lineno,
 		fflush(stdout);
 	}
 	pthread_mutex_unlock(&log_mutex);
-	return ret;
 }
