@@ -24,8 +24,9 @@
 //
 // mostly taken from https://github.com/palera1n/palera1n-c - thanks!
 // ******************************************************
-void loaderLog(log_level_t loglevel, bool newline, const char *fname, int lineno, const char *fxname, const char *__restrict format, ...)
+int loaderLog(log_level_t loglevel, bool newline, const char *fname, int lineno, const char *fxname, const char *__restrict format, ...)
 {
+	int ret = 0;
 	pthread_mutex_t log_mutex;
 	pthread_mutex_init(&log_mutex, NULL);
 	char type[0x10];
@@ -63,7 +64,7 @@ void loaderLog(log_level_t loglevel, bool newline, const char *fname, int lineno
 		break;
 	case LOG_DEBUG:
 		if (debugArg == 0 || debugArg == NULL || debugArg->boolVal == false) {
-			return;
+			return 0;
 		}
 		snprintf(type, 0x10, "%s", "Debug");
 		snprintf(colour, 0x10, "%s", MAG);
@@ -97,6 +98,7 @@ void loaderLog(log_level_t loglevel, bool newline, const char *fname, int lineno
 			printf("%s<%s>%s: ", colour_bold, type, CRESET);
 		}
 		printf("%s", colour);
+		ret = vprintf(format, logArgs);
 		va_end(logArgs);
 		if (newline)
 		{
@@ -107,4 +109,5 @@ void loaderLog(log_level_t loglevel, bool newline, const char *fname, int lineno
 		fflush(stdout);
 	}
 	pthread_mutex_unlock(&log_mutex);
+	return ret;
 }

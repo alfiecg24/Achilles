@@ -20,6 +20,6 @@ typedef enum
 
 extern arg_t args[];
 
-void loaderLog(log_level_t loglevel, bool newline, const char *fname, int lineno, const char *fxname, const char *__restrict format, ...);
+int loaderLog(log_level_t loglevel, bool newline, const char *fname, int lineno, const char *fxname, const char *__restrict format, ...);
 
 #endif // LOG_H
