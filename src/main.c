@@ -7,7 +7,7 @@ bool isARM64Host = false;
 arg_t args[] = {
     // Name, short option, long option, description, examples, type, value
     {"Verbosity", "-v", "--verbosity", "Set verbosity level, maximum level is 2", "-vv, --verbosity 2", FLAG_INT, 0},
-    {"Debug", "-d", "--debug", "Enable debug mode", NULL, FLAG_BOOL, false},
+    {"Debug", "-d", "--debug", "Enable debug logging", NULL, FLAG_BOOL, false},
     {"Help", "-h", "--help", "Show this help message", NULL, FLAG_BOOL, false},
     {"Version", "-V", "--version", "Show version information", NULL, FLAG_BOOL, false}};
 
@@ -50,6 +50,24 @@ void printVersion()
 
 int main(int argc, char *argv[])
 {
+    bool hasUsedUnrecognisedArg = false;
+    for (int v = 0; v < argc; v++) {
+        for (int i = 0; i < sizeof(args) / sizeof(arg_t); i++) {
+            if (strncmp(argv[v], "-", 1) == 0 &&
+            strcmp(argv[v], args[i].longOpt) != 0 &&
+            strncmp(argv[v], args[i].shortOpt, 2) != 0) {
+                LOG(LOG_ERROR, "ERROR: Unrecognised argument %s", argv[v]);
+                hasUsedUnrecognisedArg = true;
+                break;
+            }
+        }
+    }
+
+    if (hasUsedUnrecognisedArg) {
+        printHelp();
+        return 0;
+    }
+
     for (int i = 0; i < sizeof(args) / sizeof(arg_t); i++)
     {
         if (args[i].type == FLAG_BOOL)
