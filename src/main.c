@@ -6,7 +6,7 @@ bool isARM64Host = false;
 
 arg_t args[] = {
     // Name, short option, long option, description, examples, type, value
-    {"Verbosity", "-v", "--verbosity", "Set verbosity level, maximum level is 2", "-vv, --verbosity 2", FLAG_INT, 0},
+    {"Verbosity", "-v", "--verbosity", "Verbosity level, maximum of 2", "-vv, --verbosity 2", FLAG_INT, 0},
     {"Debug", "-d", "--debug", "Enable debug logging", NULL, FLAG_BOOL, false},
     {"Help", "-h", "--help", "Show this help message", NULL, FLAG_BOOL, false},
     {"Version", "-V", "--version", "Show version information", NULL, FLAG_BOOL, false}};
@@ -51,11 +51,13 @@ void printVersion()
 int main(int argc, char *argv[])
 {
     bool hasUsedUnrecognisedArg = false;
+    // Iterate over each defined argument
     for (int v = 0; v < argc; v++) {
+        // Iterate over each argument passed from CLI
         for (int i = 0; i < sizeof(args) / sizeof(arg_t); i++) {
-            if (strncmp(argv[v], "-", 1) == 0 &&
-            strcmp(argv[v], args[i].longOpt) != 0 &&
-            strncmp(argv[v], args[i].shortOpt, 2) != 0) {
+            if (strncmp(argv[v], "-", 1) == 0 && // Prevent the file being executing from being flagged
+            strcmp(argv[v], args[i].longOpt) != 0 && // Check if it matches the long argument option
+            strncmp(argv[v], args[i].shortOpt, 2) != 0) { // CHeck if it matches the short argument option
                 LOG(LOG_ERROR, "ERROR: Unrecognised argument %s", argv[v]);
                 hasUsedUnrecognisedArg = true;
                 break;
@@ -64,6 +66,7 @@ int main(int argc, char *argv[])
     }
 
     if (hasUsedUnrecognisedArg) {
+        // Print the help menu
         printHelp();
         return 0;
     }
@@ -116,6 +119,7 @@ int main(int argc, char *argv[])
         verbosityArg->intVal = 3;
     }
     
+    // TODO: make this char *argList to prevent possible overflowing?
     char argList[1024];
     memset(argList, 0, sizeof(argList));
     for (int i = 0; i < sizeof(args) / sizeof(arg_t); i++)
