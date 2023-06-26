@@ -1,0 +1,15 @@
+By stalling the device-to-host pipe and sending a lot of requests to cause data to be transferred from device to host, you can pile up allocations. Each of these will have io_request structures allocated and will be within a linked list for the endpoint in use. By unstalling the pipe, you can free all of these structures.
+
+However, in the rare case that the reply sent by the device is an exact multiple of the packet size (which would be 0x40), and where the host has request more bytes than this, the device has to send an additional zero-length packet to signify the completion of the transfer. This packet is sent by the the callback of the io_request that is called when said request has been processed.
+
+With a USB reset, the device initially aborts all endpoints and then disables them, before zeroing out the entire endpoint structure array and re-initialising it. As such, on an abort, the device processes all pending requests as failed, which triggers each of their callbacks.
+
+This results in the attacker being able to queue additional zero-length packets that are not in the list of requests that are reaped (properly processed and handled by the system). As a result, when the bzero is triggered on these requests, they 'leak' and are not properly zeroed out or deallocated.
+
+In A12+ SoCs, when a USB reset occurs, the abort that is subsequently triggered aborts EP0_IN for each setup packet - resulting in abort() being called twice. The first abort will queue a zero-length-packet, and the second will successfully reap it. It is after this that the bzero() happens.
+
+Furthermore, an additional bug is utilised - wherein the transfer length that is expected by the host device is checked from the setup packet, but said setup packet could have been overwritten by the time of the check. When the host receives a last packet with a size of less than 0x40 (because transfers are split into 0x40-sized packets), the transfer is complete. So, if the transfer length is an exact multiple of 0x40, a zero-length-packet must be sent to signal that the transfer has ended.
+
+Normally, this is done in the completion handler of the io_request object, but in said handler, the length of the current setup packet is used instead of the transfer actually being looked at. Using this, permanent, leaked allocations can be created - as, when an endpoint is aborted, the device goes through each io_request queued on it and perform the necessary callbacks and cleanup for aborted requests. It finishes by calling bzero() on the entire endpoint structure.
+
+However, the callbacks could have queued new IO requests, which would then be leaked - and these can be used for heap shaping. Because of how to heap allocator logic works, if the IO buffer is 0x800 bytes and two allocations are leaked that are exactly 0x800 bytes apart, the space in between them will be preferred as the spot for the next 0x800-sized allocation.
