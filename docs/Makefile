@@ -1,4 +1,4 @@
-FILES=ExploitWriteup VulnerabilityWriteup
+FILES=Write-ups/*
 MDS=$(foreach file,$(FILES),$(file).md)
 
 # check if mdpdf is installed
