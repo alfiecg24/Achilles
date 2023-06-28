@@ -247,7 +247,7 @@ The SecureROM is highly deterministic and, for this reason, the IO buffer is all
 
 For context, a memory leak occurs when objects that are allocated in memory are incorrectly de-allocated or freed - resulting in the memory remaining allocated, but inaccessible.
 
-### USB request structure
+### USB request structure 
 Below is the `usb_device_io_request` structure, which will henceforth be known as simply `io_request`:
 ```c
 struct usb_device_io_request

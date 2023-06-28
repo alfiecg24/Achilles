@@ -493,3 +493,18 @@ void resetUSBDevice(usb_handle_t *handle)
     (*handle->device)->ResetDevice(handle->device);
     (*handle->device)->USBDeviceReEnumerate(handle->device, 0);
 }
+
+int createRequestType(transfer_direction direction, transfer_type type, transfer_recipient recipient) {
+	// Returns bmRequestType using parameters for a control request
+	return (direction << 7) | (type << 5) | recipient;
+}
+
+void reverseControlRequest(int bmRequestType) {
+	transfer_direction direction = (bmRequestType & 0x80) >> 7;
+	transfer_type type = (bmRequestType & 0x60) >> 5;
+	transfer_recipient recipient = bmRequestType & 0x1F;
+	// Log direction, type, and recipient of a control request
+	LOG(LOG_DEBUG, "Direction: %s", direction == IN ? "IN" : "OUT");
+	LOG(LOG_DEBUG, "Type: %s", type == STANDARD ? "Standard" : type == CLASS ? "Class" : "Vendor");
+	LOG(LOG_DEBUG, "Recipient: %s", recipient == DEVICE ? "Device" : recipient == INTERFACE ? "Interface" : recipient == ENDPOINT ? "Endpoint" : "Other");
+}

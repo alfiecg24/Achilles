@@ -51,15 +51,18 @@ void printVersion()
 int main(int argc, char *argv[])
 {
     bool hasUsedUnrecognisedArg = false;
+    bool matchFound = false;
     // Iterate over each defined argument
-    for (int v = 0; v < argc; v++) {
+    for (int i = 0; i < sizeof(args) / sizeof(arg_t); i++) {
         // Iterate over each argument passed from CLI
-        for (int i = 0; i < sizeof(args) / sizeof(arg_t); i++) {
-            if (strncmp(argv[v], "-", 1) == 0 && // Prevent the file being executing from being flagged
-            strcmp(argv[v], args[i].longOpt) != 0 && // Check if it matches the long argument option
-            strncmp(argv[v], args[i].shortOpt, 2) != 0) { // CHeck if it matches the short argument option
-                LOG(LOG_ERROR, "ERROR: Unrecognised argument %s", argv[v]);
+        for (int v = 0; v < argc; v++) {
+            if ((strncmp(argv[v], "-", 1) == 0) && // Prevent the file being executing from being flagged
+            (strcmp(argv[v], args[i].longOpt) != 0) && // Check if it matches the long argument option
+            (strncmp(argv[v], args[i].shortOpt, 2) != 0)) { // Check if it matches the short argument option
                 hasUsedUnrecognisedArg = true;
+                continue;
+            } else {
+                matchFound = true;
                 break;
             }
         }
@@ -133,6 +136,9 @@ int main(int argc, char *argv[])
             sprintf(argList, "%s%s: %d, ", argList, args[i].name, args[i].intVal);
         }
     }
+    // Remove the trailing comma
+    argList[strlen(argList) - 2] = '\0';
+
     LOG(LOG_DEBUG, "Arguments - %s", argList);
 
     if (getArgByName("Help")->boolVal)
@@ -165,38 +171,39 @@ int main(int argc, char *argv[])
     int deviceCount;
     int i = 0;
     device_t device;
-    if (findDevice(&device) == -1) {
-        while (i < 5)
-        {
-            idevice_error_t ideviceError = idevice_get_device_list(&devices, &deviceCount);
-            if (ideviceError != IDEVICE_E_SUCCESS)
-            {
-                LOG(LOG_ERROR, "Failed to get device list: %s", ideviceError);
-                return 1;
-            }
-            if (deviceCount > 1)
-            {
-                LOG(LOG_FATAL, "ERROR: At the moment, only one device at a time is supported. Please disconnect any additional iOS devices and try again.");
-                return -1;
-            }
-            if (deviceCount == 0)
-            {
-                sleep(1);
-                i++;
-            }
-            else
-            {
-                break;
-            }
-        }
-        if (deviceCount == 0)
-        {
-            LOG(LOG_FATAL, "ERROR: No iOS device found after 5 seconds - please connect a device.");
-            return -1;
-        }
-    }
+    // if (findDevice(&device) == -1) {
+    //     while (i < 5)
+    //     {
+    //         idevice_error_t ideviceError = idevice_get_device_list(&devices, &deviceCount);
+    //         if (ideviceError != IDEVICE_E_SUCCESS)
+    //         {
+    //             LOG(LOG_ERROR, "Failed to get device list: %s", ideviceError);
+    //             return 1;
+    //         }
+    //         if (deviceCount > 1)
+    //         {
+    //             LOG(LOG_FATAL, "ERROR: At the moment, only one device at a time is supported. Please disconnect any additional iOS devices and try again.");
+    //             return -1;
+    //         }
+    //         if (deviceCount == 0)
+    //         {
+    //             sleep(1);
+    //             i++;
+    //         }
+    //         else
+    //         {
+    //             break;
+    //         }
+    //     }
+    //     if (deviceCount == 0)
+    //     {
+    //         LOG(LOG_FATAL, "ERROR: No iOS device found after 5 seconds - please connect a device.");
+    //         return -1;
+    //     }
+    // }
 
-    checkm8();
+    // checkm8();
+    reverseControlRequest(0x2);
 
     return 0;
 }

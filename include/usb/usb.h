@@ -29,6 +29,30 @@ typedef struct {
 	uint32_t sz;
 } transfer_ret_t;
 
+enum transfer_direction {
+	OUT = 0,
+	IN = 1
+};
+
+enum transfer_type {
+	STANDARD = 0,
+	CLASS = 1,
+	VENDOR = 2,
+	RESERVED = 3
+};
+
+enum transfer_recipient {
+	DEVICE = 0,
+	INTERFACE = 1,
+	ENDPOINT = 2,
+	OTHER = 3
+};
+
+typedef enum transfer_direction transfer_direction;
+typedef enum transfer_type transfer_type;
+typedef enum transfer_recipient transfer_recipient;
+
+
 typedef bool (*usb_check_cb_t)(usb_handle_t *, bool *);
 
 char *getDeviceSerialNumber(usb_handle_t *handle);
@@ -40,5 +64,7 @@ bool sendUSBControlRequestAsyncNoData(const usb_handle_t *handle, uint8_t bmRequ
 void closeUSBDevice(usb_handle_t *handle);
 bool waitUSBHandle(usb_handle_t *handle, usb_check_cb_t usb_check_cb, void *arg);
 void resetUSBDevice(usb_handle_t *handle);
+int createRequestType(transfer_direction direction, transfer_type type, transfer_recipient recipient);
+void reverseControlRequest(int bmRequestType);
 
 #endif // USB_UTILS_H
