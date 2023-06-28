@@ -6,9 +6,9 @@ def stall(device):  libusb1_async_ctrl_transfer(device, 0x80, 6, 0x304, 0x40A, b
 def leak(device): libusb1_no_error_ctrl_transfer(device, 0x80, 6, 0x304, 0x40A, 0xC0, 1)
 def no_leak(device):  libusb1_no_error_ctrl_transfer(device, 0x80, 6, 0x304, 0x40A, 0xC1, 1)
 
-def usb_req_stall(device):  libusb1_no_error_ctrl_transfer(device,  0x2, 3,   0x0,  0x80,  0x0, 10)
-def usb_req_leak(device): libusb1_no_error_ctrl_transfer(device, 0x80, 6, 0x304, 0x40A, 0x40,  1)
-def usb_req_no_leak(device):  libusb1_no_error_ctrl_transfer(device, 0x80, 6, 0x304, 0x40A, 0x41,  1)
+def usb_req_stall(device):  libusb1_no_error_ctrl_transfer(device, 0x2, 3, 0x0,  0x80, 0x0, 10)
+def usb_req_leak(device): libusb1_no_error_ctrl_transfer(device, 0x80, 6, 0x304, 0x40A, 0x40, 1)
+def usb_req_no_leak(device):  libusb1_no_error_ctrl_transfer(device, 0x80, 6, 0x304, 0x40A, 0x41, 1)
 ```
 
 Size of `usb_device_io_request` structure is `0x21`

@@ -331,27 +331,18 @@ ldp x29, x30, [sp, 0x10]
 ldp x20, x19, [sp], 0x20
 ret
 ```
-This gadget, in addition to performing it's operation as a `nop` gadget, also restores the previous `LR` register. As a result, the call to `free()` in `usb_core_complete_endpoint_io()` is skipped, so the request stays intact. Not doing so would cause issues with `free()` as we have damaged the heap's metadata by overflowing.
+This gadget, in addition to performing it's operation as a `nop` gadget, also restores the previous `LR` register. The `LR` register (link register) is also known as the return address register, and is used to store the address to return to after a function call.  Within `usb_core_complete_endpoint_io()`, which is called during the shut down of the USB stack, the callback of the request is called. After this callback has finished, the request object is freed.
 
-So, as a result of this, the device will execute from the address at the `callback` field to restore the previous `LR` register, and then move to the address in the `next` field.
-```c
-struct usb_device_io_request
-{
-    u_int32_t                       endpoint; // 0x4
-    volatile u_int8_t               *io_buffer; // 0x1
-    int                             status; // 0x4
-    u_int32_t                       io_length; // 0x4
-    u_int32_t                       return_count; // 0x4
-    void (*callback) (struct usb_device_io_request *io_request); // 0x8
-    struct usb_device_io_request    *next; // 0x8
-}; // 0x21
-```
-Once at this address, it would go to the offset of `0x11` to reach the `callback` field, and then start executing from the address in that field (which is right in the middle of our payload).
+If we don't restore this register, the device will reach the `ret` instruction at the end of the payload and return to the `usb_core_complete_endpoint_io()` function and the request will then be freed. So, by restoring the register, the call to `free()` in `usb_core_complete_endpoint_io()` is skipped, so the request stays intact. Not doing so would also cause issues with `free()` as we have damaged the heap's metadata by overflowing.
+
+So, as a result of this, the device will execute from the address at the `callback` field to restore the previous `LR` register, and then return to the previous `LR` register, which will point to the function that originally called `usb_core_complete_endpoint_io()` and hence bypass the call to `free()`.
+
+After this, the device will follow the `next` field to the address of our payload, and move to the middle of the payload.
 
 ## Executing the payload
 With the payload in place and an `io_request` having it's `next` field pointing to an address inside our payload, we can trigger a USB reset. As always, this will process the list of pending requests we just allocated while stalled as failed, and will invoke the callback for each of these.
 
-When it reaches our overflown `io_request` object, it will execute the callback (which is just a `nop` gadget) and then follow the `next` field to arrive in the middle of our payload. It will then try to execute the `callback` field of what it believes is an `io_request` object, but actually just begin exexcuting our callback chain at the address we overflowed the `next` field with + the offset of the `callback` field in the `io_request` structure (`0x11`).
+When it reaches our overflown `io_request` object, it will execute the callback (which is just a `nop` gadget) and then follow the `next` field to arrive in the middle of our payload. It will then try to execute the `callback` field of what it believes is an `io_request` object, but actually just begin exexcuting our callback chain at the address we overflowed the `next` field with + the offset of the `callback` field in the `io_request` structure (`0x20`).
 
 ## Putting the plan into action
 
