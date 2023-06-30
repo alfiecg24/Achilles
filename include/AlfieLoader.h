@@ -15,6 +15,10 @@
 #define LOG(logLevel, ...) loaderLog(logLevel, true, __FILE__, __LINE__, __func__, __VA_ARGS__)
 #define LOG_NO_NEWLINE(logLevel, ...) loaderLog(logLevel, false, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
+// Taken from gaster
+#ifndef MIN
+#	define MIN(a, b) ((a) < (b) ? (a) : (b))
+#endif
 typedef enum
 {
     FLAG_BOOL,

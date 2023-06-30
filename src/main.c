@@ -1,6 +1,7 @@
 #include <AlfieLoader.h>
 #include <string.h>
 #include <exploit/exploit.h>
+#include <exploit/payloads/helpers.h>
 
 bool isARM64Host = false;
 
@@ -202,7 +203,25 @@ int main(int argc, char *argv[])
         }
     }
 
+    if (isSerialNumberPwned(getDeviceSerialNumber(&device.handle)))
+    {
+        LOG(LOG_DEBUG, "Device serial number: %s", getDeviceSerialNumber(&device.handle));
+        LOG(LOG_FATAL, "ERROR: This device is already pwned.");
+        return -1;
+    }
+
     checkm8();
+
+    // LOG(LOG_DEBUG, "0x%2X", ((3U << 8U) | device_descriptor.i_serial_number));
+
+
+    // uint8_t branch[16];
+    // asm_arm64_x7_trampoline(0x10000E08C, branch);
+
+    // def usb_req_leak(device): libusb1_no_error_ctrl_transfer(device, 0x80, 6, 0x304, 0x40A, 0x40, 1)
+
+    // reverseControlRequest(0x80);
+    // LOG(LOG_DEBUG, "0x%2X", (0x80 & 0x80));
 
     return 0;
 }

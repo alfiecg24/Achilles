@@ -307,6 +307,8 @@ In order to craft the hole for the next IO buffer, we should do the following:
 * Trigger a USB reset so that `usb_quiesce()` is called and these requests are leaked.
 * Be left with a perfect hole that is of size `0x800` as DFU re-enters and allocates a new IO buffer.
 
+We first need to figure out at which address the IO requests will be allocated from, before figuring out how many are needed to reach the base of the IO buffer.
+
 At this point, we will have the hole for our next IO buffer to be allocated upon re-entry from DFU in the next stage. Without this stage, the IO buffer would be allocated in the same place as before and the use-after-free would be inexpoloitable.
 
 ## Triggering the use-after-free
@@ -319,7 +321,7 @@ With the new IO buffer hopefully allocated within the hole we created using heap
 After this, the IO buffer from the first iteration has been freed while the global variables still retain their values - including the variable that points to the old IO buffer. The new IO buffer should have been allocated in the hole created during the heap feng shui phase.
 
 ## Sending the payload
-As the use-after-free has now been triggered, we now need to send our payload to the device. Before doing so, however, we need to allocate some `io_request` objects - I will explain why in a second.
+As the use-after-free has now been triggered, we now need to send our payload to the device. Before doing so, however, we need to allocate some `io_request` objects - I will explain why in a second. At the moment, I am using the [ipwndfu payload](https://github.com/axi0mX/ipwndfu/blob/master/src/checkm8_arm64.S) in my exploit.
 
 First of all, we need to send the payload, which will be done like a regular DFU image transfer. We send the payload in `0x800`-sized chunks (which matches the wLength of the request we used to set the global state originally). If you think back to how the data phase is handled, you will know that at the end of the data phase the data in the IO buffer is copied into the image buffer. The image buffer is allocated at the insecure memory, A.K.A. a predictable address for us.
 

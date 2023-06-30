@@ -16,6 +16,7 @@ typedef struct {
 	io_service_t service;
 	IOUSBDeviceInterface320 **device;
 	CFRunLoopSourceRef async_event_source;
+	IOUSBInterfaceInterface300 **interface;
 } usb_handle_t;
 
 enum usb_transfer {
@@ -62,8 +63,9 @@ bool sendUSBControlRequestNoData(const usb_handle_t *handle, uint8_t bmRequestTy
 bool sendUSBControlRequestAsync(const usb_handle_t *handle, uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, void *pData, size_t wLength, unsigned usbAbortTimeout, transfer_ret_t *transferRet);
 bool sendUSBControlRequestAsyncNoData(const usb_handle_t *handle, uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, size_t wLength, unsigned USBAbortTimeout, transfer_ret_t *transferRet);
 void closeUSBDevice(usb_handle_t *handle);
-bool waitUSBHandle(usb_handle_t *handle, usb_check_cb_t usb_check_cb, void *arg);
+bool waitUSBHandle(usb_handle_t *handle, uint8_t usb_interface, uint8_t usb_alt_interface, usb_check_cb_t usb_check_cb, void *arg);
 void resetUSBDevice(usb_handle_t *handle);
+bool resetUSBHandle(usb_handle_t *handle, bool manualReset, int stage, int cpid) ;
 int createRequestType(transfer_direction direction, transfer_type type, transfer_recipient recipient);
 void reverseControlRequest(int bmRequestType);
 
