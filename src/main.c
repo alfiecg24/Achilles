@@ -61,15 +61,17 @@ int main(int argc, char *argv[])
                 continue;
             }
             if (
-            (strcmp(argv[v], args[i].longOpt) != 0) && // Check if it matches the long argument option
-            (strncmp(argv[v], args[i].shortOpt, 2) != 0)) { // Check if it matches the short argument option
+            (strcmp(argv[v], args[i].longOpt) == 0) || // Check if it matches the long argument option
+            ((strncmp(argv[v], args[i].shortOpt, 2) != 0) && // Check if it matches the short argument option
+            (strlen(argv[v]) == 2)) // Make sure there aren't additional characters
+            ) {
+                matchFound = true;
+                continue;
+            } else {
                 if (strcmp(args[i].name, args[sizeof(args) / sizeof(arg_t) - 1].name) == 0 && !matchFound) { // Check if it is the last argument
                     LOG(LOG_ERROR, "Unrecognised argument %s", argv[v]);
                     hasUsedUnrecognisedArg = true;
                 }
-                continue;
-            } else {
-                matchFound = true;
                 continue;
             }
         }
