@@ -8,7 +8,8 @@ arg_t args[] = {
     {"Verbosity", "-v", "--verbosity", "Verbosity level, maximum of 2", "-vv, --verbosity 2", FLAG_INT, 0},
     {"Debug", "-d", "--debug", "Enable debug logging", NULL, FLAG_BOOL, false},
     {"Help", "-h", "--help", "Show this help message", NULL, FLAG_BOOL, false},
-    {"Version", "-V", "--version", "Show version information", NULL, FLAG_BOOL, false}};
+    {"Version", "-V", "--version", "Show version information", NULL, FLAG_BOOL, false},
+    {"Exploit", "-e", "--exploit", "Exploit with checkm8 and exit", NULL, FLAG_BOOL, false}};
 
 arg_t *getArgByName(char *name)
 {
@@ -210,7 +211,11 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    checkm8();
+    if (getArgByName("Exploit")->boolVal)
+    {
+        LOG(LOG_INFO, "Running checkm8 exploit");
+        checkm8();
+    }
 
     return 0;
 }
