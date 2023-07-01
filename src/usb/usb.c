@@ -451,8 +451,11 @@ bool checkm8CheckUSBDevice(usb_handle_t *handle, bool *pwned) {
             return false;
         }
 		
-		if(cpid != 0) {
-			*pwned = strstr(usbSerialNumber, "PWND") != NULL;
+		LOG(LOG_DEBUG, "Ping");
+		if(usbSerialNumber != 0) {
+			LOG(LOG_DEBUG, "Pong");
+			char *yes = strstr(usbSerialNumber, "PWND");
+			LOG(LOG_DEBUG, "PWND: %s", yes);
 			ret = true;
 		}
 	}
