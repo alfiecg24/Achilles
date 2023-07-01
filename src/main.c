@@ -163,16 +163,11 @@ int main(int argc, char *argv[])
 
     struct utsname buffer;
     uname(&buffer);
-    LOG(LOG_DEBUG, "Host OS: %s", buffer.sysname);
-    LOG(LOG_DEBUG, "Host architecture: %s", buffer.machine);
+    LOG(LOG_DEBUG, "Running on %s %s", buffer.sysname, buffer.machine);
     if (strcmp(buffer.sysname, "Darwin") != 0)
     {
         LOG(LOG_FATAL, "ERROR: This tool is only supported on macOS");
         return -1;
-    }
-    if (strcmp(buffer.machine, "arm64") == 0)
-    {
-        isARM64Host = true;
     }
 
     char **devices;
@@ -218,17 +213,6 @@ int main(int argc, char *argv[])
     }
 
     checkm8();
-
-    // LOG(LOG_DEBUG, "0x%2X", ((3U << 8U) | device_descriptor.i_serial_number));
-
-
-    // uint8_t branch[16];
-    // asm_arm64_x7_trampoline(0x10000E08C, branch);
-
-    // def usb_req_leak(device): libusb1_no_error_ctrl_transfer(device, 0x80, 6, 0x304, 0x40A, 0x40, 1)
-
-    // reverseControlRequest(0x80);
-    // LOG(LOG_DEBUG, "0x%2X", (0x80 & 0x80));
 
     return 0;
 }
