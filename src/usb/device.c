@@ -41,7 +41,7 @@ device_t initDevice(io_service_t device, char *serialNumber, DeviceMode mode, in
 // Returns:
 //      int: 0 if the device was found, 1 otherwise
 // ******************************************************
-int findDevice(device_t *device)
+int findDevice(device_t *device, bool waiting)
 {
     // get all USB devices
     io_iterator_t iterator;
@@ -84,22 +84,33 @@ int findDevice(device_t *device)
         CFNumberGetValue(productID, kCFNumberIntType, &productIDInt);
         usb_handle_t handle;
         handle.service = service;
+        if (service == 0)
+        {
+            LOG(LOG_FATAL, "ERROR: Failed to get IOUSBDevice service!");
+            return -1;
+        }
+        // char *serial = getDeviceSerialNumber(&handle);
+        // if (serial == NULL)
+        // {
+        //     LOG(LOG_FATAL, "ERROR: Failed to get USB serial number!");
+        //     return -1;
+        // }
         if (vendorIDInt == 0x5ac && productIDInt == 0x1227)
         {
             *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_DFU, vendorIDInt, productIDInt);
-            LOG(LOG_DEBUG, "Initialized device in DFU mode");
+            if (!waiting) { LOG(LOG_DEBUG, "Initialised device in DFU mode"); }
             return 0;
         }
         if (vendorIDInt == 0x5ac && productIDInt == 0x1281)
         {
             *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_RECOVERY, vendorIDInt, productIDInt);
-            LOG(LOG_DEBUG, "Initialized device in recovery mode");
+            if (!waiting) { LOG(LOG_DEBUG, "Initialised device in recovery mode"); }
             return 0;
         }
         if (vendorIDInt == 0x5ac && productIDInt == 0x12ab)
         {
             *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_NORMAL, vendorIDInt, productIDInt);
-            LOG(LOG_DEBUG, "Initialized device in normal mode");
+            if (!waiting) { LOG(LOG_DEBUG, "Initialised device in normal mode"); }
             return 0;
         }
     }
@@ -122,7 +133,7 @@ int findDevice(device_t *device)
 int waitForDeviceInMode(device_t *device, DeviceMode mode, int timeout) {
     int i = 0;
     while (1) {
-        if (findDevice(device) == 0 && device->mode == mode) {
+        if (findDevice(device, true) == 0 && device->mode == mode) {
             return 0;
         }
         if (i >= timeout) {

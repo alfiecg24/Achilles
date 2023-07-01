@@ -16,7 +16,6 @@ char *getDeviceSerialNumber(usb_handle_t *handle)
     CFTypeRef serialNumber = IORegistryEntryCreateCFProperty(handle->service, CFSTR("USB Serial Number"), kCFAllocatorDefault, 0);
     if (serialNumber == NULL)
     {
-        LOG(LOG_FATAL, "ERROR: Failed to get USB serial number!");
         return NULL;
     }
     if (CFGetTypeID(serialNumber) != CFStringGetTypeID())
@@ -117,6 +116,7 @@ void closeUSBDevice(usb_handle_t *handle) {
 // ******************************************************
 void closeUSBHandle(usb_handle_t *handle) {
 	closeUSBDevice(handle);
+	LOG(LOG_DEBUG, "Closed USB handle");
 }
 
 // ******************************************************
@@ -213,13 +213,13 @@ bool waitUSBHandle(usb_handle_t *handle, uint8_t usb_interface, uint8_t usb_alt_
 		if(IOServiceGetMatchingServices(0, matching_dict, &iter) == kIOReturnSuccess) {
 			while((serv = IOIteratorNext(iter)) != IO_OBJECT_NULL) {
 				if(openUSBDevice(serv, handle)) {
-					if (openUSBInterface(usb_interface, usb_alt_interface, handle)) {
-						if(usb_check_cb == NULL || usb_check_cb(handle, arg)) {
-							ret = true;
-							break;
-						}
-						closeUSBDevice(handle);
+					//LOG(LOG_DEBUG, "usb_check_cb is %p", usb_check_cb);
+					if(usb_check_cb == NULL || usb_check_cb(handle, arg)) {
+						LOG(LOG_DEBUG, "USB handle is available, returning");
+						ret = true;
+						break;
 					}
+					closeUSBDevice(handle);
 				}
 			}
 			IOObjectRelease(iter);
@@ -232,18 +232,18 @@ bool waitUSBHandle(usb_handle_t *handle, uint8_t usb_interface, uint8_t usb_alt_
 	return ret;
 }
 
-// // ******************************************************
-// // Function: resetUSBHandle()
-// //
-// // Purpose: Reset a USB handle
-// //
-// // Parameters:
-// //      usb_handle_t *handle: the handle to reset
-// // ******************************************************
-// void resetUSBHandle(usb_handle_t *handle) {
-// 	(*handle->device)->ResetDevice(handle->device);
-// 	(*handle->device)->USBDeviceReEnumerate(handle->device, 0);
-// }
+// ******************************************************
+// Function: resetUSBHandle()
+//
+// Purpose: Reset a USB handle
+//
+// Parameters:
+//      usb_handle_t *handle: the handle to reset
+// ******************************************************
+void resetUSBHandle(usb_handle_t *handle) {
+	(*handle->device)->ResetDevice(handle->device);
+	(*handle->device)->USBDeviceReEnumerate(handle->device, 0);
+}
 
 // ******************************************************
 // Function: USBAsyncCallback()
@@ -292,7 +292,7 @@ bool sendUSBControlRequest(const usb_handle_t *handle, uint8_t bmRequestType, ui
 	IOUSBDevRequestTO req;
 	IOReturn ret;
 
-	LOG(LOG_DEBUG, "sendUSBControlRequest: bmRequestType = 0x%02x, bRequest = 0x%02x, wValue = 0x%04x, wIndex = 0x%04x, wLength = %d, pData = %p", bmRequestType, bRequest, wValue, wIndex, wLength, pData);
+	// LOG(LOG_DEBUG, "bmRequestType = 0x%02x, bRequest = 0x%02x, wValue = 0x%04x, wIndex = 0x%04x, wLength = %d, pData = %p", bmRequestType, bRequest, wValue, wIndex, wLength, pData);
 
 	req.wLenDone = 0;
 	req.pData = pData;
@@ -303,10 +303,7 @@ bool sendUSBControlRequest(const usb_handle_t *handle, uint8_t bmRequestType, ui
 	req.wIndex = OSSwapLittleToHostInt16(wIndex);
 	req.completionTimeout = req.noDataTimeout = USB_TIMEOUT;
 
-	LOG(LOG_DEBUG, "Initialised request");
-
 	ret = (*handle->device)->DeviceRequestTO(handle->device, &req);
-	LOG(LOG_DEBUG, "DeviceRequestTO returned %d", ret);
 	if(transferRet != NULL) {
 		if(ret == kIOReturnSuccess) {
 			transferRet->sz = req.wLenDone;
@@ -340,11 +337,7 @@ bool sendUSBControlRequest(const usb_handle_t *handle, uint8_t bmRequestType, ui
 bool sendUSBControlRequestAsync(const usb_handle_t *handle, uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, void *pData, size_t wLength, unsigned usbAbortTimeout, transfer_ret_t *transferRet) {
 	IOUSBDevRequestTO req;
 
-	LOG(LOG_DEBUG, "Entering sendUSBControlRequestAsyncNoData()");
-    LOG(LOG_DEBUG, "handle: %p", handle);
-    LOG(LOG_DEBUG, "handle->device: %p", handle->device);
-	LOG(LOG_DEBUG, "*handle->device: %p", *handle->device);
-	LOG(LOG_DEBUG, "*handle: %p", *handle);
+	// LOG(LOG_DEBUG, "bmRequestType = 0x%02x, bRequest = 0x%02x, wValue = 0x%04x, wIndex = 0x%04x, wLength = %d, pData = %p", bmRequestType, bRequest, wValue, wIndex, wLength, pData);
 
 	req.wLenDone = 0;
 	req.pData = pData;
@@ -354,13 +347,8 @@ bool sendUSBControlRequestAsync(const usb_handle_t *handle, uint8_t bmRequestTyp
 	req.wValue = OSSwapLittleToHostInt16(wValue);
 	req.wIndex = OSSwapLittleToHostInt16(wIndex);
 	req.completionTimeout = req.noDataTimeout = USB_TIMEOUT;
-
-	LOG(LOG_DEBUG, "Initialised request");
-
 	if((*handle->device)->DeviceRequestAsyncTO(handle->device, &req, USBAsyncCallback, transferRet) == kIOReturnSuccess) {
-		LOG(LOG_DEBUG, "Sent request");
 		sleep_ms(usbAbortTimeout);
-		LOG(LOG_DEBUG, "Aborting request");
 		if((*handle->device)->USBDeviceAbortPipeZero(handle->device) == kIOReturnSuccess) {
 			CFRunLoopRun();
 			return true;
@@ -523,9 +511,6 @@ bool sendUSBControlRequestNoData(const usb_handle_t *handle, uint8_t bmRequestTy
 bool sendUSBControlRequestAsyncNoData(const usb_handle_t *handle, uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, size_t wLength, unsigned USBAbortTimeout, transfer_ret_t *transferRet) {
 	bool ret = false;
 	void *pData;
-	LOG(LOG_DEBUG, "Entering sendUSBControlRequestAsyncNoData()");
-    LOG(LOG_DEBUG, "handle: %p", handle);
-    LOG(LOG_DEBUG, "handle->device: %p", handle->device);
 
 	if(wLength == 0) {
 		ret = sendUSBControlRequestAsync(handle, bmRequestType, bRequest, wValue, wIndex, NULL, 0, USBAbortTimeout, transferRet);
@@ -537,50 +522,60 @@ bool sendUSBControlRequestAsyncNoData(const usb_handle_t *handle, uint8_t bmRequ
 	return ret;
 }
 
-// ******************************************************
-// Function: resetUSBDevice()
-//
-// Purpose: Reset a USB device
-//
-// Parameters:
-//      usb_handle_t *handle: the handle to use
-// ******************************************************
-void resetUSBDevice(usb_handle_t *handle)
-{
-    (*handle->device)->ResetDevice(handle->device);
-    (*handle->device)->USBDeviceReEnumerate(handle->device, 0);
-}
+// bool getUSBSessionID(const usb_handle_t *handle, UInt64 *session_id) {
+// 	CFNumberRef session_id_cf = IORegistryEntryCreateCFProperty(handle->service, CFSTR("sessionID"), kCFAllocatorDefault, kNilOptions);
+// 	bool ret = false;
 
-bool getUSBSessionID(const usb_handle_t *handle, UInt64 *session_id) {
-	CFNumberRef session_id_cf = IORegistryEntryCreateCFProperty(handle->service, CFSTR("sessionID"), kCFAllocatorDefault, kNilOptions);
-	bool ret = false;
+// 	LOG(LOG_DEBUG, "Here");
+// 	if (handle->service == IO_OBJECT_NULL) {
+// 		LOG(LOG_DEBUG, "IO_OBJECT_NULL");
+// 	} else {
+// 		LOG(LOG_DEBUG, "handle->service: %p", handle->service);
+// 	}
 
-	if(session_id_cf != NULL) {
-		ret = CFGetTypeID(session_id_cf) == CFNumberGetTypeID() && CFNumberGetValue(session_id_cf, kCFNumberSInt64Type, session_id);
-		CFRelease(session_id_cf);
-	}
-	return ret;
-}
+// 	if (handle->device == IO_OBJECT_NULL) {
+// 		LOG(LOG_DEBUG, "IO_OBJECT_NULL");
+// 	} else {
+// 		LOG(LOG_DEBUG, "handle->device: %p", handle->device);
+// 	}
 
-bool manualResetCheckUSBDevice(usb_handle_t *handle, bool *session_id) {
-	UInt64 cur_session_id;
+// 	if(session_id_cf != NULL) {
+// 		LOG(LOG_DEBUG, "Got session ID");
+// 		ret = CFGetTypeID(session_id_cf) == CFNumberGetTypeID() && CFNumberGetValue(session_id_cf, kCFNumberSInt64Type, session_id);
+// 		CFRelease(session_id_cf);
+// 	}
+// 	return ret;
+// }
 
-	return getUSBSessionID(handle, &cur_session_id) && cur_session_id != *(const UInt64 *)session_id;
-}
+// bool manualResetCheckUSBDevice(usb_handle_t *handle, bool *session_id) {
+// 	UInt64 cur_session_id;
+// 	LOG(LOG_DEBUG, "Getting current session ID");
+// 	return getUSBSessionID(handle, &cur_session_id) && cur_session_id != *(const UInt64 *)session_id;
+// }
 
-bool resetUSBHandle(usb_handle_t *handle, bool manualReset, int stage, int cpid) {
-	UInt64 session_id;
-
-	if(manualReset && (stage == 2 || stage == 3) && (cpid == 0x8960 || cpid == 0x8001 || cpid == 0x8010 || cpid == 0x8011)) {
-		if(getUSBSessionID(handle, &session_id) && IOObjectRetain(handle->service) == kIOReturnSuccess) {
-			closeUSBHandle(handle);
-			LOG(LOG_INFO, "Please disconnect and reconnect the lightning cable now.");
-			return waitUSBHandle(handle, 0, 0, manualResetCheckUSBDevice, &session_id);
-		}
-		return false;
-	}
-	return (*handle->device)->ResetDevice(handle->device) == kIOReturnSuccess && (*handle->device)->USBDeviceReEnumerate(handle->device, 0) == kIOReturnSuccess;
-}
+// // ******************************************************
+// // Function: resetUSBHandle()
+// //
+// // Purpose: Reset a USB handle
+// //
+// // Parameters:
+// //      usb_handle_t *handle: the handle to use
+// // ******************************************************
+// bool resetUSBHandle(usb_handle_t *handle, bool manualReset, int stage, int cpid) {
+// 	UInt64 session_id;
+// 	// 				  STAGE_TRIGGER || STAGE_PATCH
+// 	if(manualReset && (stage == 2 || stage == 3) && (cpid == 0x8960 || cpid == 0x8001 || cpid == 0x8010 || cpid == 0x8011)) {
+// 		LOG(LOG_DEBUG, "Manually resetting device");
+// 		if(getUSBSessionID(handle, &session_id) && IOObjectRetain(handle->service) == kIOReturnSuccess) {
+// 			LOG(LOG_DEBUG, "Releasing device and awaiting reconnection");
+// 			closeUSBHandle(handle);
+// 			LOG(LOG_INFO, "Please disconnect and reconnect the lightning cable now.");
+// 			return waitUSBHandle(handle, 0, 0, manualResetCheckUSBDevice, &session_id);
+// 		}
+// 		return false;
+// 	}
+// 	return (*handle->device)->ResetDevice(handle->device) == kIOReturnSuccess && (*handle->device)->USBDeviceReEnumerate(handle->device, 0) == kIOReturnSuccess;
+// }
 
 // ******************************************************
 // Function: createRequestType()

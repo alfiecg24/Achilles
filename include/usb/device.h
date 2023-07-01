@@ -31,7 +31,7 @@ struct {
 } device_descriptor;
 
 device_t initDevice(io_service_t device, char *serialNumber, DeviceMode mode, int vid, int pid);
-int findDevice(device_t *device);
+int findDevice(device_t *device, bool waiting);
 int waitForDeviceInMode(device_t *device, DeviceMode mode, int timeout);
 
 #endif // DEVICE_H

@@ -62,10 +62,13 @@ bool sendUSBControlRequest(const usb_handle_t *handle, uint8_t bmRequestType, ui
 bool sendUSBControlRequestNoData(const usb_handle_t *handle, uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, size_t wLength, transfer_ret_t *transferRet);
 bool sendUSBControlRequestAsync(const usb_handle_t *handle, uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, void *pData, size_t wLength, unsigned usbAbortTimeout, transfer_ret_t *transferRet);
 bool sendUSBControlRequestAsyncNoData(const usb_handle_t *handle, uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, size_t wLength, unsigned USBAbortTimeout, transfer_ret_t *transferRet);
+void closeUSBInterface(usb_handle_t *handle);
 void closeUSBDevice(usb_handle_t *handle);
+void closeUSBHandle(usb_handle_t *handle);
+void initUSBHandle(usb_handle_t *handle, uint16_t vid, uint16_t pid);
 bool waitUSBHandle(usb_handle_t *handle, uint8_t usb_interface, uint8_t usb_alt_interface, usb_check_cb_t usb_check_cb, void *arg);
-void resetUSBDevice(usb_handle_t *handle);
-bool resetUSBHandle(usb_handle_t *handle, bool manualReset, int stage, int cpid) ;
+// bool resetUSBHandle(usb_handle_t *handle, bool manualReset, int stage, int cpid);
+void resetUSBHandle(usb_handle_t *handle);
 int createRequestType(transfer_direction direction, transfer_type type, transfer_recipient recipient);
 void reverseControlRequest(int bmRequestType);
 
