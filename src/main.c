@@ -3,8 +3,6 @@
 #include <exploit/exploit.h>
 #include <exploit/payloads/helpers.h>
 
-bool isARM64Host = false;
-
 arg_t args[] = {
     // Name, short option, long option, description, examples, type, value
     {"Verbosity", "-v", "--verbosity", "Verbosity level, maximum of 2", "-vv, --verbosity 2", FLAG_INT, 0},
