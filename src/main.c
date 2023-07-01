@@ -171,6 +171,12 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    // Make sure to remove when no longer needed
+    if (!getArgByName("Exploit")->boolVal) {
+        LOG(LOG_FATAL, "Exiting as -e was not passed, nothing else to do");
+        return 0;
+    }
+
     char **devices;
     int deviceCount;
     int i = 0;
@@ -213,11 +219,8 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    if (getArgByName("Exploit")->boolVal)
-    {
-        LOG(LOG_INFO, "Running checkm8 exploit");
-        checkm8();
-    }
+    LOG(LOG_INFO, "Running checkm8 exploit");
+    checkm8();
 
     return 0;
 }
