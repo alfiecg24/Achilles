@@ -53,18 +53,25 @@ int main(int argc, char *argv[])
 {
     bool hasUsedUnrecognisedArg = false;
     bool matchFound = false;
+
     // Iterate over each defined argument
     for (int i = 0; i < sizeof(args) / sizeof(arg_t); i++) {
         // Iterate over each argument passed from CLI
         for (int v = 0; v < argc; v++) {
-            if ((strncmp(argv[v], "-", 1) == 0) && // Prevent the file being executing from being flagged
+            if (strncmp(argv[v], "-", 1) != 0) { // Prevent the file being executing from being flagged
+                continue;
+            }
+            if (
             (strcmp(argv[v], args[i].longOpt) != 0) && // Check if it matches the long argument option
             (strncmp(argv[v], args[i].shortOpt, 2) != 0)) { // Check if it matches the short argument option
-                hasUsedUnrecognisedArg = true;
+                if (strcmp(args[i].name, args[sizeof(args) / sizeof(arg_t) - 1].name) == 0 && !matchFound) { // Check if it is the last argument
+                    LOG(LOG_ERROR, "Unrecognised argument %s", argv[v]);
+                    hasUsedUnrecognisedArg = true;
+                }
                 continue;
             } else {
                 matchFound = true;
-                break;
+                continue;
             }
         }
     }
@@ -119,7 +126,7 @@ int main(int argc, char *argv[])
     arg_t *verbosityArg = getArgByName("Verbosity");
     if (verbosityArg->intVal > 2)
     {
-        LOG(LOG_DEBUG, "Verbosity set to %d, max is 2 - automatically updating to 2", verbosityArg->intVal);
+        LOG(LOG_DEBUG, "Verbosity set to %d, max is 2 - automatically lowering to 2", verbosityArg->intVal);
         verbosityArg->intVal = 3;
     }
     

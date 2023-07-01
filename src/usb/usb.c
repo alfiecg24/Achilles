@@ -203,7 +203,6 @@ bool openUSBInterface(uint8_t usb_interface, uint8_t usb_alt_interface, usb_hand
 // ******************************************************
 bool waitUSBHandle(usb_handle_t *handle, uint8_t usb_interface, uint8_t usb_alt_interface, usb_check_cb_t usb_check_cb, void *arg) {
 	CFMutableDictionaryRef matching_dict;
-	const char *darwin_device_class;
 	io_iterator_t iter;
 	io_service_t serv;
 	bool ret = false;
