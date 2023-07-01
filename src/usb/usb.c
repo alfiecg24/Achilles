@@ -28,6 +28,23 @@ char *getDeviceSerialNumber(usb_handle_t *handle)
     return serialNumberCString;
 }
 
+char *getDeviceSerialNumberWithTransfer(usb_handle_t *handle) {
+	transfer_ret_t transfer_ret;
+	uint8_t buf[UINT8_MAX];
+	char *str = NULL;
+	size_t i, sz;
+	if(sendUSBControlRequest(handle, 0x80, 6, 1U << 8U, 0, &device_descriptor, sizeof(device_descriptor), &transfer_ret)
+	&& transfer_ret.ret == USB_TRANSFER_OK && transfer_ret.sz == sizeof(device_descriptor)
+	&& sendUSBControlRequest(handle, 0x80, 6, (3U << 8U) | device_descriptor.i_serial_number, 0x409, buf, sizeof(buf), &transfer_ret)
+	&& transfer_ret.ret == USB_TRANSFER_OK && transfer_ret.sz == buf[0] && (sz = buf[0] / 2) != 0 && (str = malloc(sz)) != NULL) {
+		for(i = 0; i < sz; ++i) {
+			str[i] = (char)buf[2 * (i + 1)];
+		}
+		str[sz - 1] = '\0';
+	}
+	return str;
+}
+
 // ******************************************************
 // Function: sleep_ms()
 //
@@ -409,8 +426,10 @@ uint64_t tlbi, nop_gadget, ret_gadget, patch_addr, ttbr0_addr, func_gadget, writ
 //      bool: true if the device is vulnerable, false otherwise
 // ******************************************************
 bool checkm8CheckUSBDevice(usb_handle_t *handle, bool *pwned) {
-	char *usbSerialNumber = getDeviceSerialNumber(handle);
+	char *usbSerialNumber = getDeviceSerialNumberWithTransfer(handle);
 	bool ret = false;
+
+	LOG(LOG_DEBUG, "Got a device at handle %p", handle);
 
 	if(usbSerialNumber != NULL) {
 		char *stringCPID = getCPIDFromSerialNumber(usbSerialNumber);
@@ -422,6 +441,7 @@ bool checkm8CheckUSBDevice(usb_handle_t *handle, bool *pwned) {
 		cpid = (uint16_t)cpidNum;
 
 		if(strstr(usbSerialNumber, " SRTG:[iBoot-3135.0.0.2.3]") != NULL) {
+			LOG(LOG_DEBUG, "Found a matching configuration");
 			cpid = 0x8011;
 			config_hole = 6;
 			config_overwrite_pad = 0x540;
@@ -450,13 +470,12 @@ bool checkm8CheckUSBDevice(usb_handle_t *handle, bool *pwned) {
             return false;
         }
 		
-		LOG(LOG_DEBUG, "Ping");
 		if(usbSerialNumber != 0) {
-			LOG(LOG_DEBUG, "Pong");
-			char *yes = strstr(usbSerialNumber, "PWND");
-			LOG(LOG_DEBUG, "PWND: %s", yes);
+			*pwned = strstr(usbSerialNumber, "PWND") != NULL;
 			ret = true;
 		}
+	} else {
+		LOG(LOG_ERROR, "Failed to get serial number");
 	}
 	return ret;
 }

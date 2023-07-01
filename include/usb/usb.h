@@ -30,6 +30,14 @@ typedef struct {
 	uint32_t sz;
 } transfer_ret_t;
 
+static struct {
+	uint8_t b_len, b_descriptor_type;
+	uint16_t bcd_usb;
+	uint8_t b_device_class, b_device_sub_class, b_device_protocol, b_max_packet_sz;
+	uint16_t id_vendor, id_product, bcd_device;
+	uint8_t i_manufacturer, i_product, i_serial_number, b_num_configurations;
+} device_descriptor;
+
 enum transfer_direction {
 	OUT = 0,
 	IN = 1
@@ -57,6 +65,7 @@ typedef enum transfer_recipient transfer_recipient;
 typedef bool (*usb_check_cb_t)(usb_handle_t *, bool *);
 
 char *getDeviceSerialNumber(usb_handle_t *handle);
+char *getDeviceSerialNumberWithTransfer(usb_handle_t *handle);
 bool checkm8CheckUSBDevice(usb_handle_t *handle, bool *pwned);
 bool sendUSBControlRequest(const usb_handle_t *handle, uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, void *pData, size_t wLength, transfer_ret_t *transferRet);
 bool sendUSBControlRequestNoData(const usb_handle_t *handle, uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, size_t wLength, transfer_ret_t *transferRet);
@@ -67,7 +76,6 @@ void closeUSBDevice(usb_handle_t *handle);
 void closeUSBHandle(usb_handle_t *handle);
 void initUSBHandle(usb_handle_t *handle, uint16_t vid, uint16_t pid);
 bool waitUSBHandle(usb_handle_t *handle, uint8_t usb_interface, uint8_t usb_alt_interface, usb_check_cb_t usb_check_cb, void *arg);
-// bool resetUSBHandle(usb_handle_t *handle, bool manualReset, int stage, int cpid);
 void resetUSBHandle(usb_handle_t *handle);
 int createRequestType(transfer_direction direction, transfer_type type, transfer_recipient recipient);
 void reverseControlRequest(int bmRequestType);
