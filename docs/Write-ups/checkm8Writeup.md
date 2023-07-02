@@ -56,7 +56,7 @@ USB is initialised within the `usb_init()` function, which will result in `usb_d
 int usb_dfu_init()
 {   
   // Initialise and zero out the global IO buffer
-  io_buffer = memalign(0x800, 0x40, 0);
+  io_buffer = memalign(0x800, 0x40);
   bzero(io_buffer, 0x800);
 
   // Initialise the global variables
@@ -321,7 +321,7 @@ With the new IO buffer hopefully allocated within the hole we created using heap
 After this, the IO buffer from the first iteration has been freed while the global variables still retain their values - including the variable that points to the old IO buffer. The new IO buffer should have been allocated in the hole created during the heap feng shui phase.
 
 ## Sending the payload
-As the use-after-free has now been triggered, we now need to send our payload to the device. Before doing so, however, we need to allocate some `io_request` objects - I will explain why in a second. At the moment, I am using the [ipwndfu payload](https://github.com/axi0mX/ipwndfu/blob/master/src/checkm8_arm64.S) in my exploit.
+As the use-after-free has now been triggered, we now need to send our overwrite to the device. Before doing so, however, we need to allocate some `io_request` objects - I will explain why in a second. At the moment, I am using the gaster payload in my exploit.
 
 First of all, we need to send the payload, which will be done like a regular DFU image transfer. We send the payload in `0x800`-sized chunks (which matches the wLength of the request we used to set the global state originally). If you think back to how the data phase is handled, you will know that at the end of the data phase the data in the IO buffer is copied into the image buffer. The image buffer is allocated at the insecure memory, A.K.A. a predictable address for us.
 

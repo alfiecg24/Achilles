@@ -429,8 +429,6 @@ bool checkm8CheckUSBDevice(usb_handle_t *handle, bool *pwned) {
 	char *usbSerialNumber = getDeviceSerialNumberWithTransfer(handle);
 	bool ret = false;
 
-	LOG(LOG_DEBUG, "Got a device at handle %p", handle);
-
 	if(usbSerialNumber != NULL) {
 		char *stringCPID = getCPIDFromSerialNumber(usbSerialNumber);
 		if (stringCPID == NULL) {
@@ -441,7 +439,7 @@ bool checkm8CheckUSBDevice(usb_handle_t *handle, bool *pwned) {
 		cpid = (uint16_t)cpidNum;
 
 		if(strstr(usbSerialNumber, " SRTG:[iBoot-3135.0.0.2.3]") != NULL) {
-			LOG(LOG_DEBUG, "Found a matching configuration");
+			LOG(LOG_DEBUG, "Found a matching device configuration");
 			cpid = 0x8011;
 			config_hole = 6;
 			config_overwrite_pad = 0x540;
@@ -542,61 +540,6 @@ bool sendUSBControlRequestAsyncNoData(const usb_handle_t *handle, uint8_t bmRequ
 	}
 	return ret;
 }
-
-// bool getUSBSessionID(const usb_handle_t *handle, UInt64 *session_id) {
-// 	CFNumberRef session_id_cf = IORegistryEntryCreateCFProperty(handle->service, CFSTR("sessionID"), kCFAllocatorDefault, kNilOptions);
-// 	bool ret = false;
-
-// 	LOG(LOG_DEBUG, "Here");
-// 	if (handle->service == IO_OBJECT_NULL) {
-// 		LOG(LOG_DEBUG, "IO_OBJECT_NULL");
-// 	} else {
-// 		LOG(LOG_DEBUG, "handle->service: %p", handle->service);
-// 	}
-
-// 	if (handle->device == IO_OBJECT_NULL) {
-// 		LOG(LOG_DEBUG, "IO_OBJECT_NULL");
-// 	} else {
-// 		LOG(LOG_DEBUG, "handle->device: %p", handle->device);
-// 	}
-
-// 	if(session_id_cf != NULL) {
-// 		LOG(LOG_DEBUG, "Got session ID");
-// 		ret = CFGetTypeID(session_id_cf) == CFNumberGetTypeID() && CFNumberGetValue(session_id_cf, kCFNumberSInt64Type, session_id);
-// 		CFRelease(session_id_cf);
-// 	}
-// 	return ret;
-// }
-
-// bool manualResetCheckUSBDevice(usb_handle_t *handle, bool *session_id) {
-// 	UInt64 cur_session_id;
-// 	LOG(LOG_DEBUG, "Getting current session ID");
-// 	return getUSBSessionID(handle, &cur_session_id) && cur_session_id != *(const UInt64 *)session_id;
-// }
-
-// // ******************************************************
-// // Function: resetUSBHandle()
-// //
-// // Purpose: Reset a USB handle
-// //
-// // Parameters:
-// //      usb_handle_t *handle: the handle to use
-// // ******************************************************
-// bool resetUSBHandle(usb_handle_t *handle, bool manualReset, int stage, int cpid) {
-// 	UInt64 session_id;
-// 	// 				  STAGE_TRIGGER || STAGE_PATCH
-// 	if(manualReset && (stage == 2 || stage == 3) && (cpid == 0x8960 || cpid == 0x8001 || cpid == 0x8010 || cpid == 0x8011)) {
-// 		LOG(LOG_DEBUG, "Manually resetting device");
-// 		if(getUSBSessionID(handle, &session_id) && IOObjectRetain(handle->service) == kIOReturnSuccess) {
-// 			LOG(LOG_DEBUG, "Releasing device and awaiting reconnection");
-// 			closeUSBHandle(handle);
-// 			LOG(LOG_INFO, "Please disconnect and reconnect the lightning cable now.");
-// 			return waitUSBHandle(handle, 0, 0, manualResetCheckUSBDevice, &session_id);
-// 		}
-// 		return false;
-// 	}
-// 	return (*handle->device)->ResetDevice(handle->device) == kIOReturnSuccess && (*handle->device)->USBDeviceReEnumerate(handle->device, 0) == kIOReturnSuccess;
-// }
 
 // ******************************************************
 // Function: createRequestType()

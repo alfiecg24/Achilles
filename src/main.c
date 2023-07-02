@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
     // Remove the trailing comma
     argList[strlen(argList) - 2] = '\0';
 
-    LOG(LOG_DEBUG, "Arguments - %s", argList);
+    LOG(LOG_DEBUG, "%s", argList);
 
     if (getArgByName("Help")->boolVal)
     {
