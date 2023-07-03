@@ -56,6 +56,7 @@ USB is initialised within the `usb_init()` function, which will result in `usb_d
 int usb_dfu_init()
 {   
   // Initialise and zero out the global IO buffer
+  // 0x800-sized buffer on a 0x40-byte alignment
   io_buffer = memalign(0x800, 0x40);
   bzero(io_buffer, 0x800);
 
