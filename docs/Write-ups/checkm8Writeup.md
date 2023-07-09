@@ -21,7 +21,8 @@
 - [Exploitation](#exploitation)
   - [Heap feng shui](#heap-feng-shui)
   - [Triggering the use-after-free](#triggering-the-use-after-free)
-  - [Sending the payload](#sending-the-payload)
+  - [The payload](#the-payload)
+    - [](#)
   - [Executing the payload](#executing-the-payload)
   - [Putting the plan into action](#putting-the-plan-into-action)
   - [Testing](#testing)
@@ -321,7 +322,9 @@ With the new IO buffer hopefully allocated within the hole we created using heap
 
 After this, the IO buffer from the first iteration has been freed while the global variables still retain their values - including the variable that points to the old IO buffer. The new IO buffer should have been allocated in the hole created during the heap feng shui phase.
 
-## Sending the payload
+## The payload
+
+### 
 As the use-after-free has now been triggered, we now need to send our overwrite to the device. Before doing so, however, we need to allocate some `io_request` objects - I will explain why in a second. At the moment, I am using the gaster payload in my exploit.
 
 First of all, we need to send the payload, which will be done like a regular DFU image transfer. We send the payload in `0x800`-sized chunks (which matches the wLength of the request we used to set the global state originally). If you think back to how the data phase is handled, you will know that at the end of the data phase the data in the IO buffer is copied into the image buffer. The image buffer is allocated at the insecure memory, A.K.A. a predictable address for us.

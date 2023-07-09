@@ -212,9 +212,9 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (isSerialNumberPwned(getDeviceSerialNumber(&device.handle)))
+    if (isSerialNumberPwned(getDeviceSerialNumberIOKit(&device.handle)))
     {
-        LOG(LOG_DEBUG, "Serial number: %s", getDeviceSerialNumber(&device.handle));
+        LOG(LOG_DEBUG, "Serial number: %s", getDeviceSerialNumberIOKit(&device.handle));
         LOG(LOG_FATAL, "ERROR: This device is already pwned.");
         return -1;
     }

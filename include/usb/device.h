@@ -22,16 +22,32 @@ typedef struct
     DeviceMode mode;
 } device_t;
 
-// struct {
-// 	uint8_t b_len, b_descriptor_type;
-// 	uint16_t bcd_usb;
-// 	uint8_t b_device_class, b_device_sub_class, b_device_protocol, b_max_packet_sz;
-// 	uint16_t id_vendor, id_product, bcd_device;
-// 	uint8_t i_manufacturer, i_product, i_serial_number, b_num_configurations;
-// } device_descriptor;
-
-device_t initDevice(io_service_t device, char *serialNumber, DeviceMode mode, int vid, int pid);
+// ******************************************************
+// Function: findDevice()
+//
+// Purpose: Find a device
+//
+// Parameters:
+//      device_t *device: the device struct to return
+//
+// Returns:
+//      int: 0 if the device was found, 1 otherwise
+// ******************************************************
 int findDevice(device_t *device, bool waiting);
+
+// ******************************************************
+// Function: waitForDeviceInMode()
+//
+// Purpose: Wait for a device to be in a certain mode
+//
+// Parameters:
+//      device_t *device: the device to wait for
+//      DeviceMode mode: the mode to wait for
+//      int timeout: the timeout in seconds
+//
+// Returns:
+//      int: 0 if the device was found, 1 otherwise
+// ******************************************************
 int waitForDeviceInMode(device_t *device, DeviceMode mode, int timeout);
 
 #endif // DEVICE_H

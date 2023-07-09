@@ -64,20 +64,150 @@ typedef enum transfer_recipient transfer_recipient;
 
 typedef bool (*usb_check_cb_t)(usb_handle_t *, bool *);
 
-char *getDeviceSerialNumber(usb_handle_t *handle);
+// ******************************************************
+// Function: getDeviceSerialNumberIOKit()
+//
+// Purpose: Get the serial number of the device from the USB handle using IOKit
+//
+// Parameters:
+//      usb_handle_t *handle: the USB handle
+//
+// Returns:
+//      char *: the serial number of the device
+// ******************************************************
+char *getDeviceSerialNumberIOKit(usb_handle_t *handle);
+
+// ******************************************************
+// Function: getDeviceSerialNumberTransfer()
+//
+// Purpose: Get the serial number of the device directly from the USB handle using USB control requests
+//
+// Parameters:
+//      usb_handle_t *handle: the USB handle
+//
+// Returns:
+//      char *: the serial number of the device
+// ******************************************************
 char *getDeviceSerialNumberWithTransfer(usb_handle_t *handle);
+
+// ******************************************************
+// Function: checkm8CheckUSBDevice()
+//
+// Purpose: Check if a USB device is vulnerable to checkm8 and update global variables accordingly
+//
+// Parameters:
+//      usb_handle_t *handle: the handle to use
+//      bool *pwned: whether the device is vulnerable
+//
+// Returns:
+//      bool: true if the device is vulnerable, false otherwise
+// ******************************************************
 bool checkm8CheckUSBDevice(usb_handle_t *handle, bool *pwned);
+
+// ******************************************************
+// Function: sendUSBControlRequest()
+//
+// Purpose: Send a USB control request
+//
+// Parameters:
+//      const usb_handle_t *handle: the handle to use
+//      uint8_t bmRequestType: the request type
+//      uint8_t bRequest: the request
+//      uint16_t wValue: the value
+//      uint16_t wIndex: the index
+//      void *pData: the data
+//      size_t wLength: the length
+//      transfer_ret_t *transferRet: the transfer return
+//
+// Returns:
+//      bool: true if the request was sent successfully, false otherwise
+// ******************************************************
 bool sendUSBControlRequest(const usb_handle_t *handle, uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, void *pData, size_t wLength, transfer_ret_t *transferRet);
+
+// ******************************************************
+// Function: sendUSBControlRequestNoData()
+//
+// Purpose: Send a USB control request with no data
+//
+// Parameters:
+//      const usb_handle_t *handle: the handle to use
+//      uint8_t bmRequestType: the request type
+//      uint8_t bRequest: the request
+//      uint16_t wValue: the value
+//      uint16_t wIndex: the index
+//      size_t wLength: the length
+//      transfer_ret_t *transferRet: the transfer return
+//
+// Returns:
+//      bool: true if the request was sent successfully, false otherwise
+// ******************************************************
 bool sendUSBControlRequestNoData(const usb_handle_t *handle, uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, size_t wLength, transfer_ret_t *transferRet);
-bool sendUSBControlRequestAsync(const usb_handle_t *handle, uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, void *pData, size_t wLength, unsigned usbAbortTimeout, transfer_ret_t *transferRet);
+
+// ******************************************************
+// Function: sendUSBControlRequestAsyncNoData()
+//
+// Purpose: Send a USB control request with no data asynchronously
+//
+// Parameters:
+//      const usb_handle_t *handle: the handle to use
+//      uint8_t bmRequestType: the request type
+//      uint8_t bRequest: the request
+//      uint16_t wValue: the value
+//      uint16_t wIndex: the index
+//      size_t wLength: the length
+//      unsigned USBAbortTimeout: the timeout
+//      transfer_ret_t *transferRet: the transfer return
+//
+// Returns:
+//      bool: true if the request was sent successfully, false otherwise
+// ******************************************************
 bool sendUSBControlRequestAsyncNoData(const usb_handle_t *handle, uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, size_t wLength, unsigned USBAbortTimeout, transfer_ret_t *transferRet);
-void closeUSBInterface(usb_handle_t *handle);
-void closeUSBDevice(usb_handle_t *handle);
+
+// ******************************************************
+// Function: closeUSBHandle()
+//
+// Purpose: Close a USB handle
+//
+// Parameters:
+//      usb_handle_t *handle: the handle to close
+// ******************************************************
 void closeUSBHandle(usb_handle_t *handle);
+
+// ******************************************************
+// Function: initUSBHandle()
+//
+// Purpose: Initialize a USB handle
+//
+// Parameters:
+//      usb_handle_t *handle: the handle to initialize
+//      uint16_t vid: the vendor ID
+//      uint16_t pid: the product ID
+// ******************************************************
 void initUSBHandle(usb_handle_t *handle, uint16_t vid, uint16_t pid);
+
+// ******************************************************
+// Function: waitUSBHandle()
+//
+// Purpose: Wait for a USB handle to become available
+//
+// Parameters:
+//      usb_handle_t *handle: the handle to wait for
+//      usb_check_cb_t usb_check_cb: the callback to call when the handle is available
+//      void *arg: the argument to pass to the callback
+//
+// Returns:
+//      bool: true if the handle is available, false otherwise
+// ******************************************************
 bool waitUSBHandle(usb_handle_t *handle, uint8_t usb_interface, uint8_t usb_alt_interface, usb_check_cb_t usb_check_cb, void *arg);
+
+// ******************************************************
+// Function: resetUSBHandle()
+//
+// Purpose: Reset a USB handle
+//
+// Parameters:
+//      usb_handle_t *handle: the handle to reset
+// ******************************************************
 void resetUSBHandle(usb_handle_t *handle);
-int createRequestType(transfer_direction direction, transfer_type type, transfer_recipient recipient);
-void reverseControlRequest(int bmRequestType);
 
 #endif // USB_UTILS_H

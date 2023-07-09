@@ -1,20 +1,5 @@
 #include <usb/device.h>
 
-// ******************************************************
-// Function: initDevice()
-//
-// Purpose: Initializes a device_t struct
-//
-// Parameters:
-//      io_service_t device: the device to initialize
-//      char *serialNumber: the serial number of the device
-//      DeviceMode mode: the mode of the device
-//      int vid: the vendor ID of the device
-//      int pid: the product ID of the device
-//
-// Returns:
-//      device_t: the initialized device
-// ******************************************************
 device_t initDevice(io_service_t device, char *serialNumber, DeviceMode mode, int vid, int pid)
 {
     device_t dev;
@@ -30,17 +15,6 @@ device_t initDevice(io_service_t device, char *serialNumber, DeviceMode mode, in
     return dev;
 }
 
-// ******************************************************
-// Function: findDevice()
-//
-// Purpose: Find a device
-//
-// Parameters:
-//      device_t *device: the device struct to return
-//
-// Returns:
-//      int: 0 if the device was found, 1 otherwise
-// ******************************************************
 int findDevice(device_t *device, bool waiting)
 {
     // get all USB devices
@@ -89,27 +63,22 @@ int findDevice(device_t *device, bool waiting)
             LOG(LOG_FATAL, "ERROR: Failed to get IOUSBDevice service!");
             return -1;
         }
-        // char *serial = getDeviceSerialNumber(&handle);
-        // if (serial == NULL)
-        // {
-        //     LOG(LOG_FATAL, "ERROR: Failed to get USB serial number!");
-        //     return -1;
-        // }
+
         if (vendorIDInt == 0x5ac && productIDInt == 0x1227)
         {
-            *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_DFU, vendorIDInt, productIDInt);
+            *device = initDevice(service, getDeviceSerialNumberIOKit(&handle), MODE_DFU, vendorIDInt, productIDInt);
             if (!waiting) { LOG(LOG_DEBUG, "Initialised device in DFU mode"); }
             return 0;
         }
         if (vendorIDInt == 0x5ac && productIDInt == 0x1281)
         {
-            *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_RECOVERY, vendorIDInt, productIDInt);
+            *device = initDevice(service, getDeviceSerialNumberIOKit(&handle), MODE_RECOVERY, vendorIDInt, productIDInt);
             if (!waiting) { LOG(LOG_DEBUG, "Initialised device in recovery mode"); }
             return 0;
         }
         if (vendorIDInt == 0x5ac && productIDInt == 0x12ab)
         {
-            *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_NORMAL, vendorIDInt, productIDInt);
+            *device = initDevice(service, getDeviceSerialNumberIOKit(&handle), MODE_NORMAL, vendorIDInt, productIDInt);
             if (!waiting) { LOG(LOG_DEBUG, "Initialised device in normal mode"); }
             return 0;
         }
@@ -117,19 +86,6 @@ int findDevice(device_t *device, bool waiting)
     return -1;
 }
 
-// ******************************************************
-// Function: waitForDeviceInMode()
-//
-// Purpose: Wait for a device to be in a certain mode
-//
-// Parameters:
-//      device_t *device: the device to wait for
-//      DeviceMode mode: the mode to wait for
-//      int timeout: the timeout in seconds
-//
-// Returns:
-//      int: 0 if the device was found, 1 otherwise
-// ******************************************************
 int waitForDeviceInMode(device_t *device, DeviceMode mode, int timeout) {
     int i = 0;
     while (1) {
