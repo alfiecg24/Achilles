@@ -1,8 +1,6 @@
-# checkm8 write-up
+# A comprehensive write-up of the checkm8 BootROM exploit
 
-## Table of contents
-- [checkm8 write-up](#checkm8-write-up)
-  - [Table of contents](#table-of-contents)
+- [A comprehensive write-up of the checkm8 BootROM exploit](#a-comprehensive-write-up-of-the-checkm8-bootrom-exploit)
 - [Analysis](#analysis)
   - [Introduction](#introduction)
     - [Resources](#resources)
@@ -22,11 +20,9 @@
   - [Heap feng shui](#heap-feng-shui)
   - [Triggering the use-after-free](#triggering-the-use-after-free)
   - [The payload](#the-payload)
-    - [](#)
+    - [The overwrite](#the-overwrite)
+    - [The function of the payload](#the-function-of-the-payload)
   - [Executing the payload](#executing-the-payload)
-  - [Putting the plan into action](#putting-the-plan-into-action)
-  - [Testing](#testing)
-  - [Troubleshooting](#troubleshooting)
 - [Conclusion](#conclusion)
 
 # Analysis
@@ -35,7 +31,7 @@ This is my analysis and writeup of the vulnerabilities exploited in the checkm8 
 * The main use-after-free (not patched until A14)
 * The memory leak (patched in A12)
 
-The memory leak is essential in order to exploit the use-after-free, and I will be going into further detail later on in this writeup. However, it is this leak that is the reason the use-after-free cannot be exploited on A12 and A13 SoCs.
+The memory leak is essential in order to exploit the use-after-free, and I will be going into further detail later on in this writeup. However, it is the patching of this leak that is the reason the use-after-free cannot be exploited on A12 and A13 SoCs.
 
 ### Resources
 Before we start, there are some important resources that I used to help me understand the exploit:
@@ -92,12 +88,13 @@ int handle_interface_request(struct usb_device_request *request, uint8_t **out_b
   int ret = -1;
 
   // Host to device
-  if ( (request->bmRequestType & 0x80) == 0)
+  if ((request->bmRequestType & 0x80) == 0)
   {
     switch(request->bRequest)
     {
       case 1: // DFU_DNLOAD
       {
+
         if(wLength > sizeof(*io_buffer)) {
           return -1;
         }
@@ -112,11 +109,13 @@ int handle_interface_request(struct usb_device_request *request, uint8_t **out_b
       case 6: // DFU_ABORT
       {
         totalReceived = 0;
+
         if(!dfuDone) {
           // Update global variables to abort DFU
           completionStatus = -1;
           dfuDone = true;
         }
+
         ret = 0;
         break;
       }
@@ -210,7 +209,8 @@ int getDFUImage(void* buffer, int maxLength)
 
   // Shut down all USB operations once done
   usb_quiesce();
-  return completionStatus;
+
+   // return ... //
 }
 ```
 So, what the function does is essentially allow for image transfers to happen and for DFU to do it's thing, and then shuts down the USB stack once it is finished. Now, looking back at the `handle_ep0_data_phase()` function, the global variables are all reset once the data phase has completed. However, if the data is _never fully transferred_, what happens then? The function simply returns **without clearing the global state**. This is good for us, as the attacker, because it means that the global variable holding the pointer to the IO buffer will still be intact.
@@ -299,6 +299,8 @@ The stages of exploitation are as follows:
 * Trigger the use-after-free vulnerability
 * Sending and executing the payload
 
+The following sections will have code examples for each of these stages - which are taken from my currently-unreleased checkm8-based project.
+
 ## Heap feng shui
 Heap feng shui is the technique of deliberately manipulating the heap and shaping it to benefit exploitation. Using the memory leak discussed earlier, we can trick the heap allocator into allocating the IO buffer in a different location on re-entry - allowing us to access the freed buffer from the previous iteration of DFU.
 
@@ -309,9 +311,71 @@ In order to craft the hole for the next IO buffer, we should do the following:
 * Trigger a USB reset so that `usb_quiesce()` is called and these requests are leaked.
 * Be left with a perfect hole that is of size `0x800` as DFU re-enters and allocates a new IO buffer.
 
-We first need to figure out at which address the IO requests will be allocated from, before figuring out how many are needed to reach the base of the IO buffer.
+Here's the heap spray function from my project, which is adapted for the T8011 BootROM:
+```c
+bool checkm8HeapSpray(device_t *device)
+{
+    checkm8Stall(device)
+    for (int i = 1; i <= config.hole; i++)
+    {
+        checkm8NoLeak(device)
+    }
+    checkm8USBRequestLeak(device)
+    checkm8NoLeak(device)
+    return true;
+}
+```
+I'll walk through the function step-by-step.
 
-At this point, we will have the hole for our next IO buffer to be allocated upon re-entry from DFU in the next stage. Without this stage, the IO buffer would be allocated in the same place as before and the use-after-free would be inexpoloitable.
+```c
+checkm8Stall(device)
+```
+
+This stalls the device-to-host endpoint, which will allow for a large number of `io_request` structures to be allocated as we can send requests but they will not be processed while the device is in the stalled state. Additionally, this request will leak a zero-length packet, as it matches the requirements in the callback function in order for an additional zero-length packet to be sent.
+
+```c
+for (int i = 1; i <= config.hole; i++)
+{
+    checkm8NoLeak(device)
+}
+```
+This sends `config.hole` requests to the device, which will each have an `io_request` structure allocated for them. Such requests will not leak zero-length packets, as they do not match the requirements for the callback function to send an additional zero-length packet. This will create a 'hole' as such that they will all be correctly de-allocated when the USB stack is quiesced.
+
+```c
+checkm8USBRequestLeak(device)
+```
+This will leak an additional zero-length packet and give us the hole that we need. This is because we send a zero-length packet at the beginning of the function, so the allocations will currently look something like this:
+```
+[  Leaked packet  ]
+[  Normal packet  ]
+[  Normal packet  ]
+[  Normal packet  ]
+[  Normal packet  ]
+[  Normal packet  ]
+[  Normal packet  ]
+[  Leaked packet  ]
+```
+After resetting the USB stack, it will look something like this:
+```
+[ Allocated space ]
+[   Empty space   ]
+[   Empty space   ]
+[   Empty space   ]
+[   Empty space   ]
+[   Empty space   ]
+[   Empty space   ]
+[ Allocated space ]
+```
+The heap allocator will then see this gap as the preferred place to allocate the next IO buffer upon re-entry into DFU.
+
+```c
+checkm8NoLeak(device)
+```
+This will send a request that does not leak a zero-length packet, which will be de-allocated when the USB stack is quiesced. As it stands, I am not entirely sure why this is necessary, but it is. Without this, the exploit will fail.
+
+At this point, we will have the hole for our next IO buffer to be allocated upon re-entry from DFU in the next stage. Without this stage, the IO buffer would be allocated in the same place as before and the use-after-free would be inexploitable.
+
+After the heap feng shui stage, a USB reset is triggered, DFU re-enters and the IO buffer is allocated in the hole we created.
 
 ## Triggering the use-after-free
 With the new IO buffer hopefully allocated within the hole we created using heap feng shui, we can now trigger the main use-after-free vulnerability.
@@ -320,41 +384,20 @@ With the new IO buffer hopefully allocated within the hole we created using heap
 * Begin the data phase but leave it as incomplete in order to evade the clearing of the global state.
 * Send a `DFU_ABORT` request in order to cause the IO buffer to be freed and the re-entry of DFU. This will trigger the use-after-free vulnerability.
 
-After this, the IO buffer from the first iteration has been freed while the global variables still retain their values - including the variable that points to the old IO buffer. The new IO buffer should have been allocated in the hole created during the heap feng shui phase.
+After this, the IO buffer from the first iteration has been freed while the global variables still retain their values - including the variable that points to the old IO buffer. The new IO buffer should have been allocated in the hole created during the heap feng shui phase. Hence, by sending data to the device, it will be written into the address in the global variable that points to the old IO buffer.
+
+Next, we need to send our overwrite and payload in order to give us full arbitrary code execution.
 
 ## The payload
 
-### 
-As the use-after-free has now been triggered, we now need to send our overwrite to the device. Before doing so, however, we need to allocate some `io_request` objects - I will explain why in a second. At the moment, I am using the gaster payload in my exploit.
+### The overwrite
 
-First of all, we need to send the payload, which will be done like a regular DFU image transfer. We send the payload in `0x800`-sized chunks (which matches the wLength of the request we used to set the global state originally). If you think back to how the data phase is handled, you will know that at the end of the data phase the data in the IO buffer is copied into the image buffer. The image buffer is allocated at the insecure memory, A.K.A. a predictable address for us.
-
-Next, we will stall the device and queue requests so that they are added to the linked list of requests. If we queue enough so that they begin to be allocated in our freed buffer, we can then have an overwrite written directly on top of these requests. Using this overwrite, we can change the `callback` field to simply point to a `nop` gadget, and the `next` field to point to a location within the image buffer - where our payload now sits.
-
-You may be wondering why we didn't just overwrite the `callback` field to point directly to our payload. The `nop` gadget is at offset `0x1800BCD0C` in the `T8011` SecureROM dump and actually looks like this:
-```s
-ldp x29, x30, [sp, 0x10]
-ldp x20, x19, [sp], 0x20
-ret
-```
-This gadget, in addition to performing it's operation as a `nop` gadget, also restores the previous `LR` register. The `LR` register (link register) is also known as the return address register, and is used to store the address to return to after a function call.  Within `usb_core_complete_endpoint_io()`, which is called during the shut down of the USB stack, the callback of the request is called. After this callback has finished, the request object is freed.
-
-If we don't restore this register, the device will reach the `ret` instruction at the end of the payload and return to the `usb_core_complete_endpoint_io()` function and the request will then be freed. So, by restoring the register, the call to `free()` in `usb_core_complete_endpoint_io()` is skipped, so the request stays intact. Not doing so would also cause issues with `free()` as we have damaged the heap's metadata by overflowing.
-
-So, as a result of this, the device will execute from the address at the `callback` field to restore the previous `LR` register, and then return to the previous `LR` register, which will point to the function that originally called `usb_core_complete_endpoint_io()` and hence bypass the call to `free()`.
-
-After this, the device will follow the `next` field to the address of our payload, and move to the middle of the payload.
+### The function of the payload
 
 ## Executing the payload
-With the payload in place and an `io_request` having it's `next` field pointing to an address inside our payload, we can trigger a USB reset. As always, this will process the list of pending requests we just allocated while stalled as failed, and will invoke the callback for each of these.
+With the payload in place and an `io_request` having it's `next` field pointing to an address inside our payload, we can trigger a USB reset. As always, this will process the list of pending requests (which we just allocated while stalled) as failed, and will invoke the callback for each of these requests.
 
-When it reaches our overflown `io_request` object, it will execute the callback (which is just a `nop` gadget) and then follow the `next` field to arrive in the middle of our payload. It will then try to execute the `callback` field of what it believes is an `io_request` object, but actually just begin exexcuting our callback chain at the address we overflowed the `next` field with + the offset of the `callback` field in the `io_request` structure (`0x20`).
-
-## Putting the plan into action
-
-## Testing
-
-## Troubleshooting
+When it reaches our overflown `io_request` object, it will execute the callback (which is just a `nop` gadget to restore the link and FP registers) and then follow the `next` field to arrive in the middle of our payload. It will then try to execute the `callback` field of what it believes is an `io_request` object, but actually just begin executing our callback chain at the address we overflowed the `next` field with + the offset of the `callback` field in the `io_request` structure (`0x20`).
 
 # Conclusion
 
