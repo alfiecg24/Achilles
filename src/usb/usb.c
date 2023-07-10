@@ -72,7 +72,6 @@ void closeUSBDevice(usb_handle_t *handle) {
 
 void closeUSBHandle(usb_handle_t *handle) {
 	closeUSBDevice(handle);
-	LOG(LOG_DEBUG, "Closed USB handle");
 }
 
 bool openUSBDevice(io_service_t service, usb_handle_t *handle) {
@@ -267,7 +266,6 @@ bool checkm8CheckUSBDevice(usb_handle_t *handle, bool *pwned) {
 		cpid = (uint16_t)cpidNum;
 
 		if(strstr(usbSerialNumber, " SRTG:[iBoot-3135.0.0.2.3]") != NULL) {
-			LOG(LOG_DEBUG, "Found a matching device configuration");
 			cpid = 0x8011;
 			config_hole = 6;
 			config_overwrite_pad = 0x540;
