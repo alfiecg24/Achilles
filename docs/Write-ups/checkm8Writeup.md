@@ -21,7 +21,7 @@
   - [Triggering the use-after-free](#triggering-the-use-after-free)
   - [The payload](#the-payload)
     - [The overwrite](#the-overwrite)
-    - [The function of the payload](#the-function-of-the-payload)
+    - [The main payload](#the-main-payload)
   - [Executing the payload](#executing-the-payload)
 - [Conclusion](#conclusion)
 
@@ -371,7 +371,7 @@ The heap allocator will then see this gap as the preferred place to allocate the
 ```c
 checkm8NoLeak(device)
 ```
-This will send a request that does not leak a zero-length packet, which will be de-allocated when the USB stack is quiesced. As it stands, I am not entirely sure why this is necessary, but it is. Without this, the exploit will fail.
+This will send a request that does not leak a zero-length packet, which will be de-allocated when the USB stack is quiesced. As it stands, I am not entirely sure why this is necessary, but it is - without this, the exploit will fail.
 
 At this point, we will have the hole for our next IO buffer to be allocated upon re-entry from DFU in the next stage. Without this stage, the IO buffer would be allocated in the same place as before and the use-after-free would be inexploitable.
 
@@ -389,10 +389,53 @@ After this, the IO buffer from the first iteration has been freed while the glob
 Next, we need to send our overwrite and payload in order to give us full arbitrary code execution.
 
 ## The payload
-
+The payload is the machine code that we send to the device to be executed as part of the exploitation process. It is sent in two parts:
+* The overwrite
+* The actual payload
+The overwrite is the data that we send to the device in order to overwrite the `callback` and `next` fields of the `io_request` structure. This will then direct the execution flow to the main payload.
 ### The overwrite
+For the overwrite, the `callback` and `next` fields in the `io_request` structure at the beginning of the freed buffer need to be overwritten. Both fields are pointers to areas in memory - `callback` being a pointer to the callback function and `next` being a pointer to the next `io_request` structure in the linked list of pending requests.
 
-### The function of the payload
+When exploiting the checkm8 exploit, the overwriting of the `callback` function is an opportunity to restore the link and FP registers to prevent the current USB request from being freed. Because we have overwritten the data in the heap, trying to free the object will result in the invalid heap metadata causing issues and possibly a crash on the device.
+
+For those who aren't sure what the link and FP registers are, here's a quick summary. The link register (LR) holds the address that the program should jump back to after returning from a function. The frame pointer (FP) is used to hold the address of the current **stack frame**, which looks something like this:
+```
++-----------------+
+|  Return Address |
++-----------------+
+|  Arguments      |
+|  and Parameters |
++-----------------+
+| Local Variables |
++-----------------+
+| Saved Registers |
++-----------------+
+|  Frame Pointer  |
++-----------------+
+```
+The stack frame is the area of the stack that is currently being used by the program, and typically changes when a function is called or returns. As you can see, it holds local variables, the return address and other data important to the program at that time.
+
+However, you may be wondering - what is the point of restoring these registers? Well, if you think back to what happens when the USB stack shuts down, it will process the list of pending requests and `usb_core_complete_endpoint_io()` will invoke the callback function for each of them. However, after doing so, this function will free the IO request object. If we can restore the link and FP registers, we can have execution jump back to the function that called `usb_core_complete_endpoint_io()`, instead of continuing on to free the IO request object in this function.
+
+However, as `callback` is a pointer to an area in memory, we cannot simply just overwrite the field with machine code to do this job for us. This leads me to the `nop` gadget, which is used in popular checkm8 implementations - although the name is not particularly accurate. `nop` means "no operation", and is typically code that does nothing. However, in the case of checkm8, the `nop` gadget that is in the BootROM code looks like this:
+```
+ldp x29, x30, [sp, #0x10]
+ldp x20, x19, [sp], #0x20
+ret
+```
+For some context, the `x29` register is the frame pointer, and the `x30` is the link register. It's also important to know that for ARM64, the stack usually grows downwards, from a high address to a low address, and the stack pointer (SP) holds the address of the lowest address occupied by the stack.
+
+So, with that, here is a breakdown of `ldp x29, x30, [sp, #0x10]`:
+1. `ldp` is the load pair instruction, which loads a pair of registers from memory into the specified address.
+2. `x29, x30` is the pair of registers to load from.
+3. `[sp, #0x10]` is the address to load the registers from. `sp` is the stack pointer, and `#0x10` is the offset from the stack pointer to load the registers from.
+Because the stack grows downwards, adding `0x10` to the stack pointer will point to the memory just above the stack pointer, which is where the link and FP registers are stored. `0x10` is the combined size of the pair of registers, AKA 16 bytes - as each register is 64 bits, or 8 bytes.
+
+`ldp x20, x19, [sp], #0x20` does a similar job, except it loads the registers from the stack pointer without an offset, but then **increments** the stack pointer by `0x20` (32 bytes) - this is done for alignment purposes and to ensure that the stack pointer is pointing to the correct address for the next instruction that may access that memory.
+
+Finally, `ret` is the return instruction, which will return to the address stored in the link register.
+
+### The main payload
 
 ## Executing the payload
 With the payload in place and an `io_request` having it's `next` field pointing to an address inside our payload, we can trigger a USB reset. As always, this will process the list of pending requests (which we just allocated while stalled) as failed, and will invoke the callback for each of these requests.
