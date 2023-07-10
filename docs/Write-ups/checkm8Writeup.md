@@ -306,10 +306,10 @@ Heap feng shui is the technique of deliberately manipulating the heap and shapin
 
 In order to craft the hole for the next IO buffer, we should do the following:
 * Stall the device-to-host endpoint.
-* Send a large number requests to create a `0x800`-sized group of request allocations.
+* Send a large number requests to create a build-up of request allocations.
 * Have the first and last of these requests meet the requirements for sending an additional zero-length packet.
 * Trigger a USB reset so that `usb_quiesce()` is called and these requests are leaked.
-* Be left with a perfect hole that is of size `0x800` as DFU re-enters and allocates a new IO buffer.
+* Be left with a hole that can be used to control allocation of the next IO buffer.
 
 Here's the heap spray function from my project, which is adapted for the T8011 BootROM:
 ```c
@@ -373,12 +373,14 @@ checkm8NoLeak(device)
 ```
 This will send a request that does not leak a zero-length packet, which will be de-allocated when the USB stack is quiesced. As it stands, I am not entirely sure why this is necessary, but it is - without this, the exploit will fail.
 
-At this point, we will have the hole for our next IO buffer to be allocated upon re-entry from DFU in the next stage. Without this stage, the IO buffer would be allocated in the same place as before and the use-after-free would be inexploitable.
+Accounting for all heap allocations being rounded up to the nearest multiple of `0x40`, and the `0x40`-sized header for each packet, we can safely assume that each `io_request` object will occupy `0x80` bytes on the heap. So, one strategy for heap feng shui would be to send `0x10` non-leaking packets to the device, which would create a hole of size `0x800` - which is exactly the size of the IO buffer. Testing this strategy proved it to be successful in exploitation.
 
-After the heap feng shui stage, a USB reset is triggered, DFU re-enters and the IO buffer is allocated in the hole we created.
+However, a quicker and more simple strategy (which is utilised in most implementations) is to send enough packets that a hole will be created that is smaller than `0x800`, but big enough that allocations will end up being shuffled around enough so that the IO buffer is allocated elsewhere upon re-entry. This is the strategy used in the function shown above, and it makes the exploit quicker.
+
+At this point, we will have the heap in such a state that the next IO buffer will be allocated in a location other than the standard address, which is occupied by the freed buffer. If the new IO buffer were to be allocated in the same place, we would not be able to exploit the use-after-free vulnerability as the freed buffer would be overwritten.
 
 ## Triggering the use-after-free
-With the new IO buffer hopefully allocated within the hole we created using heap feng shui, we can now trigger the main use-after-free vulnerability.
+With the new IO buffer hopefully allocated elsewhere within the heap, thanks to our heap feng shui, we can now trigger the main use-after-free vulnerability.
 
 * Send a setup packet with a request type of `0x80`, a `DFU_DNLOAD` request and a wLength that is less than `0x800` to the device. This will set all the global variables to their necessary values.
 * Begin the data phase but leave it as incomplete in order to evade the clearing of the global state.
