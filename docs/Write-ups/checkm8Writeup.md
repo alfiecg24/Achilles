@@ -311,6 +311,10 @@ In order to craft the hole for the next IO buffer, we should do the following:
 * Trigger a USB reset so that `usb_quiesce()` is called and these requests are leaked.
 * Be left with a hole that can be used to control allocation of the next IO buffer.
 
+Accounting for all heap allocations being rounded up to the nearest multiple of `0x40`, and the `0x40`-sized header for each packet, we can safely assume that each `io_request` object will occupy `0x80` bytes on the heap. So, one strategy for heap feng shui would be to send `0x10` non-leaking packets to the device, which would create a hole of size `0x800` - which is exactly the size of the IO buffer. Testing this strategy proved it to be successful in exploitation.
+
+However, a quicker and more simple strategy (which is utilised in most implementations) is to send enough packets that a hole will be created that is smaller than `0x800`, but big enough that allocations will end up being shuffled around enough so that the IO buffer is allocated elsewhere upon re-entry. This is the strategy used in the function shown below, and it makes the exploit quicker.
+
 Here's the heap spray function from my project, which is adapted for the T8011 BootROM:
 ```c
 bool checkm8HeapSpray(device_t *device)
@@ -366,25 +370,43 @@ After resetting the USB stack, it will look something like this:
 [   Empty space   ]
 [ Allocated space ]
 ```
-The heap allocator will then see this gap as the preferred place to allocate the next IO buffer upon re-entry into DFU.
+The heap allocator will then allocate objects inside this hole enough to shuffle around other allocations, which will result in the IO buffer being allocated elsewhere on re-entry.
 
 ```c
 checkm8NoLeak(device)
 ```
 This will send a request that does not leak a zero-length packet, which will be de-allocated when the USB stack is quiesced. As it stands, I am not entirely sure why this is necessary, but it is - without this, the exploit will fail.
 
-Accounting for all heap allocations being rounded up to the nearest multiple of `0x40`, and the `0x40`-sized header for each packet, we can safely assume that each `io_request` object will occupy `0x80` bytes on the heap. So, one strategy for heap feng shui would be to send `0x10` non-leaking packets to the device, which would create a hole of size `0x800` - which is exactly the size of the IO buffer. Testing this strategy proved it to be successful in exploitation.
-
-However, a quicker and more simple strategy (which is utilised in most implementations) is to send enough packets that a hole will be created that is smaller than `0x800`, but big enough that allocations will end up being shuffled around enough so that the IO buffer is allocated elsewhere upon re-entry. This is the strategy used in the function shown above, and it makes the exploit quicker.
-
 At this point, we will have the heap in such a state that the next IO buffer will be allocated in a location other than the standard address, which is occupied by the freed buffer. If the new IO buffer were to be allocated in the same place, we would not be able to exploit the use-after-free vulnerability as the freed buffer would be overwritten.
 
 ## Triggering the use-after-free
 With the new IO buffer hopefully allocated elsewhere within the heap, thanks to our heap feng shui, we can now trigger the main use-after-free vulnerability.
 
-* Send a setup packet with a request type of `0x80`, a `DFU_DNLOAD` request and a wLength that is less than `0x800` to the device. This will set all the global variables to their necessary values.
+* Send a setup packet with a request type of `0x80`, a `DFU_DNLOAD` request and a wLength that is less than or equal to `0x800` to the device. This will set all the global variables to their necessary values.
 * Begin the data phase but leave it as incomplete in order to evade the clearing of the global state.
 * Send a `DFU_ABORT` request in order to cause the IO buffer to be freed and the re-entry of DFU. This will trigger the use-after-free vulnerability.
+
+```c
+bool checkm8TriggerUaF(device_t *device)
+{
+  unsigned usbAbortTimeout = 10;
+	transfer_ret_t transferRet;
+
+	while(sendUSBControlRequestAsyncNoData(&device->handle, 0x21, DFU_DNLOAD, 0, 0, DFU_MAX_TRANSFER_SIZE, usbAbortTimeout, &transferRet)) {
+		if(transferRet.sz < config.overwritePadding 
+        && sendUSBControlRequestNoData(&device->handle, 0, 0, 0, 0, config.overwritePadding - transferRet.sz, &transferRet) 
+        && transferRet.ret == USB_TRANSFER_STALL) {
+			sendUSBControlRequestNoData(&device->handle, 0x21, DFU_CLRSTATUS, 0, 0, 0, NULL);
+			return true;
+		}
+		if(!sendUSBControlRequestNoData(&device->handle, 0x21, DFU_DNLOAD, 0, 0, EP0_MAX_PACKET_SIZE, NULL)) {
+			break;
+		}
+		usbAbortTimeout = (usbAbortTimeout + 1) % 10;
+	}
+	return false;
+}
+```
 
 After this, the IO buffer from the first iteration has been freed while the global variables still retain their values - including the variable that points to the old IO buffer. The new IO buffer should have been allocated in the hole created during the heap feng shui phase. Hence, by sending data to the device, it will be written into the address in the global variable that points to the old IO buffer.
 
