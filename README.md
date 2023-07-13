@@ -28,7 +28,7 @@ In its current state, this project does the following things:
 ## Dependencies
 * [libimobiledevice](https://github.com/libimobiledevice/libimobiledevice)
 
-You will need to specify the path to your libimobiledevice and version in the `Makefile`, in the `FRAMEWORKS` arguments. The default version is `1.0.6`. This will hopefully be resolved in the future so that the project can be built by simply running `make`.
+You will need to specify the version of your libimobiledevice installation in the `Makefile`, in the `FRAMEWORKS` arguments. The default version is `1.0.6`. This will hopefully be resolved in the future so that the project can be built by simply running `make`.
 
 ## Documentation
 I have made an effort to document the code as much as possible, and in all header files you will find a description of a function's purpose, parameters and return value for each function exported in the header. Hopefully this can help anyone who wants to learn more about the BootROM and iOS bootchain understand what is going on a bit better.

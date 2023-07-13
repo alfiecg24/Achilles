@@ -1,7 +1,7 @@
 CC=gcc
 SOURCES=src/main.c src/exploit/*.c src/usb/*.c src/utils/*.c src/exploit/payloads/*.c
 FRAMEWORKS=-framework IOKit -framework CoreFoundation -limobiledevice-1.0.6
-CFLAGS=-Iinclude -Wunused
+CFLAGS=-Iinclude -Wunused -Wunused-variable
 OUTPUT=build/AlfieLoader
 
 all: dirs AlfieLoader
