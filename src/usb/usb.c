@@ -248,6 +248,7 @@ char *getCPIDFromSerialNumber(char *serial) {
 	return NULL;
 }
 
+bool foundYoloDevice, foundPongoDevice;
 uint16_t cpid;
 size_t config_hole, ttbr0_vrom_off, ttbr0_sram_off, config_large_leak, config_overwrite_pad;
 uint64_t tlbi, nop_gadget, ret_gadget, patch_addr, ttbr0_addr, func_gadget, write_ttbr0, memcpy_addr, aes_crypto_cmd, boot_tramp_end, gUSBSerialNumber, dfu_handle_request, usb_core_do_transfer, dfu_handle_bus_reset, insecure_memory_base, handle_interface_request, usb_create_string_descriptor, usb_serial_number_string_descriptor;
@@ -289,13 +290,16 @@ bool checkm8CheckUSBDevice(usb_handle_t *handle, bool *pwned) {
 			handle_interface_request = 0x10000E08C;
 			usb_create_string_descriptor = 0x10000D234;
 			usb_serial_number_string_descriptor = 0x18008062A;
+		} else if (strstr(usbSerialNumber, "YOLO:checkra1n") != NULL) {
+			foundYoloDevice = true;
 		} else {
             LOG(LOG_FATAL, "ERROR: AlfieLoader does not support CPID 0x%X at this time", cpid);
             return false;
         }
 		
 		if(usbSerialNumber != 0) {
-			*pwned = strstr(usbSerialNumber, "PWND") != NULL;
+			extern bool bootingPongoOS;
+			*pwned = strstr(usbSerialNumber, "PWND");
 			ret = true;
 		}
 	} else {

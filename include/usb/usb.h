@@ -210,4 +210,6 @@ bool waitUSBHandle(usb_handle_t *handle, uint8_t usb_interface, uint8_t usb_alt_
 // ******************************************************
 void resetUSBHandle(usb_handle_t *handle);
 
+void sleep_ms(unsigned ms);
+
 #endif // USB_UTILS_H

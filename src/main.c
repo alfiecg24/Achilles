@@ -211,8 +211,8 @@ int main(int argc, char *argv[])
             return -1;
         }
     }
-
-    if (isSerialNumberPwned(getDeviceSerialNumberIOKit(&device.handle)))
+    char *serial = getDeviceSerialNumberIOKit(&device.handle);
+    if (isSerialNumberPwned(serial) && !isInDownloadMode(serial))
     {
         LOG(LOG_DEBUG, "Serial number: %s", getDeviceSerialNumberIOKit(&device.handle));
         LOG(LOG_FATAL, "ERROR: This device is already pwned.");
