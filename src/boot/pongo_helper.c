@@ -1,5 +1,7 @@
 #include <boot/pongo_helper.h>
 
+// Heavily based on pongo_helper.c from palera1n
+
 #define USB_RET_SUCCESS         KERN_SUCCESS
 #define USB_RET_NOT_RESPONDING  kIOReturnNotResponding
 #define USB_RET_IO              kIOReturnNotReady
