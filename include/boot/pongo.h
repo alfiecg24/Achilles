@@ -7,5 +7,6 @@
 #include <exploit/dfu.h>
 
 bool bootPongoOS(device_t *device);
+bool pongoOSHasBooted(char *serial);
 
 #endif // PONGO_H

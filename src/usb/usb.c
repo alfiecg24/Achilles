@@ -142,9 +142,7 @@ bool waitUSBHandle(usb_handle_t *handle, uint8_t usb_interface, uint8_t usb_alt_
 		if(IOServiceGetMatchingServices(0, matching_dict, &iter) == kIOReturnSuccess) {
 			while((serv = IOIteratorNext(iter)) != IO_OBJECT_NULL) {
 				if(openUSBDevice(serv, handle)) {
-					//LOG(LOG_DEBUG, "usb_check_cb is %p", usb_check_cb);
 					if(usb_check_cb == NULL || usb_check_cb(handle, arg)) {
-						LOG(LOG_DEBUG, "USB handle is available, returning");
 						ret = true;
 						break;
 					}

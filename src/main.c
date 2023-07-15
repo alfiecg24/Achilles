@@ -1,7 +1,6 @@
 #include <AlfieLoader.h>
 #include <string.h>
 #include <exploit/exploit.h>
-#include <exploit/payloads/helpers.h>
 
 arg_t args[] = {
     // Name, short option, long option, description, examples, type, value
@@ -9,7 +8,8 @@ arg_t args[] = {
     {"Debug", "-d", "--debug", "Enable debug logging", NULL, FLAG_BOOL, false},
     {"Help", "-h", "--help", "Show this help message", NULL, FLAG_BOOL, false},
     {"Version", "-V", "--version", "Show version information", NULL, FLAG_BOOL, false},
-    {"Exploit", "-e", "--exploit", "Exploit with checkm8 and exit", NULL, FLAG_BOOL, false}};
+    {"Exploit", "-e", "--exploit", "Exploit with checkm8 and exit", NULL, FLAG_BOOL, false},
+    {"PongoOS", "-p", "--pongo", "Boot PongoOS", NULL, FLAG_BOOL, false}};
 
 arg_t *getArgByName(char *name)
 {
@@ -172,8 +172,8 @@ int main(int argc, char *argv[])
     }
 
     // Make sure to remove when no longer needed
-    if (!getArgByName("Exploit")->boolVal) {
-        LOG(LOG_FATAL, "Exiting as -e was not passed, nothing else to do");
+    if (!getArgByName("Exploit")->boolVal && !getArgByName("PongoOS")->boolVal) {
+        LOG(LOG_FATAL, "Exiting as -e and -p were not passed, nothing else to do");
         return 0;
     }
 
