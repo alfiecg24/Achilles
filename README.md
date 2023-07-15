@@ -42,3 +42,7 @@ You may find that there are similarities in here to other projects like this - a
 
 ## Credits
 * Axi0mX - checkm8, [ipwndfu](https://github.com/axi0mX/ipwndfu)
+* checkra1n team - [checkra1n](https://checkra.in/)
+* 0x7FF - [gaster](https://github.com/0x7ff/gaster)
+* kok3shidoll - [ra1npoc](https://github.com/kok3shidoll/ra1npoc)
+* Mineek - [openra1n](https://github.com/mineek/openra1n)
