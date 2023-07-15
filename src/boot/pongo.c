@@ -1,5 +1,31 @@
 #include <boot/pongo.h>
 
+bool pongoOSHasBooted(char *serial) {
+    if (serial == NULL) {
+        LOG(LOG_ERROR, "ERROR: failed to get device serial number");
+        return false;
+    }
+    if (strstr(serial, "SRTG:[PongoOS") != NULL) {
+        return true;
+    }
+    return false;
+}
+
+void awaitPongoOS(usb_handle_t *handle) {
+    struct timespec start, end;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    while (!pongoOSHasBooted(getDeviceSerialNumberWithTransfer(handle))) {
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        double timeTaken = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
+        if (timeTaken > 10) {
+            LOG(LOG_ERROR, "ERROR: timed out waiting for PongoOS to boot");
+            return;
+        }
+        sleep_ms(100);
+    }
+    return;
+}
+
 // HUGE thanks to @mineekdev for their openra1n project,
 // which was the template for this code.
 
@@ -130,16 +156,11 @@ bool bootPongoOS(device_t *device)
         }
     }
     sendUSBControlRequestNoData(&device->handle, 0x21, DFU_CLRSTATUS, 0, 0, 0, NULL);
+    resetUSBHandle(&device->handle);
+    closeUSBHandle(&device->handle);
+    initUSBHandle(&device->handle, 0x05ac, 0x4141);
+    LOG(LOG_INFO, "Waiting for PongoOS to boot");
+    waitUSBHandle(&device->handle, 0, 0, NULL, NULL);
+    awaitPongoOS(&device->handle);
     return true;
-}
-
-bool pongoOSHasBooted(char *serial) {
-    if (serial == NULL) {
-        LOG(LOG_ERROR, "ERROR: failed to get device serial number");
-        return false;
-    }
-    if (strstr(serial, "SRTG:[PongoOS") != NULL) {
-        return true;
-    }
-    return false;
 }

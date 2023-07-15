@@ -211,6 +211,46 @@ int main(int argc, char *argv[])
             return -1;
         }
     }
+    if (device.mode == MODE_PONGO) {
+        initUSBHandle(&device.handle, 0x5ac, 0x4141);
+        waitUSBHandle(&device.handle, 0, 0, NULL, NULL);
+        FILE *kpf = fopen("jailbreak/kpf", "rb");
+        if (kpf == NULL) {
+            LOG(LOG_FATAL, "Failed to open kpf");
+            return -1;
+        }
+        fseek(kpf, 0, SEEK_END);
+        size_t kpfSize = ftell(kpf);
+        fseek(kpf, 0, SEEK_SET);
+        unsigned char *kpfData = malloc(kpfSize);
+        fread(kpfData, kpfSize, 1, kpf);
+        fclose(kpf);
+        bool ret;
+        LOG(LOG_DEBUG, "Uploading 0x%X bytes to PongoOS", (unsigned long long)kpfSize);
+        ret = sendUSBControlRequest(&device.handle, 0x21, 1, 0, 0, (unsigned char *)&kpfSize, 4, NULL);
+        if (ret)
+        {
+            LOG(LOG_DEBUG, "Starting transfer");
+            int bulkRet = sendUSBBulkUpload(&device.handle, kpfData, kpfSize);
+            // IOReturn bulkRet = kIOReturnSuccess;
+            // uint64_t input[5];
+            // input[0] = (&device.handle)->interface;
+            // input[1] = USB_TIMEOUT;
+            // input[2] = USB_TIMEOUT;
+            // input[3] = 0;
+            // input[4] = 0;
+            // mach_port_t fConnection = (&device.handle)->service;
+            // ret = IOConnectCallMethod(fConnection, kUSBInterfaceUserClientWritePipe, input, 5, kpfData, kpfSize, 0, 0, 0, 0);
+            // LOG(LOG_DEBUG, "Transfer done");
+            if (bulkRet == kIOReturnSuccess)
+            {
+                LOG(LOG_DEBUG, "Uploaded 0x%X bytes to PongoOS", (unsigned long long)kpfSize);
+            } else {
+                LOG(LOG_ERROR, "Failed to upload 0x%X bytes to PongoOS", (unsigned long long)kpfSize);
+            }
+        }
+        return 0;
+    }
     char *serial = getDeviceSerialNumberIOKit(&device.handle);
     if (isSerialNumberPwned(serial) && !isInDownloadMode(serial))
     {

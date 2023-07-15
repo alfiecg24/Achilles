@@ -38,4 +38,7 @@ Furthermore, I have included a detailed writeup on the vulnerabilities exploited
 If you find any issues with the documentation, please open an issue or submit a pull request to help improve it.
 
 ## Disclaimer
-You may find that there are similarities in here to other projects like this - and that is true. This was just a personal project for me to learn more about the BootROM and iOS bootchain. As a result, I relied a lot on open-source solutions such as [ipwndfu](https://github.com/axi0mX), [gaster](https://github.com/0x7ff/gaster) and [PongoOS](https://github.com/checkra1n/PongoOS) to help me along the way.
+You may find that there are similarities in here to other projects like this - and that is true. This was just a personal project for me to learn more about the BootROM and iOS bootchain. As a result, I relied a lot on open-source solutions such as [ipwndfu](https://github.com/axi0mX/ipwndfu), [gaster](https://github.com/0x7ff/gaster) and [PongoOS](https://github.com/checkra1n/PongoOS) to help me along the way.
+
+## Credits
+* Axi0mX - checkm8, [ipwndfu](https://github.com/axi0mX/ipwndfu)

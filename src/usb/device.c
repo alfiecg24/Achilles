@@ -82,6 +82,12 @@ int findDevice(device_t *device, bool waiting)
             if (!waiting) { LOG(LOG_DEBUG, "Initialised device in normal mode"); }
             return 0;
         }
+        if (vendorIDInt == 0x5ac && productIDInt == 0x4141)
+        {
+            *device = initDevice(service, getDeviceSerialNumberIOKit(&handle), MODE_PONGO, vendorIDInt, productIDInt);
+            if (!waiting) { LOG(LOG_DEBUG, "Initialised PongoOS device"); }
+            return 0;   
+        }
     }
     return -1;
 }

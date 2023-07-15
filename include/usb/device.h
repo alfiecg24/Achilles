@@ -10,7 +10,8 @@
 enum DeviceMode {
     MODE_NORMAL,
     MODE_RECOVERY,
-    MODE_DFU
+    MODE_DFU,
+    MODE_PONGO
 };
 
 typedef enum DeviceMode DeviceMode;

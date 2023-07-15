@@ -163,6 +163,8 @@ bool sendUSBControlRequestNoData(const usb_handle_t *handle, uint8_t bmRequestTy
 // ******************************************************
 bool sendUSBControlRequestAsyncNoData(const usb_handle_t *handle, uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, size_t wLength, unsigned USBAbortTimeout, transfer_ret_t *transferRet);
 
+int sendUSBBulkUpload(usb_handle_t *handle, void *buffer, size_t length);
+
 // ******************************************************
 // Function: closeUSBHandle()
 //
