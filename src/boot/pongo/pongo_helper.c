@@ -154,7 +154,10 @@ void jailbreakBoot(usb_handle_t *handle) {
 
 	// Set boot arguments to boot from ramdisk
 	char *args = "xargs rootdev=md0";
-	if (getArgByName("Boot arguments")->stringVal[0] == '\0') {
+	if (getArgByName("Boot arguments")->set) {
+		size_t extra = strlen(getArgByName("Boot arguments")->stringVal) + 1;
+		args = malloc(strlen(args) + extra);
+		strcpy(args, "xargs rootdev=md0");
 		strcat(args, " ");
 		strcat(args, getArgByName("Boot arguments")->stringVal);
 	}

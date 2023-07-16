@@ -252,8 +252,8 @@ int main(int argc, char *argv[])
     }
 
     // Make sure to remove when no longer needed
-    if (!getArgByName("Exploit")->boolVal && !getArgByName("PongoOS")->boolVal) {
-        LOG(LOG_FATAL, "Exiting as -e and -p were not passed, nothing else to do");
+    if (!getArgByName("Exploit")->set && !getArgByName("PongoOS")->set && !getArgByName("Jailbreak")->set) {
+        LOG(LOG_FATAL, "Exiting as neither -e, -p nor -j were not passed, nothing else to do");
         return 0;
     }
 
