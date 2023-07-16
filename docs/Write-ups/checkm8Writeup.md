@@ -375,7 +375,7 @@ The heap allocator will then allocate objects inside this hole enough to shuffle
 ```c
 checkm8NoLeak(device)
 ```
-This will send a request that does not leak a zero-length packet, which will be de-allocated when the USB stack is quiesced. As it stands, I am not entirely sure why this is necessary, but it is - without this, the exploit will fail.
+This will send a request that does not leak a zero-length packet, which will be de-allocated when the USB stack is quiesced. The `checkm8NoLeak()` transfer has a `wLength` of `0xC1`, which is the highest of all the transfers used in heap feng shui. As a result, it will mean that the host is requesting more bytes in the setup packet, which will result in the conditions being met in order to the additional zero-length packet to be sent.
 
 At this point, we will have the heap in such a state that the next IO buffer will be allocated in a location other than the standard address, which is occupied by the freed buffer. If the new IO buffer were to be allocated in the same place, we would not be able to exploit the use-after-free vulnerability as the freed buffer would be overwritten.
 

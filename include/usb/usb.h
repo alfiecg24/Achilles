@@ -17,6 +17,7 @@ typedef struct {
 	IOUSBDeviceInterface320 **device;
 	CFRunLoopSourceRef async_event_source;
 	IOUSBInterfaceInterface300 **interface;
+	pthread_t thread;
 } usb_handle_t;
 
 enum usb_transfer {

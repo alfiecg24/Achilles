@@ -16,6 +16,7 @@
 #include <unistd.h>             // close
 #include <sys/mman.h>           // mmap, munmap
 #include <sys/stat.h>           // fstst
+#include <dirent.h>             // opendir, readdir, closedir
 
 #include <IOKit/IOKitLib.h>
 #include <IOKit/usb/IOUSBLib.h>

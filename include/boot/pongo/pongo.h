@@ -8,6 +8,6 @@
 #include <time.h>
 
 bool bootPongoOS(device_t *device);
-bool pongoOSHasBooted(char *serial);
+bool isInPongoOS(char *serial);
 
 #endif // PONGO_H

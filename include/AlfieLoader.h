@@ -12,8 +12,10 @@
 #define CREDITS "Alfie"
 #define RELEASE_TYPE "Development"
 
-#define LOG(logLevel, ...) loaderLog(logLevel, true, __FILE__, __LINE__, __func__, __VA_ARGS__)
-#define LOG_NO_NEWLINE(logLevel, ...) loaderLog(logLevel, false, __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define LOG(logLevel, ...) AlfieLoaderLog(logLevel, true, __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define LOG_NO_NEWLINE(logLevel, ...) AlfieLoaderLog(logLevel, false, __FILE__, __LINE__, __func__, __VA_ARGS__)
+
+#define MAX_ARG_LEN 0x100
 
 // Taken from gaster
 #ifndef MIN
@@ -22,7 +24,8 @@
 typedef enum
 {
     FLAG_BOOL,
-    FLAG_INT
+    FLAG_INT,
+    FLAG_STRING
 } flag_type_t;
 typedef struct
 {
@@ -36,6 +39,7 @@ typedef struct
     {
         bool boolVal;
         int intVal;
+        char stringVal[MAX_ARG_LEN];
     };
 } arg_t;
 

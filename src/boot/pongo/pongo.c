@@ -1,6 +1,6 @@
-#include <boot/pongo.h>
+#include <boot/pongo/pongo.h>
 
-bool pongoOSHasBooted(char *serial) {
+bool isInPongoOS(char *serial) {
     if (serial == NULL) {
         LOG(LOG_ERROR, "ERROR: failed to get device serial number");
         return false;
@@ -14,7 +14,7 @@ bool pongoOSHasBooted(char *serial) {
 void awaitPongoOS(usb_handle_t *handle) {
     struct timespec start, end;
     clock_gettime(CLOCK_MONOTONIC, &start);
-    while (!pongoOSHasBooted(getDeviceSerialNumberWithTransfer(handle))) {
+    while (!isInPongoOS(getDeviceSerialNumberWithTransfer(handle))) {
         clock_gettime(CLOCK_MONOTONIC, &end);
         double timeTaken = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
         if (timeTaken > 10) {
@@ -108,11 +108,11 @@ bool preparePongoOS()
 bool bootPongoOS(device_t *device)
 {
     FILE *pongoFile;
-    void *pongoOS;
+    void *PongoOS;
     size_t pongoSize;
     transfer_ret_t ret;
     preparePongoOS();
-    if (pongoOS == NULL) {
+    if (PongoOS == NULL) {
         LOG(LOG_ERROR, "ERROR: failed to get PongoOS");
         return false;
     }
@@ -128,8 +128,8 @@ bool bootPongoOS(device_t *device)
     fseek(pongoFile, 0, SEEK_END);
     pongoSize = ftell(pongoFile);
     rewind(pongoFile);
-    pongoOS = malloc(pongoSize);
-    fread(pongoOS, pongoSize, 1, pongoFile);
+    PongoOS = malloc(pongoSize);
+    fread(PongoOS, pongoSize, 1, pongoFile);
     fclose(pongoFile);
     remove("src/boot/payloads/checkra1n/PongoShellcode.bin");
 
@@ -146,7 +146,7 @@ bool bootPongoOS(device_t *device)
         {
             retry:
                 size = ((pongoSize - lengthSent) > 0x800) ? 0x800 : (pongoSize - lengthSent);
-                sendUSBControlRequest(&device->handle, 0x21, DFU_DNLOAD, 0, 0, (unsigned char *)&pongoOS[lengthSent], size, &ret);
+                sendUSBControlRequest(&device->handle, 0x21, DFU_DNLOAD, 0, 0, (unsigned char *)&PongoOS[lengthSent], size, &ret);
                 if (ret.sz != size || ret.ret != USB_TRANSFER_OK) {
                     LOG(LOG_DEBUG, "Retrying at length 0x%X", lengthSent);
                     sleep_ms(100);

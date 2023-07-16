@@ -232,17 +232,8 @@ bool sendUSBControlRequestAsync(const usb_handle_t *handle, uint8_t bmRequestTyp
 }
 
 int sendUSBBulkUpload(usb_handle_t *handle, void *buffer, size_t length) {
-	transfer_ret_t ret;
-	LOG(LOG_DEBUG, "Sending 0x%X bytes to device", length);
-	if (*handle->interface == NULL) {
-		LOG(LOG_ERROR, "Interface is NULL");
-		return -1;
-	}
-	LOG(LOG_DEBUG, "*handle->interface = %p", *handle->interface);
-	LOG(LOG_DEBUG, "**handle->interface = %p", **handle->interface);
-	ret.ret = (*handle->interface)->WritePipe(*handle->interface, 1, buffer, length);
-	ret.sz = length;
-	return ret.ret;
+	openUSBInterface(0, 0, handle);
+	return (*handle->interface)->WritePipe((handle->interface), 2, buffer, length);
 }
 
 void initUSBHandle(usb_handle_t *handle, uint16_t vid, uint16_t pid) {

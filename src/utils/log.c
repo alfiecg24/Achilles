@@ -7,7 +7,7 @@
 #include <utils/log.h>
 #include <utils/ANSI-color-codes.h>
 
-int loaderLog(log_level_t loglevel, bool newline, const char *fname, int lineno, const char *fxname, const char *__restrict format, ...)
+int AlfieLoaderLog(log_level_t loglevel, bool newline, const char *fname, int lineno, const char *fxname, const char *__restrict format, ...)
 {
 	int ret = 0;
 	pthread_mutex_t log_mutex;

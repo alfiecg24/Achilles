@@ -8,8 +8,11 @@ arg_t args[] = {
     {"Debug", "-d", "--debug", "Enable debug logging", NULL, FLAG_BOOL, false},
     {"Help", "-h", "--help", "Show this help message", NULL, FLAG_BOOL, false},
     {"Version", "-V", "--version", "Show version information", NULL, FLAG_BOOL, false},
+    {"Quick mode", "-q", "--quick", "Don't ask for confirmation during the program", NULL, FLAG_BOOL, false},
     {"Exploit", "-e", "--exploit", "Exploit with checkm8 and exit", NULL, FLAG_BOOL, false},
-    {"PongoOS", "-p", "--pongo", "Boot PongoOS", NULL, FLAG_BOOL, false}};
+    {"PongoOS", "-p", "--pongo", "Boot to PongoOS and exit" , NULL, FLAG_BOOL, false},
+    {"Jailbreak", "-j", "--jailbreak", "Jailbreak rootless using palera1n kpf, ramdisk and overlay", NULL, FLAG_BOOL, false},
+    {"Boot arguments", "-b", "--boot-args", "Boot arguments to pass to PongoOS", NULL, FLAG_STRING, NULL}};
 
 arg_t *getArgByName(char *name)
 {
@@ -48,11 +51,27 @@ void printVersion()
     printf("%s %s - %s\n", NAME, VERSION, RELEASE_TYPE);
 }
 
+bool checkForContradictions() {
+    if (getArgByName("PongoOS")->boolVal && getArgByName("Jailbreak")->boolVal) {
+        LOG(LOG_ERROR, "Cannot use both -p and -j");
+        return true;
+    }
+    if (getArgByName("Exploit")->boolVal && (getArgByName("PongoOS")->boolVal || getArgByName("Jailbreak")->boolVal)) {
+        LOG(LOG_ERROR, "Cannot use -e with -p or -j");
+        return true;
+    }
+    if(getArgByName("Boot arguments")->stringVal[0] != '\0' && !(getArgByName("PongoOS")->boolVal || getArgByName("Jailbreak")->boolVal)) {
+        LOG(LOG_ERROR, "Cannot use -b without -p or -j");
+        return true;
+    }
+    return false;
+}
+
 int main(int argc, char *argv[])
 {
     bool hasUsedUnrecognisedArg = false;
     bool matchFound = false;
-
+    // printf("hello, world\n");
     // Iterate over each defined argument
     for (int i = 0; i < sizeof(args) / sizeof(arg_t); i++) {
         // Iterate over each argument passed from CLI
@@ -96,6 +115,48 @@ int main(int argc, char *argv[])
                 }
             }
         }
+        // else if (args[i].type == FLAG_STRING)
+        // {
+        //     printf("Defined: %s\n", args[i].name);
+        //     for (int j = 0; j < argc; j++)
+        //     {
+        //         printf("%d\n", j);
+        //         printf("argv[%d]: %s\n", j, argv[j]);
+        //         if ((j - 1) >= 0 && (strcmp(argv[j - 1], args[i].shortOpt) == 0 || strcmp(argv[j - 1], args[i].longOpt) == 0))
+        //         {
+        //             printf("Last argument was %s\n", argv[j - 1]);
+        //         }
+        //         if (strcmp(argv[j], args[i].longOpt) == 0)
+        //         {
+        //             printf("Found argument %s matching %s\n", argv[j], args[i].name);
+        //             if (j + 1 < argc)
+        //             {
+        //                 // Set the value of the string to the next argument
+        //                 strcpy(args[i].stringVal, argv[j + 1]);
+        //                 j++;
+        //                 previousArgWasString = true;
+        //             }
+        //         }
+        //         else if (strncmp(argv[j], args[i].shortOpt, 2) == 0)
+        //         {
+        //             if (j + 1 < argc)
+        //             {
+        //                 // Set the value of the string to the next argument
+        //                 if (strlen(argv[j + 1]) <= MAX_ARG_LEN)
+        //                 { 
+        //                     strcpy(args[i].stringVal, argv[j + 1]);
+        //                     j++;
+        //                     previousArgWasString = true;
+        //                 }
+        //                 else {
+        //                     LOG(LOG_ERROR, "Argument %s is too long", argv[j + 1]);
+        //                 }
+        //             }
+        //         } else {
+        //             printf("Bad argument: %s\n", argv[j]);
+        //         }
+        //     }
+        // }
         else if (args[i].type == FLAG_INT)
         { // Check if the argument is an integer
             for (int j = 0; j < argc; j++)
@@ -122,6 +183,11 @@ int main(int argc, char *argv[])
                 }
             }
         }
+    }
+
+    // Check for contradictions
+    if (checkForContradictions()) {
+        return 1;
     }
 
     arg_t *verbosityArg = getArgByName("Verbosity");
@@ -211,46 +277,6 @@ int main(int argc, char *argv[])
             return -1;
         }
     }
-    if (device.mode == MODE_PONGO) {
-        initUSBHandle(&device.handle, 0x5ac, 0x4141);
-        waitUSBHandle(&device.handle, 0, 0, NULL, NULL);
-        FILE *kpf = fopen("jailbreak/kpf", "rb");
-        if (kpf == NULL) {
-            LOG(LOG_FATAL, "Failed to open kpf");
-            return -1;
-        }
-        fseek(kpf, 0, SEEK_END);
-        size_t kpfSize = ftell(kpf);
-        fseek(kpf, 0, SEEK_SET);
-        unsigned char *kpfData = malloc(kpfSize);
-        fread(kpfData, kpfSize, 1, kpf);
-        fclose(kpf);
-        bool ret;
-        LOG(LOG_DEBUG, "Uploading 0x%X bytes to PongoOS", (unsigned long long)kpfSize);
-        ret = sendUSBControlRequest(&device.handle, 0x21, 1, 0, 0, (unsigned char *)&kpfSize, 4, NULL);
-        if (ret)
-        {
-            LOG(LOG_DEBUG, "Starting transfer");
-            int bulkRet = sendUSBBulkUpload(&device.handle, kpfData, kpfSize);
-            // IOReturn bulkRet = kIOReturnSuccess;
-            // uint64_t input[5];
-            // input[0] = (&device.handle)->interface;
-            // input[1] = USB_TIMEOUT;
-            // input[2] = USB_TIMEOUT;
-            // input[3] = 0;
-            // input[4] = 0;
-            // mach_port_t fConnection = (&device.handle)->service;
-            // ret = IOConnectCallMethod(fConnection, kUSBInterfaceUserClientWritePipe, input, 5, kpfData, kpfSize, 0, 0, 0, 0);
-            // LOG(LOG_DEBUG, "Transfer done");
-            if (bulkRet == kIOReturnSuccess)
-            {
-                LOG(LOG_DEBUG, "Uploaded 0x%X bytes to PongoOS", (unsigned long long)kpfSize);
-            } else {
-                LOG(LOG_ERROR, "Failed to upload 0x%X bytes to PongoOS", (unsigned long long)kpfSize);
-            }
-        }
-        return 0;
-    }
     char *serial = getDeviceSerialNumberIOKit(&device.handle);
     if (isSerialNumberPwned(serial) && !isInDownloadMode(serial))
     {
@@ -259,7 +285,6 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    LOG(LOG_INFO, "Running checkm8 exploit");
     checkm8();
 
     return 0;

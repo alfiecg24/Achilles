@@ -21,7 +21,7 @@ typedef enum
 extern arg_t args[];
 
 // ******************************************************
-// Function: loaderLog()
+// Function: AlfieLoaderLog()
 //
 // Purpose: Log a message to stdout formatted with ANSI colour codes
 //
@@ -36,6 +36,6 @@ extern arg_t args[];
 //
 // mostly taken from https://github.com/palera1n/palera1n-c - thanks!
 // ******************************************************
-int loaderLog(log_level_t loglevel, bool newline, const char *fname, int lineno, const char *fxname, const char *__restrict format, ...);
+int AlfieLoaderLog(log_level_t loglevel, bool newline, const char *fname, int lineno, const char *fxname, const char *__restrict format, ...);
 
 #endif // LOG_H
