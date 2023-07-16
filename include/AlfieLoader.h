@@ -34,12 +34,13 @@ typedef struct
     char *longOpt;
     char *description;
     char *examples;
+    bool set;
     flag_type_t type;
     union
     {
         bool boolVal;
         int intVal;
-        char stringVal[MAX_ARG_LEN];
+        char *stringVal;
     };
 } arg_t;
 

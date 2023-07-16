@@ -4,15 +4,15 @@
 
 arg_t args[] = {
     // Name, short option, long option, description, examples, type, value
-    {"Verbosity", "-v", "--verbosity", "Verbosity level, maximum of 2", "-vv, --verbosity 2", FLAG_INT, 0},
-    {"Debug", "-d", "--debug", "Enable debug logging", NULL, FLAG_BOOL, false},
-    {"Help", "-h", "--help", "Show this help message", NULL, FLAG_BOOL, false},
-    {"Version", "-V", "--version", "Show version information", NULL, FLAG_BOOL, false},
-    {"Quick mode", "-q", "--quick", "Don't ask for confirmation during the program", NULL, FLAG_BOOL, false},
-    {"Exploit", "-e", "--exploit", "Exploit with checkm8 and exit", NULL, FLAG_BOOL, false},
-    {"PongoOS", "-p", "--pongo", "Boot to PongoOS and exit" , NULL, FLAG_BOOL, false},
-    {"Jailbreak", "-j", "--jailbreak", "Jailbreak rootless using palera1n kpf, ramdisk and overlay", NULL, FLAG_BOOL, false},
-    {"Boot arguments", "-b", "--boot-args", "Boot arguments to pass to PongoOS", NULL, FLAG_STRING, NULL}};
+    {"Verbosity", "-v", "--verbosity", "Verbosity level, maximum of 2", "-vv, --verbosity 2", false, FLAG_INT, 0},
+    {"Debug", "-d", "--debug", "Enable debug logging", NULL, false, FLAG_BOOL, false},
+    {"Help", "-h", "--help", "Show this help message", NULL, false, FLAG_BOOL, false},
+    {"Version", "-V", "--version", "Show version information", NULL, false, FLAG_BOOL, false},
+    {"Quick mode", "-q", "--quick", "Don't ask for confirmation during the program", NULL, false, FLAG_BOOL, false},
+    {"Exploit", "-e", "--exploit", "Exploit with checkm8 and exit", NULL, false, FLAG_BOOL, false},
+    {"PongoOS", "-p", "--pongo", "Boot to PongoOS and exit" , NULL, false, FLAG_BOOL, false},
+    {"Jailbreak", "-j", "--jailbreak", "Jailbreak rootless using palera1n kpf, ramdisk and overlay", NULL, false, FLAG_BOOL, false},
+    {"Boot arguments", "-b", "--boot-args", "Boot arguments to pass to PongoOS", NULL, false, FLAG_STRING, NULL}};
 
 arg_t *getArgByName(char *name)
 {
@@ -60,7 +60,7 @@ bool checkForContradictions() {
         LOG(LOG_ERROR, "Cannot use -e with -p or -j");
         return true;
     }
-    if(getArgByName("Boot arguments")->stringVal[0] != '\0' && !(getArgByName("PongoOS")->boolVal || getArgByName("Jailbreak")->boolVal)) {
+    if(getArgByName("Boot arguments")->stringVal != NULL && getArgByName("Boot arguments")->stringVal[0] != '\0' && !(getArgByName("PongoOS")->boolVal || getArgByName("Jailbreak")->boolVal)) {
         LOG(LOG_ERROR, "Cannot use -b without -p or -j");
         return true;
     }
@@ -71,13 +71,17 @@ int main(int argc, char *argv[])
 {
     bool hasUsedUnrecognisedArg = false;
     bool matchFound = false;
-    // printf("hello, world\n");
+
     // Iterate over each defined argument
     for (int i = 0; i < sizeof(args) / sizeof(arg_t); i++) {
         // Iterate over each argument passed from CLI
         for (int v = 0; v < argc; v++) {
-            if (strncmp(argv[v], "-", 1) != 0) { // Prevent the file being executing from being flagged
-                continue;
+            if (v > 0) {
+                    if (strstr(argv[v], " ") != NULL
+                    || (strcmp(argv[v - 1], "-b") == 0 
+                    || strcmp(argv[v - 1], "--boot-args") == 0)) {
+                        continue;
+                    }
             }
             if (
             (strcmp(argv[v], args[i].longOpt) == 0) || // Check if it matches the long argument option
@@ -108,59 +112,56 @@ int main(int argc, char *argv[])
         { // Check if the argument is a boolean
             for (int j = 0; j < argc; j++)
             {
+                if (j > 0) {
+                    if (strstr(argv[j], " ") != NULL
+                    || (strcmp(argv[j - 1], "-b") == 0 
+                    || strcmp(argv[j - 1], "--boot-args") == 0)) {
+                        continue;
+                    }
+                }
                 if (strcmp(argv[j], args[i].shortOpt) == 0 || strcmp(argv[j], args[i].longOpt) == 0)
                 {
                     // Set the boolean value to true if the argument is found
                     args[i].boolVal = true;
+                    args[i].set = true;
                 }
             }
         }
-        // else if (args[i].type == FLAG_STRING)
-        // {
-        //     printf("Defined: %s\n", args[i].name);
-        //     for (int j = 0; j < argc; j++)
-        //     {
-        //         printf("%d\n", j);
-        //         printf("argv[%d]: %s\n", j, argv[j]);
-        //         if ((j - 1) >= 0 && (strcmp(argv[j - 1], args[i].shortOpt) == 0 || strcmp(argv[j - 1], args[i].longOpt) == 0))
-        //         {
-        //             printf("Last argument was %s\n", argv[j - 1]);
-        //         }
-        //         if (strcmp(argv[j], args[i].longOpt) == 0)
-        //         {
-        //             printf("Found argument %s matching %s\n", argv[j], args[i].name);
-        //             if (j + 1 < argc)
-        //             {
-        //                 // Set the value of the string to the next argument
-        //                 strcpy(args[i].stringVal, argv[j + 1]);
-        //                 j++;
-        //                 previousArgWasString = true;
-        //             }
-        //         }
-        //         else if (strncmp(argv[j], args[i].shortOpt, 2) == 0)
-        //         {
-        //             if (j + 1 < argc)
-        //             {
-        //                 // Set the value of the string to the next argument
-        //                 if (strlen(argv[j + 1]) <= MAX_ARG_LEN)
-        //                 { 
-        //                     strcpy(args[i].stringVal, argv[j + 1]);
-        //                     j++;
-        //                     previousArgWasString = true;
-        //                 }
-        //                 else {
-        //                     LOG(LOG_ERROR, "Argument %s is too long", argv[j + 1]);
-        //                 }
-        //             }
-        //         } else {
-        //             printf("Bad argument: %s\n", argv[j]);
-        //         }
-        //     }
-        // }
+        else if (args[i].type == FLAG_STRING)
+        { // Check if the argument is a string
+            for (int j = 0; j < argc; j++)
+            {
+                if (j > 0) {
+                    if (strstr(argv[j], " ") != NULL
+                    || (strcmp(argv[j - 1], "-b") == 0 
+                    || strcmp(argv[j - 1], "--boot-args") == 0)) {
+                        continue;
+                    }
+                }
+                if (strcmp(argv[j], args[i].shortOpt) == 0 || strcmp(argv[j], args[i].longOpt) == 0)
+                {
+                    if (j + 1 < argc)
+                    {
+                        size_t argLen = strlen(argv[j + 1]);
+                        char *arg = malloc(argLen + 1);
+                        strcpy(arg, argv[j + 1]);
+                        args[i].stringVal = arg;
+                        args[i].set = true;
+                    }
+                }
+            }
+        }
         else if (args[i].type == FLAG_INT)
         { // Check if the argument is an integer
             for (int j = 0; j < argc; j++)
             {
+                if (j > 0) {
+                    if (strstr(argv[j], " ") != NULL
+                    || (strcmp(argv[j - 1], "-b") == 0 
+                    || strcmp(argv[j - 1], "--boot-args") == 0)) {
+                        continue;
+                    }
+                }
                 if (strncmp(argv[j], args[i].shortOpt, 2) == 0)
                 { // Check if the argument is a short option
                     int argLen = strlen(argv[j]);
@@ -170,6 +171,9 @@ int main(int argc, char *argv[])
                         {
                             // Increment the integer value for each time the short option is repeated
                             args[i].intVal++;
+                            if (!args[i].set) { args[i].set = true; }
+                        } else {
+                            break;
                         }
                     }
                 }
@@ -184,7 +188,6 @@ int main(int argc, char *argv[])
             }
         }
     }
-
     // Check for contradictions
     if (checkForContradictions()) {
         return 1;
@@ -202,13 +205,24 @@ int main(int argc, char *argv[])
     memset(argList, 0, sizeof(argList));
     for (int i = 0; i < sizeof(args) / sizeof(arg_t); i++)
     {
-        if (args[i].type == FLAG_BOOL)
+        // if (args[i].type == FLAG_BOOL)
+        // {
+        //     sprintf(argList, "%s%s: %s, ", argList, args[i].name, args[i].boolVal ? "true" : "false");
+        // }
+        // else if (args[i].type == FLAG_INT)
+        // {
+        //     sprintf(argList, "%s%s: %d, ", argList, args[i].name, args[i].intVal);
+        // }
+        if (args[i].type == FLAG_BOOL && args[i].set)
         {
             sprintf(argList, "%s%s: %s, ", argList, args[i].name, args[i].boolVal ? "true" : "false");
         }
-        else if (args[i].type == FLAG_INT)
+        else if (args[i].type == FLAG_INT && args[i].set)
         {
             sprintf(argList, "%s%s: %d, ", argList, args[i].name, args[i].intVal);
+        }
+        else if (args[i].type == FLAG_STRING && args[i].set) {
+            sprintf(argList, "%s%s: %s, ", argList, args[i].name, args[i].stringVal);
         }
     }
     // Remove the trailing comma
