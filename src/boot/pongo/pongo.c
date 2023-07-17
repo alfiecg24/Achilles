@@ -65,6 +65,10 @@ bool preparePongoOS()
     fseek(pongoFile, 0, SEEK_END);
     pongoSize = ftell(pongoFile);
     rewind(pongoFile);
+    if (pongoSize >= 0x7fe00) {
+        LOG(LOG_ERROR, "ERROR: PongoOS is too large, must be less than 0x7fe00 bytes but is 0x%X bytes", pongoSize);
+        return false;
+    }
     pongo = malloc(pongoSize);
     fread(pongo, pongoSize, 1, pongoFile);
     fclose(pongoFile);
@@ -111,7 +115,7 @@ bool bootPongoOS(device_t *device)
     void *PongoOS;
     size_t pongoSize;
     transfer_ret_t ret;
-    preparePongoOS();
+    if (!preparePongoOS()) { return false; }
     if (PongoOS == NULL) {
         LOG(LOG_ERROR, "ERROR: failed to get PongoOS");
         return false;

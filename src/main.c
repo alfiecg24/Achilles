@@ -12,7 +12,9 @@ arg_t args[] = {
     {"Exploit", "-e", "--exploit", "Exploit with checkm8 and exit", NULL, false, FLAG_BOOL, false},
     {"PongoOS", "-p", "--pongo", "Boot to PongoOS and exit" , NULL, false, FLAG_BOOL, false},
     {"Jailbreak", "-j", "--jailbreak", "Jailbreak rootless using palera1n kpf, ramdisk and overlay", NULL, false, FLAG_BOOL, false},
-    {"Boot arguments", "-b", "--boot-args", "Boot arguments to pass to PongoOS", NULL, false, FLAG_STRING, NULL}};
+    {"Boot arguments", "-b", "--boot-args", "Boot arguments to pass to PongoOS", NULL, false, FLAG_STRING, NULL}
+    // {"Override Pongo", "-k"} // TODO: Implement this
+    };
 
 arg_t *getArgByName(char *name)
 {
@@ -60,8 +62,8 @@ bool checkForContradictions() {
         LOG(LOG_ERROR, "Cannot use -e with -p or -j");
         return true;
     }
-    if(getArgByName("Boot arguments")->stringVal != NULL && getArgByName("Boot arguments")->stringVal[0] != '\0' && !(getArgByName("PongoOS")->boolVal || getArgByName("Jailbreak")->boolVal)) {
-        LOG(LOG_ERROR, "Cannot use -b without -p or -j");
+    if(getArgByName("Boot arguments")->stringVal != NULL && getArgByName("Boot arguments")->set && !getArgByName("Jailbreak")->boolVal) {
+        LOG(LOG_ERROR, "Cannot use -b without -j");
         return true;
     }
     return false;
