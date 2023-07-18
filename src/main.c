@@ -258,18 +258,16 @@ int main(int argc, char *argv[])
         LOG(LOG_FATAL, "Exiting as neither -e, -p nor -j were not passed, nothing else to do");
         return 0;
     }
-
-    char **devices;
-    int deviceCount;
+    
     int i = 0;
     device_t device;
     while (findDevice(&device, false) == -1)
     {
         sleep(1);
         i++;
-        if (i == 5)
+        if (i == 10)
         {
-            LOG(LOG_FATAL, "ERROR: No iOS device found after 5 seconds - please connect a device.");
+            LOG(LOG_FATAL, "ERROR: No iOS device found after 10 seconds - please connect a device.");
             return -1;
         }
     }
