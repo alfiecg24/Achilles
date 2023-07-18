@@ -10,7 +10,7 @@
 
 #define CMD_LEN_MAX 0x200
 
-int issuePongoCommand(usb_handle_t *handle, char *command)
+bool issuePongoCommand(usb_handle_t *handle, char *command)
 {
 	bool ret;
 	if (command == NULL) return EINVAL;
@@ -154,12 +154,12 @@ void jailbreakBoot(usb_handle_t *handle) {
 
 	// Set boot arguments to boot from ramdisk
 	char *args = "xargs rootdev=md0";
-	if (getArgByName("Boot arguments")->set) {
-		size_t extra = strlen(getArgByName("Boot arguments")->stringVal) + 1;
+	if (getArgumentByName("Boot arguments")->set) {
+		size_t extra = strlen(getArgumentByName("Boot arguments")->stringVal) + 1;
 		args = malloc(strlen(args) + extra);
 		strcpy(args, "xargs rootdev=md0");
 		strcat(args, " ");
-		strcat(args, getArgByName("Boot arguments")->stringVal);
+		strcat(args, getArgumentByName("Boot arguments")->stringVal);
 	}
 	issuePongoCommand(handle, args);
 	sleep(1);

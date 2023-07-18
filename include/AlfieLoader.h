@@ -44,7 +44,18 @@ typedef struct
     };
 } arg_t;
 
-arg_t *getArgByName(char *name);
+// ******************************************************
+// Function: getArgumentByName()
+//
+// Purpose: Get the arg_t struct for an argument by its name
+//
+// Parameters:
+//      char *name: the name of the argument
+//
+// Returns:
+//      arg_t *: the arg_t struct for the argument, NULL if the argument doesn't exist
+// ******************************************************
+arg_t *getArgumentByName(char *name);
 
 extern arg_t args[];
 

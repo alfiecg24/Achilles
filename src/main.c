@@ -16,7 +16,7 @@ arg_t args[] = {
     // {"Override Pongo", "-k"} // TODO: Implement this
     };
 
-arg_t *getArgByName(char *name)
+arg_t *getArgumentByName(char *name)
 {
     // Get an argument by its name
     for (int i = 0; i < sizeof(args) / sizeof(arg_t); i++)
@@ -54,15 +54,15 @@ void printVersion()
 }
 
 bool checkForContradictions() {
-    if (getArgByName("PongoOS")->boolVal && getArgByName("Jailbreak")->boolVal) {
+    if (getArgumentByName("PongoOS")->boolVal && getArgumentByName("Jailbreak")->boolVal) {
         LOG(LOG_ERROR, "Cannot use both -p and -j");
         return true;
     }
-    if (getArgByName("Exploit")->boolVal && (getArgByName("PongoOS")->boolVal || getArgByName("Jailbreak")->boolVal)) {
+    if (getArgumentByName("Exploit")->boolVal && (getArgumentByName("PongoOS")->boolVal || getArgumentByName("Jailbreak")->boolVal)) {
         LOG(LOG_ERROR, "Cannot use -e with -p or -j");
         return true;
     }
-    if(getArgByName("Boot arguments")->stringVal != NULL && getArgByName("Boot arguments")->set && !getArgByName("Jailbreak")->boolVal) {
+    if(getArgumentByName("Boot arguments")->stringVal != NULL && getArgumentByName("Boot arguments")->set && !getArgumentByName("Jailbreak")->boolVal) {
         LOG(LOG_ERROR, "Cannot use -b without -j");
         return true;
     }
@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    arg_t *verbosityArg = getArgByName("Verbosity");
+    arg_t *verbosityArg = getArgumentByName("Verbosity");
     if (verbosityArg->intVal > 2)
     {
         LOG(LOG_DEBUG, "Verbosity set to %d, max is 2 - automatically lowering to 2", verbosityArg->intVal);
@@ -232,13 +232,13 @@ int main(int argc, char *argv[])
 
     LOG(LOG_DEBUG, "%s", argList);
 
-    if (getArgByName("Help")->boolVal)
+    if (getArgumentByName("Help")->boolVal)
     {
         printHelp();
         return 0;
     }
 
-    if (getArgByName("Version")->boolVal)
+    if (getArgumentByName("Version")->boolVal)
     {
         printVersion();
         return 0;
@@ -254,7 +254,7 @@ int main(int argc, char *argv[])
     }
 
     // Make sure to remove when no longer needed
-    if (!getArgByName("Exploit")->set && !getArgByName("PongoOS")->set && !getArgByName("Jailbreak")->set) {
+    if (!getArgumentByName("Exploit")->set && !getArgumentByName("PongoOS")->set && !getArgumentByName("Jailbreak")->set) {
         LOG(LOG_FATAL, "Exiting as neither -e, -p nor -j were not passed, nothing else to do");
         return 0;
     }

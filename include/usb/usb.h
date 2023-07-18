@@ -164,6 +164,19 @@ bool sendUSBControlRequestNoData(const usb_handle_t *handle, uint8_t bmRequestTy
 // ******************************************************
 bool sendUSBControlRequestAsyncNoData(const usb_handle_t *handle, uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, size_t wLength, unsigned USBAbortTimeout, transfer_ret_t *transferRet);
 
+// ******************************************************
+// Function: sendUSBBulkUpload()
+//
+// Purpose: Send a USB bulk upload
+//
+// Parameters:
+//      usb_handle_t *handle: the handle to use
+//      void *buffer: the buffer to send
+//      size_t length: the length of the buffer
+//
+// Returns:
+//      int: the IOReturn code
+// ******************************************************
 int sendUSBBulkUpload(usb_handle_t *handle, void *buffer, size_t length);
 
 // ******************************************************
@@ -213,6 +226,14 @@ bool waitUSBHandle(usb_handle_t *handle, uint8_t usb_interface, uint8_t usb_alt_
 // ******************************************************
 void resetUSBHandle(usb_handle_t *handle);
 
+// ******************************************************
+// Function: sleep_ms()
+//
+// Purpose: Sleep for a given number of milliseconds
+//
+// Parameters:
+//      unsigned ms: the number of milliseconds to sleep
+// ******************************************************
 void sleep_ms(unsigned ms);
 
 #endif // USB_UTILS_H

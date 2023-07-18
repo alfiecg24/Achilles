@@ -17,7 +17,7 @@ int AlfieLoaderLog(log_level_t loglevel, bool newline, const char *fname, int li
 	char colour_bold[0x10];
 	va_list logArgs;
 	va_start(logArgs, format);
-	arg_t *debugArg = getArgByName("Debug");
+	arg_t *debugArg = getArgumentByName("Debug");
 	switch (loglevel)
 	{
 	case LOG_FATAL:
@@ -67,7 +67,7 @@ int AlfieLoaderLog(log_level_t loglevel, bool newline, const char *fname, int li
 		time(&curtime);
 		struct tm *timeinfo = localtime(&curtime);
 		snprintf(timestring, 0x80, "%s[%s%02d/%02d/%d %02d:%02d:%02d%s]", CRESET, HBLK, timeinfo->tm_mon + 1, timeinfo->tm_mday, timeinfo->tm_year - 100, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, CRESET);
-		arg_t *verbosityArg = getArgByName("Verbosity");
+		arg_t *verbosityArg = getArgumentByName("Verbosity");
 		if (verbosityArg->intVal == 2)
 		{
 			printf("%s%s%s <%s> " CRESET "%s" HBLU "%s" CRESET ":" RED "%d" CRESET ":" BGRN "%s()" CRESET ":%s ", colour_bold, timestring, colour_bold, type, WHT, fname, lineno, fxname, colour_bold);
