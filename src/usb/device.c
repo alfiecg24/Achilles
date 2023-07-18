@@ -67,7 +67,13 @@ int findDevice(device_t *device, bool waiting)
         if (vendorIDInt == 0x5ac && productIDInt == 0x1227)
         {
             *device = initDevice(service, getDeviceSerialNumberIOKit(&handle), MODE_DFU, vendorIDInt, productIDInt);
-            if (!waiting) { LOG(LOG_DEBUG, "Initialised device in DFU mode"); }
+            if (!waiting) {
+                if (isInDownloadMode(device->serialNumber)) {
+                    LOG(LOG_DEBUG, "Initialised device in YoloDFU/download mode"); 
+                } else {
+                    LOG(LOG_DEBUG, "Initialised device in DFU mode"); 
+                }
+            }
             return 0;
         }
         if (vendorIDInt == 0x5ac && productIDInt == 0x1281)
@@ -85,7 +91,7 @@ int findDevice(device_t *device, bool waiting)
         if (vendorIDInt == 0x5ac && productIDInt == 0x4141)
         {
             *device = initDevice(service, getDeviceSerialNumberIOKit(&handle), MODE_PONGO, vendorIDInt, productIDInt);
-            if (!waiting) { LOG(LOG_DEBUG, "Initialised PongoOS device"); }
+            if (!waiting) { LOG(LOG_DEBUG, "Initialised Pongo USB device"); }
             return 0;   
         }
     }
