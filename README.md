@@ -1,5 +1,7 @@
 # AlfieLoader
 
+[![Time spent on AlfieLoader](https://wakatime.com/badge/user/61592169-b9cf-4af8-b6fa-8ac7d4369b01/project/c122878a-9ce8-40b1-a337-e53a7ef5f337.svg)](https://wakatime.com/badge/user/61592169-b9cf-4af8-b6fa-8ac7d4369b01/project/c122878a-9ce8-40b1-a337-e53a7ef5f337)
+
 ## What is AlfieLoader?
 A (very early in development) pre-boot execution environment for Apple mobile devices vulnerable to checkm8 - a work-in-progress project similar to [checkra1n](https://checkra.in/)/[PongoOS](https://github.com/checkra1n/PongoOS). While it is not at this stage yet, it is the goal for this project.
 
