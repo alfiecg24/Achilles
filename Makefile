@@ -4,10 +4,14 @@ FRAMEWORKS=-framework IOKit -framework CoreFoundation -limobiledevice-1.0.6
 CFLAGS=-Iinclude -Wunused -Wunused-variable
 OUTPUT=build/AlfieLoader
 
-all: dirs AlfieLoader
+all: dirs payloads AlfieLoader
 
 dirs:
 	@mkdir -p build
+
+payloads:
+	@cd src/exploit/payloads/gaster && make
+	@cd ../../../../
 	
 clean:
 	@rm -rf build
