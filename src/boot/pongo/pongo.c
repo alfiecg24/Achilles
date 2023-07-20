@@ -29,7 +29,7 @@ void awaitPongoOS(usb_handle_t *handle) {
 // HUGE thanks to @mineekdev for their openra1n project,
 // which was the template for this code.
 
-bool preparePongoOS()
+bool preparePongoOS(void **pongoBuf, size_t *size)
 {
     FILE *shellcodeFile, *pongoFile;
     size_t shellcodeSize, pongoSize;
@@ -96,15 +96,9 @@ bool preparePongoOS()
     uint32_t *pongoSizeInData = (uint32_t *)(pongo + 0x1fc);
     *pongoSizeInData = pongoSize - shellcodeSize;
 
-    // Write PongoOS to file
-    pongoFile = fopen("src/boot/payloads/checkra1n/PongoShellcode.bin", "wb+");
-    if (pongoFile == NULL)
-    {
-        LOG(LOG_ERROR, "ERROR: failed to open PongoOS file");
-        return false;
-    }
-    fwrite(pongo, pongoSize, 1, pongoFile);
-    fclose(pongoFile);
+    // Update parameters
+    *pongoBuf = pongo;
+    *size = pongoSize;
 
     return true;
 }
@@ -115,27 +109,11 @@ bool bootPongoOS(device_t *device)
     void *PongoOS;
     size_t pongoSize;
     transfer_ret_t ret;
-    if (!preparePongoOS()) { return false; }
+    if (!preparePongoOS(&PongoOS, &pongoSize)) { return false; }
     if (PongoOS == NULL) {
         LOG(LOG_ERROR, "ERROR: failed to get PongoOS");
         return false;
     }
-
-    // TODO: a better way to do this without file IO
-    // Get PongoOS
-    pongoFile = fopen("src/boot/payloads/checkra1n/PongoShellcode.bin", "rb");
-    if (pongoFile == NULL)
-    {
-        LOG(LOG_ERROR, "ERROR: failed to open PongoOS file");
-        return false;
-    }
-    fseek(pongoFile, 0, SEEK_END);
-    pongoSize = ftell(pongoFile);
-    rewind(pongoFile);
-    PongoOS = malloc(pongoSize);
-    fread(PongoOS, pongoSize, 1, pongoFile);
-    fclose(pongoFile);
-    remove("src/boot/payloads/checkra1n/PongoShellcode.bin");
 
     char *serial = getDeviceSerialNumberWithTransfer(&device->handle);
     if (serial == NULL) {
