@@ -115,12 +115,6 @@ bool bootPongoOS(device_t *device)
         return false;
     }
 
-    char *serial = getDeviceSerialNumberWithTransfer(&device->handle);
-    if (serial == NULL) {
-        LOG(LOG_ERROR, "ERROR: failed to get device serial number");
-        return false;
-    }
-
     LOG(LOG_DEBUG, "Sending PongoOS of size 0x%X", pongoSize);
     {
         size_t lengthSent = 0, size;
