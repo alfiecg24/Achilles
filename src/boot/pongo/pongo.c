@@ -105,7 +105,6 @@ bool preparePongoOS(void **pongoBuf, size_t *size)
 
 bool bootPongoOS(device_t *device)
 {
-    FILE *pongoFile;
     void *PongoOS;
     size_t pongoSize;
     transfer_ret_t ret;
