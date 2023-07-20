@@ -441,7 +441,7 @@ Next, we need to send our overwrite and payload in order to give us full arbitra
 The payload is the machine code that we send to the device to be executed as part of the exploitation process. It is sent in two parts:
 * The overwrite
 * The actual payload
-The overwrite is the data that we send to the device in order to overwrite the `callback` and `next` fields of the `io_request` structure. This will then direct the execution flow to the main payload.
+The overwrite is the data that we send to the device in order to overwrite the `callback` and `next` fields of an `io_request` structure. This will then direct the execution flow to the main payload.
 ### The overwrite
 For the overwrite, the `callback` and `next` fields in the `io_request` structure at the beginning of the freed buffer need to be overwritten. Both fields are pointers to areas in memory - `callback` being a pointer to the callback function and `next` being a pointer to the next `io_request` structure in the linked list of pending requests.
 
@@ -485,6 +485,112 @@ Because the stack grows downwards, adding `0x10` to the stack pointer will point
 Finally, `ret` is the return instruction, which will return to the address stored in the link register.
 
 ### The main payload
+While ARM64 assembly may seem rather daunting, you will see that it actually makes a lot of sense once you understand what each instruction does. Here is the `_main` function from the main checkm8 payload for T8011, which also contains another label as part of it:
+```asm
+_main:
+	stp x29, x30, [sp, #-0x10]!
+	ldr x0, =payload_dest
+	ldr x2, =dfu_handle_bus_reset
+	str xzr, [x2]
+	ldr x2, =dfu_handle_request
+	add x1, x0, #0xC
+	str x1, [x2]
+	adr x1, _main
+	ldr x2, =payload_off
+	add x1, x1, x2
+	ldr x2, =payload_sz
+	ldr x3, =memcpy_addr
+	blr x3
+	ldr x0, =gUSBSerialNumber
+_find_zero_loop:
+	add x0, x0, #1
+	ldrb w1, [x0]
+	cbnz w1, _find_zero_loop
+	adr x1, PWND_STR
+	ldp x2, x3, [x1]
+	stp x2, x3, [x0]
+	ldr x0, =gUSBSerialNumber
+	ldr x1, =usb_create_string_descriptor
+	blr x1
+	ldr x1, =usb_serial_number_string_descriptor
+	strb w0, [x1]
+	mov w0, #0xD2800000
+	ldr x1, =patch_addr
+	str w0, [x1]
+	ldp x29, x30, [sp], #0x10
+	ret
+
+PWND_STR:
+.asciz " PWND:[checkm8]"
+```
+
+The first line simply stores the new link register and frame pointer, as any program would do when branching to a new function. However, after this line, the proper payload begins.
+
+```asm
+ldr x0, =payload_dest
+ldr x2, =dfu_handle_bus_reset
+str xzr, [x2]
+```
+This loads the address of the payload destination into the `x0` register, and the address of `dfu_handle_bus_reset` into `x2`. `dfu_handle_bus_reset` is the `handle_bus_reset` property of the USB interface instance created when DFU starts, and is simply a pointer to the `handle_bus_reset()` function. After this, the value in the `xzr` register (the zero register) is stored into memory at the address of `dfu_handle_bus_reset` in order to ensure the device does not respond to a USB reset and trigger the shut down of the USB stack again.
+
+```asm
+ldr x2, =dfu_handle_request
+add x1, x0, #0xC
+str x1, [x2]
+```
+This loads the address of `dfu_handle_request` (which is the `handle_request` field of the interface instance) into `x2`, and then adds `0xC` to the value in `x0` (the payload destination) and then stores the result in `x1`. It then stores the value in `x1` into the value at the address stored in `x2`, which is `dfu_handle_request`. This means that when `interface->handle_request()` is called, it will jump to the shellcode inside `payload_handle_checkm8_request.S`, which I'll get to later.
+
+```asm
+adr x1, _main
+ldr x2, =payload_off
+add x1, x1, x2
+ldr x2, =payload_sz
+ldr x3, =memcpy_addr
+blr x3
+```
+This will load the PC-relative address of `_main` into `x1`, and the address of the end of the payload into `x2`. By adding them together and storing the result in `x1`, we can calculate the address that is `payload_off`-bytes from the address of `_main`. The `payload_sz` variable is then loaded into `x2` and the address of the `memcpy()` function is loaded into `x3`. Finally, `blr x3` will branch to the address in `x3` but have the link register link back to the `_main` function, and execute `memcpy()`.
+
+The parameters of `memcpy()` are as follows: `memcpy(void *dst, void *src, size_t n)`. So, the address of the payload destination is still stored in `x0`, the address of the payload is stored in `x1` and the size of the payload is stored in `x2`. Hence, the `memcpy()` call will copy the payload into the payload destination.
+
+```asm
+ldr x0, =gUSBSerialNumber
+```
+After returning from `memcpy()`, the address of `gUSBSerialNumber` (global USB serial number) is loaded into `x0` as the payload destination is no longer needed in the payload.
+
+```
+_find_zero_loop:
+   add x0, x0, #1
+   ldrb w1, [x0]
+   cbnz w1, _find_zero_loop
+```
+This is a loop that will increment the address in `x0` (`gUSBSerialNumber`) by `1` and load the byte at that address into `w1`. If the byte is not zero, it will branch back to `_find_zero_loop` and continue. This will continue until the byte at the address in `x0` is zero, at which point it will continue on to the next instruction. It does this to find the end of the serial number string in memory, so that it can add `PWND:[checkm8]` to the end of it.
+
+```
+adr x1, PWND_STR
+ldp x2, x3, [x1]
+stp x2, x3, [x0]
+```
+As you can see, `PWND_STR` is loaded into `x1`, and then the pair of registers `x2` and `x3` are loaded from the address in `x1`. These are then stored into the address in `x0`, which is the end of the serial number string. This will add `PWND:[checkm8]` to the end of the serial number string.
+
+```asm
+ldr x0, =gUSBSerialNumber
+ldr x1, =usb_create_string_descriptor
+blr x1
+```
+The started address of `gUSBSerialNumber` is once again loaded into `x0`, and the address of the `usb_create_string_descriptor()` function into `x1`. Then, by branching with a link to the register `x1`, the device creates a new string descriptor using the serial number so that it will appear to the host computer with the custom serial number string.
+
+```asm
+ldr x1, =usb_serial_number_string_descriptor
+strb w0, [x1]
+```
+The `usb_serial_number_string_descriptor` is then updated with the new serial number string to reflect the changes just made by the payload.
+
+```asm
+mov w0, #0xD2800000
+ldr x1, =patch_addr
+str w0, [x1]
+```
+A value of `0xD2800000` is loaded into `w0`, which corresponds to the instruction `mov x0, 0`. The value in `patch_addr` is loaded into `x1`, and `0xD2800000` is written into memory at the address pointed to by `patch_addr`. The reason for this is that `patch_addr` points to an instruction inside the `image4_validate_property_callback()`, and replaces it - this is so that if an image is found to not be properly signed, instead of branching to a function that will reject it, `mov x0, 0` will set the return value to 0, so the device will think it is a validly-signed image. This is the signature check patch that is used to allow booting untrusted images.
 
 ## Executing the payload
 With the payload in place and an `io_request` having it's `next` field pointing to an address inside our payload, we can trigger a USB reset. As always, this will process the list of pending requests (which we just allocated while stalled) as failed, and will invoke the callback for each of these requests.
