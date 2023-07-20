@@ -68,10 +68,6 @@ int uploadFileToPongo(usb_handle_t *handle, unsigned char *data, unsigned int da
 void jailbreakBoot(usb_handle_t *handle) {
 	LOG(LOG_INFO, "Setting up jailbroken iOS");
 
-	// Invert framebuffer
-	issuePongoCommand(handle, "fbinvert");
-	sleep(1);
-
 	// Lock fuses
 	issuePongoCommand(handle, "fuse lock");
 	sleep(1);
