@@ -150,12 +150,37 @@ void jailbreakBoot(usb_handle_t *handle) {
 
 	// Set boot arguments to boot from ramdisk
 	char *args = "xargs rootdev=md0";
-	if (getArgumentByName("Boot arguments")->set) {
-		size_t extra = strlen(getArgumentByName("Boot arguments")->stringVal) + 1;
+
+	// This is very messy but it will have to do for now
+	if (getArgumentByName("Boot arguments")->set || getArgumentByName("Verbose boot")->set || getArgumentByName("Serial output")->set) {
+		size_t extra = 0;
+		if (getArgumentByName("Boot arguments")->set) {
+			extra += strlen(getArgumentByName("Boot arguments")->stringVal) + 1; // + 1 for space
+		}
+		if (getArgumentByName("Verbose boot")->boolVal) {
+			if ((getArgumentByName("Boot arguments")->set && strstr(getArgumentByName("Boot arguments")->stringVal, "-v") != NULL)) {
+			} else {
+				extra += strlen(" -v");
+			}
+		}
+		if (getArgumentByName("Serial output")->boolVal) {
+			if ((getArgumentByName("Boot arguments")->set && strstr(getArgumentByName("Boot arguments")->stringVal, "serial=") != NULL)) {
+			} else {
+				extra += strlen(" serial=3");
+			}
+		}
 		args = malloc(strlen(args) + extra);
 		strcpy(args, "xargs rootdev=md0");
-		strcat(args, " ");
-		strcat(args, getArgumentByName("Boot arguments")->stringVal);
+		if (getArgumentByName("Boot arguments")->set) {
+			strcat(args, " ");
+			strcat(args, getArgumentByName("Boot arguments")->stringVal);
+		}
+		if (getArgumentByName("Verbose boot")->boolVal && strstr(args, "-v") == NULL) {
+			strcat(args, " -v");
+		}
+		if (getArgumentByName("Serial output")->boolVal && strstr(args, "serial=") == NULL) {
+			strcat(args, " serial=3");
+		}
 	}
 	issuePongoCommand(handle, args);
 	sleep(1);
