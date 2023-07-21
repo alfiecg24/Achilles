@@ -451,6 +451,8 @@ bool checkm8CheckUSBDevice(usb_handle_t *handle, bool *pwned) {
 			handle_interface_request = 0x10000BFFC;
 			usb_create_string_descriptor = 0x10000B1CC;
 			usb_serial_number_string_descriptor = 0x18000082A;
+		} else if (strstr(usbSerialNumber, "YOLO:") != NULL) {
+
 		} else {
             LOG(LOG_FATAL, "ERROR: AlfieLoader does not support CPID 0x%X at this time", cpid);
             return false;
