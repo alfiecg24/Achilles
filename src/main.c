@@ -88,6 +88,7 @@ int main(int argc, char *argv[])
     for (int i = 0; i < sizeof(args) / sizeof(arg_t); i++) {
         // Iterate over each argument passed from CLI
         for (int v = 0; v < argc; v++) {
+            if (v == 0) { continue; }
             if (v > 0) {
                     if (strstr(argv[v], " ") != NULL
                     || (strcmp(argv[v - 1], "-b") == 0 
