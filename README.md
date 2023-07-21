@@ -38,6 +38,13 @@ Furthermore, I have included a detailed writeup on the vulnerabilities exploited
 
 If you find any issues with the documentation, please open an issue or submit a pull request to help improve it.
 
+## Supported devices
+The regular gaster exploit should support A7 - A11 as well as T2, and booting PongoOS should work on A8 - A11 - however, I have only managed to test on the following devices:
+* iPad Pro 10.5" (A10X) - regular, PongoOS
+* iPad Pro 9.7" (A9X) - regular, PongoOS
+* iPhone 6 (A8) - regular, PongoOS
+
+If anyone else has had successes or failures with other devices, please let me know so I can update this list and/or fix any issues you may experience.
 ## Disclaimer
 You may find that there are similarities in here to other projects like this - and that is true. This was just a personal project for me to learn more about the BootROM and iOS bootchain. As a result, I relied a lot on open-source solutions such as [ipwndfu](https://github.com/axi0mX/ipwndfu), [gaster](https://github.com/0x7ff/gaster) and [PongoOS](https://github.com/checkra1n/PongoOS) to help me along the way.
 
