@@ -521,7 +521,7 @@ _find_zero_loop:
 	ret
 
 PWND_STR:
-.asciz " PWND:[checkm8]"
+.asciz " HAXX:[Alfie]"
 ```
 
 The first line simply stores the new link register and frame pointer, as any program would do when branching to a new function. However, after this line, the proper payload begins.

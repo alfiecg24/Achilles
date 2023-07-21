@@ -302,7 +302,8 @@ bool checkm8CheckUSBDevice(usb_handle_t *handle, bool *pwned) {
 		
 		if(usbSerialNumber != 0) {
 			extern bool bootingPongoOS;
-			*pwned = strstr(usbSerialNumber, "PWND");
+			extern char *pwndString;
+			*pwned = strstr(usbSerialNumber, "PWND") || strstr(usbSerialNumber, pwndString);
 			ret = true;
 		}
 	} else {

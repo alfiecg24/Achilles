@@ -123,7 +123,6 @@ void jailbreakBoot(usb_handle_t *handle) {
 
 	// Mount the ramdisk
 	issuePongoCommand(handle, "ramdisk");
-	sleep(1);
 
 	// Open binpack.dmg and upload it to PongoOS
 	FILE *overlay = fopen("src/userland/binpack/binpack.dmg", "rb");
@@ -146,7 +145,6 @@ void jailbreakBoot(usb_handle_t *handle) {
 
 	// Mount the binpack
 	issuePongoCommand(handle, "overlay");
-	sleep(1);
 
 	// Set boot arguments to boot from ramdisk
 	char *args = "xargs rootdev=md0";
