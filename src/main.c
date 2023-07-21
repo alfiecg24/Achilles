@@ -217,14 +217,6 @@ int main(int argc, char *argv[])
     memset(argList, 0, sizeof(argList));
     for (int i = 0; i < sizeof(args) / sizeof(arg_t); i++)
     {
-        // if (args[i].type == FLAG_BOOL)
-        // {
-        //     sprintf(argList, "%s%s: %s, ", argList, args[i].name, args[i].boolVal ? "true" : "false");
-        // }
-        // else if (args[i].type == FLAG_INT)
-        // {
-        //     sprintf(argList, "%s%s: %d, ", argList, args[i].name, args[i].intVal);
-        // }
         if (args[i].type == FLAG_BOOL && args[i].set)
         {
             sprintf(argList, "%s%s: %s, ", argList, args[i].name, args[i].boolVal ? "true" : "false");
