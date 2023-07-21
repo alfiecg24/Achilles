@@ -21,8 +21,8 @@
   - [Triggering the use-after-free](#triggering-the-use-after-free)
   - [The payload](#the-payload)
     - [The overwrite](#the-overwrite)
-    - [The main payload](#the-main-payload)
   - [Executing the payload](#executing-the-payload)
+    - [The actual payload](#the-actual-payload)
 - [Conclusion](#conclusion)
 
 # Analysis
@@ -41,7 +41,6 @@ Before we start, there are some important resources that I used to help me under
 * [This checkm8 "Q&A"](https://medium.com/@deepaknx/a-inquisitive-q-a-on-checkm8-bootrom-exploit-82da0d6f6c)
 * [ipwndfu](https://github/Axi0mX/ipwndfu) by [axi0mX](https://twitter.com/axi0mX)
 * [gaster](https://github.com/0x7FF/gaster) by [0x7FF](https://github.com/0x7FF)
-* The leaked iBoot/BootROM source codes - not linked here for obvious reasons
 * [securerom.fun](https://securerom.fun) for their collection of BootROM dumps that I reverse engineered
 
 ### Disclaimer
@@ -484,7 +483,14 @@ Because the stack grows downwards, adding `0x10` to the stack pointer will point
 
 Finally, `ret` is the return instruction, which will return to the address stored in the link register.
 
-### The main payload
+## Executing the payload
+With the payload in place and an `io_request` having it's `next` field pointing to an address inside our payload, we can trigger a USB reset. As always, this will process the list of pending requests (which we just allocated while stalled) as failed, and will invoke the callback for each of these requests.
+
+When it reaches our overflown `io_request` object, it will execute the callback (which is just a `nop` gadget to restore the link and FP registers) and then follow the `next` field to arrive in the middle of our payload. It will then try to execute the `callback` field of what it believes is an `io_request` object, but actually just begin executing our callback chain at the address we overflowed the `next` field with + the offset of the `callback` field in the `io_request` structure (`0x20`).
+
+Now, I will go through the payload and aim to explain exactly what it does at each step.
+
+### The actual payload
 While ARM64 assembly may seem rather daunting, you will see that it actually makes a lot of sense once you understand what each instruction does. Here is the `_main` function from the main checkm8 payload for T8011, which also contains another label as part of it:
 ```asm
 _main:
@@ -521,7 +527,7 @@ _find_zero_loop:
 	ret
 
 PWND_STR:
-.asciz " HAXX:[Alfie]"
+.asciz " PWND:[checkm8]"
 ```
 
 The first line simply stores the new link register and frame pointer, as any program would do when branching to a new function. However, after this line, the proper payload begins.
@@ -531,14 +537,14 @@ ldr x0, =payload_dest
 ldr x2, =dfu_handle_bus_reset
 str xzr, [x2]
 ```
-This loads the address of the payload destination into the `x0` register, and the address of `dfu_handle_bus_reset` into `x2`. `dfu_handle_bus_reset` is the `handle_bus_reset` property of the USB interface instance created when DFU starts, and is simply a pointer to the `handle_bus_reset()` function. After this, the value in the `xzr` register (the zero register) is stored into memory at the address of `dfu_handle_bus_reset` in order to ensure the device does not respond to a USB reset and trigger the shut down of the USB stack again.
+This loads the address of the payload destination into the `x0` register, and the address of `dfu_handle_bus_reset` into `x2`. `dfu_handle_bus_reset` is the `handle_bus_reset` property of the USB interface instance created when DFU starts, and is simply a pointer to the `handle_bus_reset()` function. After this, the value in the `xzr` register (the zero register) is stored into memory at the address of `dfu_handle_bus_reset` in order to ensure the device does not respond to a USB reset and trigger the shut down of the USB stack again - as this will cause issues due to the state of the heap and how we are using the allocated `io_request` structures for the exploit.
 
 ```asm
 ldr x2, =dfu_handle_request
 add x1, x0, #0xC
 str x1, [x2]
 ```
-This loads the address of `dfu_handle_request` (which is the `handle_request` field of the interface instance) into `x2`, and then adds `0xC` to the value in `x0` (the payload destination) and then stores the result in `x1`. It then stores the value in `x1` into the value at the address stored in `x2`, which is `dfu_handle_request`. This means that when `interface->handle_request()` is called, it will jump to the shellcode inside `payload_handle_checkm8_request.S`, which I'll get to later.
+This loads the address of `dfu_handle_request` (which is the `handle_request` field of the interface instance) into `x2`, and then adds `0xC` to the value in `x0` (the payload destination) and then stores the result in `x1`. It then stores the value in `x1` into the value at the address stored in `x2`, which is `dfu_handle_request`. This means that when `interface->handle_request()` is called, it will jump to the shellcode inside `payload_handle_checkm8_request.S`, which is gaster specific and does not need to be gone into here. TLDR: it replaces the `handle_request()` function of the DFU interface with a custom one that will do something different when a specific USB request is sent (`0xA1, 2`). Gaster uses this in the `gaster_command()` function for encryption/decryption operations. If this specific request is not used, the replacement shellcode will just call the standard `handle_interface_request()`.
 
 ```asm
 adr x1, _main
@@ -592,13 +598,13 @@ str w0, [x1]
 ```
 A value of `0xD2800000` is loaded into `w0`, which corresponds to the instruction `mov x0, 0`. The value in `patch_addr` is loaded into `x1`, and `0xD2800000` is written into memory at the address pointed to by `patch_addr`. The reason for this is that `patch_addr` points to an instruction inside the `image4_validate_property_callback()`, and replaces it - this is so that if an image is found to not be properly signed, instead of branching to a function that will reject it, `mov x0, 0` will set the return value to 0, so the device will think it is a validly-signed image. This is the signature check patch that is used to allow booting untrusted images.
 
-## Executing the payload
-With the payload in place and an `io_request` having it's `next` field pointing to an address inside our payload, we can trigger a USB reset. As always, this will process the list of pending requests (which we just allocated while stalled) as failed, and will invoke the callback for each of these requests.
-
-When it reaches our overflown `io_request` object, it will execute the callback (which is just a `nop` gadget to restore the link and FP registers) and then follow the `next` field to arrive in the middle of our payload. It will then try to execute the `callback` field of what it believes is an `io_request` object, but actually just begin executing our callback chain at the address we overflowed the `next` field with + the offset of the `callback` field in the `io_request` structure (`0x20`).
+And that's it - the payload has executed, signature checks are patched, the serial number is updated and the exploit is **finally complete**.
 
 # Conclusion
+With that, I will conclude this write-up on the checkm8 exploit. It has certainly been immensely interesting for me and I've learned a lot about both the BootROM, but also exploitation in general. Until researching checkm8, I had no idea how important memory leaks can be in exploitation.
 
-If you spot any errors, please don't hesitate to contact me and let me know - I'd rather fix the errors ASAP than have anyone learn incorrect information! Furthermore, extra questions are welcome and I will try to answer all as quick as I can.
+I hope that this write-up has offered a thorough insight into the checkm8 exploit, and that it has been helpful to you.
+
+If you spot any errors, or have any feedback (positive or negative!), please don't hesitate to contact me and let me know - I'd rather fix the errors ASAP than have anyone learn incorrect information! Furthermore, extra questions are welcome and I will try to answer all as quick as I can.
 
 If you would like to contact me, drop me an email at alfie@alfiecg.uk. Thank you!
