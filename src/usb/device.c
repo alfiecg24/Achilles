@@ -82,7 +82,7 @@ int findDevice(device_t *device, bool waiting)
             if (!waiting) { LOG(LOG_DEBUG, "Initialised device in recovery mode"); }
             return 0;
         }
-        if (vendorIDInt == 0x5ac && productIDInt == 0x12ab)
+        if (vendorIDInt == 0x5ac && (productIDInt == 0x12ab || productIDInt == 0x12a8))
         {
             *device = initDevice(service, getDeviceSerialNumberIOKit(&handle), MODE_NORMAL, vendorIDInt, productIDInt);
             if (!waiting) { LOG(LOG_DEBUG, "Initialised device in normal mode"); }

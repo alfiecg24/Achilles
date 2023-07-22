@@ -40,13 +40,13 @@ If you find any issues with the documentation, please open an issue or submit a 
 
 ## Supported devices
 The regular gaster exploit should support A7-11 as well as T2, and booting PongoOS should work on A8-11 - with that, I have confirmed that the following devices work on my setup (M1 MacBook Air + IOKit):
+* iPhone X (A11) - regular, PongoOS
 * iPad Pro 10.5" (A10X) - regular, PongoOS
 * iPad Pro 12.9" (A10X) - regular, PongoOS
 * iPad Pro 9.7" (A9X) - regular, PongoOS
 * iPhone 6 (A8) - regular, PongoOS
 
 SoCs that still need testing are as follows:
-* A11 (iPhone 8/X) - regular, PongoOS
 * T2 (Macs) - regular
 * A10 (iPhone 7 (Plus), iPad 6) - regular, PongoOS
 * A9 (iPhone 6S (Plus), iPhone SE, iPad 5) - regular, PongoOS
