@@ -183,8 +183,9 @@ void jailbreakBoot(usb_handle_t *handle) {
 	issuePongoCommand(handle, args);
 	sleep(1);
 
+	// Only give XNU ownership of the framebuffer if we're booting with verbose output
+	// otherwise verbose boot is enabled regardless of boot-args
 	if (strstr(args, "-v") != NULL) {
-		
 		// Give XNU ownership of the framebuffer for verbose boot
 		issuePongoCommand(handle, "xfb");
 		sleep(1);

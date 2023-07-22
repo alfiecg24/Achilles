@@ -63,8 +63,10 @@ Any damage caused to your device is your own responsibility. I am not responsibl
 
 ## Credits
 * Axi0mX - checkm8, [ipwndfu](https://github.com/axi0mX/ipwndfu)
-* checkra1n team - [checkra1n](https://checkra.in/)
+* checkra1n team - [checkra1n](https://checkra.in/), YoloDFU payloads
 * palera1n team - [palera1n](https://palera.in/)
 * 0x7FF - [gaster](https://github.com/0x7ff/gaster)
 * kok3shidoll - [ra1npoc](https://github.com/kok3shidoll/ra1npoc)
 * Mineek - [openra1n](https://github.com/mineek/openra1n)
+
+All licenses for any code used in this project that is not my own can be found in the [other/licenses](other/licenses) directory.
