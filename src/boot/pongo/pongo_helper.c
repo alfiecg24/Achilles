@@ -183,9 +183,14 @@ void jailbreakBoot(usb_handle_t *handle) {
 	issuePongoCommand(handle, args);
 	sleep(1);
 
-	// Give XNU ownership of the framebuffer for verbose boot
-	issuePongoCommand(handle, "xfb");
-	sleep(1);
+	if (strstr(args, "-v") != NULL) {
+		
+		// Give XNU ownership of the framebuffer for verbose boot
+		issuePongoCommand(handle, "xfb");
+		sleep(1);
+	}
+	free(args);
+
 
 	LOG(LOG_INFO, "Booting iOS");
 
