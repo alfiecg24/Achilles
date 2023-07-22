@@ -39,12 +39,23 @@ Furthermore, I have included a detailed writeup on the vulnerabilities exploited
 If you find any issues with the documentation, please open an issue or submit a pull request to help improve it.
 
 ## Supported devices
-The regular gaster exploit should support A7 - A11 as well as T2, and booting PongoOS should work on A8 - A11 - however, I have only managed to test on the following devices:
+The regular gaster exploit should support A7-11 as well as T2, and booting PongoOS should work on A8-11 - with that, I have confirmed that the following devices work on my setup (M1 MacBook Air + IOKit):
 * iPad Pro 10.5" (A10X) - regular, PongoOS
+* iPad Pro 12.9" (A10X) - regular, PongoOS
 * iPad Pro 9.7" (A9X) - regular, PongoOS
 * iPhone 6 (A8) - regular, PongoOS
 
-If anyone else has had successes or failures with other devices, please let me know so I can update this list and/or fix any issues you may experience.
+SoCs that still need testing are as follows:
+* A11 (iPhone 8/X) - regular, PongoOS
+* T2 (Macs) - regular
+* A10 (iPhone 7 (Plus), iPad 6) - regular, PongoOS
+* A9 (iPhone 6S (Plus), iPhone SE, iPad 5) - regular, PongoOS
+* A8X (iPad Air 2) - regular, PongoOS
+* A7 (iPhone 5S, iPad Air, iPad Mini 2/3) - regular
+
+If you want to test with your device, please do so and them submit an issue or pull request with your results. Make sure to include information about your host machine (OS version, model), device (model, SoC) and iOS version (only necessary if having issues with PongoOS).
+
+If anyone else has successes or failures with other devices, please let me know so I can update this list and/or fix any issues you may experience.
 ## Disclaimer
 You may find that there are similarities in here to other projects like this - and that is true. This was just a personal project for me to learn more about the BootROM and iOS bootchain. As a result, I relied a lot on open-source solutions such as [ipwndfu](https://github.com/axi0mX/ipwndfu), [gaster](https://github.com/0x7ff/gaster) and [PongoOS](https://github.com/checkra1n/PongoOS) to help me along the way.
 
