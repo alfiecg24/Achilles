@@ -235,9 +235,15 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+#ifdef ALFIELOADER_LIBUSB
+    char *usbBackend = "libusb";
+#else
+    char *usbBackend = "IOKit";
+#endif
+
     struct utsname buffer;
     uname(&buffer);
-    LOG(LOG_DEBUG, "Running on %s %s", buffer.sysname, buffer.machine);
+    LOG(LOG_DEBUG, "Running on %s %s, %s", buffer.sysname, buffer.machine, usbBackend);
     if (strcmp(buffer.sysname, "Darwin") != 0)
     {
         LOG(LOG_FATAL, "ERROR: This tool is only supported on macOS");
