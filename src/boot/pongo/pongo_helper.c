@@ -190,7 +190,6 @@ void jailbreakBoot(usb_handle_t *handle) {
 		issuePongoCommand(handle, "xfb");
 		sleep(1);
 	}
-	free(args);
 
 
 	LOG(LOG_INFO, "Booting iOS");
