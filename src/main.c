@@ -14,8 +14,8 @@ arg_t args[] = {
     {"Jailbreak", "-j", "--jailbreak", "Jailbreak rootless using palera1n kpf, ramdisk and overlay", NULL, false, FLAG_BOOL, false},
     {"Verbose boot", "-V", "--verbose-boot", "Boot device with verbose boot", NULL, false, FLAG_BOOL, false},
     {"Serial output", "-s", "--serial", "Enable serial output from the device when booting", NULL, false, FLAG_BOOL, false},
-    {"Boot arguments", "-b", "--boot-args", "Boot arguments to pass to PongoOS", NULL, false, FLAG_STRING, NULL}
-    // {"Override Pongo", "-k"} // TODO: Implement this
+    {"Boot arguments", "-b", "--boot-args", "Boot arguments to pass to PongoOS", NULL, false, FLAG_STRING, NULL},
+    {"Override Pongo", "-k", "--override-pongo", "Use a custom Pongo.bin file", NULL, false, FLAG_STRING, NULL} // TODO: Implement this
     };
 
 arg_t *getArgumentByName(char *name)
@@ -89,6 +89,32 @@ bool checkForContradictions() {
     return false;
 }
 
+bool parseMultipleShortArgs(char *multipleArgs) {
+    bool unrecognisedOption = false;
+    for (int i = 1; i < strlen(multipleArgs); i++) {
+        char *newArg = malloc(sizeof(char) * 3);
+        newArg[0] = '-';
+        newArg[1] = multipleArgs[i];
+        newArg[2] = '\0';
+        arg_t *arg = findMatchingArgument(newArg);
+        if (arg != NULL) {
+            if (arg->type == FLAG_BOOL) {
+                arg->boolVal = true;
+                arg->set = true;
+            } else if (arg->type == FLAG_INT) {
+                arg->intVal++;
+                arg->set = true;
+            } else if (arg->type == FLAG_STRING) {
+                LOG(LOG_ERROR, "Cannot use string argument '%s' with multiple short arguments", arg->name);
+                unrecognisedOption = true;
+            }
+        } else {
+            unrecognisedOption = true;
+        }
+    }
+    return unrecognisedOption;
+}
+
 bool checkForUnrecognisedArguments(int argc, char *argv[]) {
     bool foundUnrecognisedArg = false;
     for (int i = 0; i < argc; i++) {
@@ -98,7 +124,12 @@ bool checkForUnrecognisedArguments(int argc, char *argv[]) {
             && findMatchingArgument(argv[i - 1])->type == FLAG_STRING) {
                 continue;
             }
-            if (findMatchingArgument(argv[i]) == NULL) {
+            if (strstr(argv[i], "--") == NULL
+            && strstr(argv[i], "-") != NULL
+            && argv[i][0] == '-'
+            && strlen(argv[i]) > 2) {
+                foundUnrecognisedArg = parseMultipleShortArgs(argv[i]);
+            } else if (findMatchingArgument(argv[i]) == NULL) {
                 LOG(LOG_ERROR, "Unrecognised argument %s", argv[i]);
                 foundUnrecognisedArg = true;
             }
@@ -110,13 +141,11 @@ bool checkForUnrecognisedArguments(int argc, char *argv[]) {
 void parseArguments(int argc, char *argv[]) {
     for (int i = 0; i < argc; i++) {
         if (i == 0) { continue; }
-        if (strstr(argv[i], "-") == NULL) { continue; }
         if (i > 0) {
             if (findMatchingArgument(argv[i - 1]) != NULL
             && findMatchingArgument(argv[i - 1])->type == FLAG_STRING) {
                 arg_t *previousArg = findMatchingArgument(argv[i - 1]);
                 if (previousArg->type == FLAG_STRING) {
-                    LOG(LOG_DEBUG, "Setting string value of %s to %s", previousArg->name, argv[i]);
                     previousArg->stringVal = argv[i];
                     previousArg->set = true;
                 }
@@ -126,13 +155,18 @@ void parseArguments(int argc, char *argv[]) {
                 if (arg == NULL) {
                     continue;
                 }
+                if (strstr(argv[i], "--") == NULL
+                && strstr(argv[i], "-") != NULL
+                && argv[i][0] == '-'
+                && strlen(argv[i]) > 2) {
+                    parseMultipleShortArgs(argv[i]);
+                }
+                    
                 if (arg->type == FLAG_BOOL) {
-                    LOG(LOG_DEBUG, "Setting bool value of %s to true", arg->name);
                     arg->boolVal = true;
                     arg->set = true;
                 }
                 else if (arg->type == FLAG_INT) {
-                    LOG(LOG_DEBUG, "Setting int value of %s to %d", arg->name, arg->intVal);
                     arg->intVal++;
                     arg->set = true;
                 }
@@ -145,7 +179,6 @@ void parseArguments(int argc, char *argv[]) {
 int main(int argc, char *argv[])
 {
     bool hasUsedUnrecognisedArg = checkForUnrecognisedArguments(argc, argv);
-    bool matchFound = false;
 
     if (hasUsedUnrecognisedArg) {
         // Print the help menu
@@ -153,7 +186,9 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    // Parse arguments
     parseArguments(argc, argv);
+
     // Check for contradictions
     if (checkForContradictions()) {
         return 1;
