@@ -23,11 +23,10 @@ extern arg_t args[];
 // ******************************************************
 // Function: step()
 //
-// Purpose: Print a message to stdout that can be updated and has a countdown
+// Purpose: Print a message to stdout that has a countdown
 //
 // Parameters:
-//      int time: the number of seconds to count to
-//      int time2: the number of seconds to count from
+//      int time: the number of seconds to count down from
 //      char *text: the message to print
 // ******************************************************
 void step(int time, bool endWithNewline, char *text);
