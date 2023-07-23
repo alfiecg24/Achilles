@@ -17,3 +17,6 @@ Additionally, I have included the palera1n kernel patchfinder binary, the ramdis
 
 ## PongoOS
 [PongoOS](https://github.com/checkra1n/PongoOS) and the checkra1n jailbreak has provided the YoloDFU payloads used in AlfieLoader, as well as the PongoOS binary used to boot the device. The PongoOS binary and the YoloDFU payloads can be found in the [src/boot/payloads/checkra1n](../../src/boot/payloads/checkra1n) directory.
+
+## LZ4
+The [LZ4](https://github.com/lz4/lz4) compression algorithm is used to compress PongoOS before sending it to the device (we actually use LZ4HC as it has higher compression than the regular LZ4 algorithm).
