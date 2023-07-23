@@ -3,24 +3,30 @@
 [![Time spent on AlfieLoader](https://wakatime.com/badge/user/61592169-b9cf-4af8-b6fa-8ac7d4369b01/project/c122878a-9ce8-40b1-a337-e53a7ef5f337.svg)](https://wakatime.com/badge/user/61592169-b9cf-4af8-b6fa-8ac7d4369b01/project/c122878a-9ce8-40b1-a337-e53a7ef5f337)
 
 ## What is AlfieLoader?
-A (very early in development) pre-boot execution environment for Apple mobile devices vulnerable to checkm8 - a work-in-progress project similar to [checkra1n](https://checkra.in/)/[PongoOS](https://github.com/checkra1n/PongoOS). While it is not at this stage yet, it is the goal for this project.
+AlfieLoader is a project that aims to provide a easy way to harness the power of the checkm8 exploit. It has three prominent features:
+* Exploitation using gaster payloads to patch signature checks
+* Booting PongoOS as a drop-in replacement for checkra1n 1337
+* Jailbreaking rootless with palera1n
+
+This project is nowhere near the maturity of the original versions of these projects, but was only created as a personal project to learn more about the BootROM and iOS bootchain. As such, I am in no way denouncing the above projects, and would in fact recommend using them over AlfieLoader at the moment, as they are much more mature and stable.
 
 ## Why is it called AlfieLoader?
 I wanted to get started with this project as soon as possible in the beginning, and did not want to spend hours contemplating different names. I subsequently decided to name it AlfieLoader, as my name is Alfie. While it may change in the future, it will remain as is until further notice.
 
 ## What does it do?
 In its current state, this project does the following things:
-* Runs the checkm8 exploit on T8011 with gaster payload
+* Runs the checkm8 exploit A7-A11 + T2 with gaster payloads
 * Boots PongoOS on SoCs S8000-T8015 as a drop-in replacement for checkra1n 0.1337.X
 * Allows for jailbreaking rootless with palera1n on supported devices
 
+You can check the [supported devices](#supported-devices) section to see which devices confirmed to work and which ones still need testing.
+
 ## What are the current limitations?
-* I can only test this on an iPad Pro 10.5" (T8011)
 * Only planned support is for A7-A11 devices
 * A12+ devices cannot be supported unless a BootROM vulnerability is found and publicised
 
 ## What is planned for the future?
-At the moment, AlfieLoader can boot PongoOS, and will (in the future) be able to patch signature checks on checkm8 devices using the gaster payloads, but is currentlt limited to T8011 devices. However, in the future, I plan to gear the project more towards a checkra1n-like experience. This includes booting a pre-boot execution environment (such as PongoOS), and jailbreaking the device. However, the option for regular checkm8 exploitation will always be available.
+At the moment, AlfieLoader can boot PongoOS, and is able to patch signature checks on checkm8 devices using the gaster payloads, but I haven't tested all devices. However, in the future, I plan to gear the project more towards a checkra1n-like experience. This includes booting a pre-boot execution environment (such as PongoOS), and jailbreaking the device. However, the option for regular checkm8 exploitation will always be available.
 
 As part of this, I plan on creating an alternative to PongoOS. While this is a difficult task, and one that I certainly do not have the knowledge to take up at the moment, I hope that I can learn enough to be able to do this in the future. Thanks to the brilliant efforts of the checkra1n team and their open-source PongoOS, I have a great starting point to learn from and hopefully something that can aid me in this complex project.
 
