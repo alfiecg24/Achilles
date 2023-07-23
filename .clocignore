@@ -1,0 +1,4 @@
+src/boot/lz4
+include/boot/lz4
+docs/Write-ups
+other/licenses
