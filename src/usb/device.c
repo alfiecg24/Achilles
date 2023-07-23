@@ -45,11 +45,6 @@ int findDevice(device_t *device, bool waiting) {
         return -1;
     }
 
-    if (count == 0) {
-        LOG(LOG_ERROR, "No USB devices found!");
-        return -1;
-    }
-
     for (int i = 0; i < count; i++) {
         libusb_device_handle *libusbHandle;
         struct libusb_device_descriptor desc;
@@ -107,7 +102,7 @@ int findDevice(device_t *device, bool waiting) {
         }
     }
     libusb_free_device_list(list, 1);
-    return 0;
+    return -1;
 }
 
 #else

@@ -27,19 +27,20 @@ void sleep_ms(unsigned ms) {
 #ifdef ALFIELOADER_LIBUSB
 
 char *getDeviceSerialNumberBuiltIn(usb_handle_t *handle) {
-    // struct libusb_device_descriptor desc;
-	// int ret = libusb_get_device_descriptor(handle->device, &desc);
-	// if (ret < 0) {
-	// 	LOG(LOG_ERROR, "Failed to get USB device descriptor!");
-	// 	return -1;
-	// }
-	// if (handle != NULL) {
-	// 	unsigned char serialNumber[256];
-	// 	libusb_get_string_descriptor_ascii(handle->device, desc.iSerialNumber, serialNumber, 256);
-	// 	if (serialNumber != NULL) {
-	// 		return serialNumber;
-	// 	}
-	// }
+    struct libusb_device_descriptor desc;
+	struct libusb_device *dev = libusb_get_device(handle->device);
+	int ret = libusb_get_device_descriptor(dev, &desc);
+	if (ret < 0) {
+		LOG(LOG_ERROR, "Failed to get USB device descriptor!");
+		return NULL;
+	}
+	if (handle != NULL) {
+		char *serialNumber = malloc(256);
+		libusb_get_string_descriptor_ascii(handle->device, desc.iSerialNumber, (unsigned char *)serialNumber, 256);
+		if (serialNumber != NULL) {
+			return serialNumber;
+		}
+	}
 	// TODO
 	return NULL;
 }
@@ -55,21 +56,16 @@ void resetUSBHandle(usb_handle_t *handle) {
 }
 
 bool waitUSBHandle(usb_handle_t *handle, usb_check_cb_t usb_check_cb, void *arg) {
-	if (libusb_init(&handle->context) == LIBUSB_SUCCESS) {
+	if (libusb_init(NULL) == LIBUSB_SUCCESS) {
 		for (;;) {
 			if ((handle->device = libusb_open_device_with_vid_pid(NULL, handle->vid, handle->pid)) != NULL) {
-				if (libusb_set_configuration(handle->device, 1) == LIBUSB_SUCCESS && libusb_claim_interface(handle->device, 0) == LIBUSB_SUCCESS) {
-					if ((libusb_set_interface_alt_setting(handle->device, 0, 0) == LIBUSB_SUCCESS) && (usb_check_cb == NULL || usb_check_cb(handle, arg))) {
-						handle->usb_interface = 0;
-						return true;
-					}
-					libusb_release_interface(handle->device, 0);
+				if (libusb_set_configuration(handle->device, 1) == LIBUSB_SUCCESS && (usb_check_cb == NULL || usb_check_cb(handle, arg))) {
+					return true;
 				}
 				libusb_close(handle->device);
 			}
 			sleep_ms(USB_TIMEOUT);
 		}
-		libusb_exit(handle->context);
 	}
 	return false;
 }
@@ -156,6 +152,7 @@ int sendUSBBulkUpload(usb_handle_t *handle, void *buffer, size_t length) {
 	} else if (ret == LIBUSB_ERROR_TIMEOUT) {
 		LOG(LOG_ERROR, "USB timeout sending bulk upload");
 	}
+	libusb_release_interface(handle->device, 0);
 	return transferred;
 }
 
