@@ -7,6 +7,7 @@
 #include <stddef.h>
 #include <pthread.h>
 #include <assert.h>
+#include <utils/ANSI-color-codes.h>
 
 typedef enum
 {
@@ -19,6 +20,18 @@ typedef enum
 } log_level_t;
 
 extern arg_t args[];
+
+// ******************************************************
+// Function: step()
+//
+// Purpose: Print a message to stdout that can be updated and has a countdown
+//
+// Parameters:
+//      int time: the number of seconds to count to
+//      int time2: the number of seconds to count from
+//      char *text: the message to print
+// ******************************************************
+void step(int time, bool endWithNewline, char *text);
 
 // ******************************************************
 // Function: AlfieLoaderLog()

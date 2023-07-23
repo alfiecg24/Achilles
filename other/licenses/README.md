@@ -11,7 +11,7 @@ Gaster also provided exploit assembly code for the checkm8 exploit, which you ca
 [ipwndfu](https://github.com/axi0mX/ipwndfu) contains the original checkm8 exploit implementation, and was extremely influential in helping me understand the exploit. There is, as it stands, very little (if any) code from ipwndfu in AlfieLoader, but I have included the license for it anyway.
 
 ## palera1n
-[palera1n](https://github.com/palera1n/palera1n) has provided utilties such as the logging system used in AlfieLoader, the code for interacting with PongoOS, and other small QoL improvements (such as putting the device in recovery mode).
+[palera1n](https://github.com/palera1n/palera1n) has provided utilties such as the logging system used in AlfieLoader, the code for interacting with PongoOS, and other small features (such as putting the device in recovery mode) and also their DFU helper, which mine is heavily based off of.
 
 Additionally, I have included the palera1n kernel patchfinder binary, the ramdisk and the overlay (binpack) used in the jailbreak in order to allow for jailbreaking with palera1n through AlfieLoader. These files can be found in the [src/kernel/patchfinder](../../src/kernel/patchfinder/) and [src/userland](../../src/userland/)  directories.
 

@@ -243,7 +243,7 @@ void initUSBHandle(usb_handle_t *handle, uint16_t vid, uint16_t pid) {
 }
 
 char *getCPIDFromSerialNumber(char *serial) {
-	if (strstr(serial, "CPID:")) {
+	if (strstr(serial, "CPID:") != NULL) {
 		char *cpid = strdup(strstr(serial, "CPID:") + 5);
 		cpid[4] = '\0';
 		return cpid;
@@ -251,7 +251,16 @@ char *getCPIDFromSerialNumber(char *serial) {
 	return NULL;
 }
 
-uint16_t cpid;
+char *getBDIDFromSerialNumer(char *serial) {
+	if (strstr(serial, "BDID:") != NULL) {
+		char *bdid = strdup(strstr(serial, "BDID:") + 3);
+		bdid[4] = '\0';
+		return bdid;
+	}
+	return NULL;
+}
+
+uint16_t cpid, bdid;
 size_t config_hole, ttbr0_vrom_off, ttbr0_sram_off, config_large_leak, config_overwrite_pad;
 uint64_t tlbi, nop_gadget, ret_gadget, patch_addr, ttbr0_addr, func_gadget, write_ttbr0, memcpy_addr, aes_crypto_cmd, boot_tramp_end, gUSBSerialNumber, dfu_handle_request, usb_core_do_transfer, dfu_handle_bus_reset, insecure_memory_base, handle_interface_request, usb_create_string_descriptor, usb_serial_number_string_descriptor;
 
@@ -267,6 +276,13 @@ bool checkm8CheckUSBDevice(usb_handle_t *handle, bool *pwned) {
 		}
 		int cpidNum = (int)strtol(stringCPID, NULL, 16);
 		cpid = (uint16_t)cpidNum;
+		char *stringBDID = getBDIDFromSerialNumer(usbSerialNumber);
+		if (stringBDID == NULL) {
+			LOG(LOG_ERROR, "Failed to get BDID from serial number");
+			return false;
+		}
+		int bdidNum = (int)strtol(stringBDID, NULL, 16);
+		bdid = (uint16_t)bdidNum;
 		if (strstr(usbSerialNumber, " SRTG:[iBoot-1704.10]") != NULL) { // A7
 			cpid = 0x8960;
 			config_large_leak = 7936;

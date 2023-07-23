@@ -1,11 +1,17 @@
-#include <time.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <stddef.h>
-#include <pthread.h>
-#include <assert.h>
 #include <utils/log.h>
-#include <utils/ANSI-color-codes.h>
+
+void step(int time, bool endWithNewline, char *text) {
+	for (int i = 0; i <= time; i++) {
+		printf(BCYN "\r\033[K%s (%d)" CRESET, text, time - i);
+		fflush(stdout);
+		sleep(1);
+	}
+	if (endWithNewline) {
+		printf(CYN "\r%s (%d)\n" CRESET, text, 0);
+	} else {
+		printf(CYN "\r%s (%d)" CRESET, text, 0);
+	}
+}
 
 int AlfieLoaderLog(log_level_t loglevel, bool newline, const char *fname, int lineno, const char *fxname, const char *__restrict format, ...)
 {
