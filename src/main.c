@@ -31,6 +31,16 @@ arg_t *getArgumentByName(char *name)
     return (arg_t *){NULL};
 }
 
+arg_t *findMatchingArgument(char *argv) {
+    // Find a matching argument
+    for (int i = 0; i < sizeof(args) / sizeof(arg_t); i++) {
+        if (strcmp(argv, args[i].shortOpt) == 0 || strcmp(argv, args[i].longOpt) == 0) {
+            return &args[i];
+        }
+    }
+    return NULL;
+}
+
 void printHelp()
 {
     // Print help information
@@ -79,39 +89,63 @@ bool checkForContradictions() {
     return false;
 }
 
-int main(int argc, char *argv[])
-{
-    bool hasUsedUnrecognisedArg = false;
-    bool matchFound = false;
-
-    // Iterate over each defined argument
-    for (int i = 0; i < sizeof(args) / sizeof(arg_t); i++) {
-        // Iterate over each argument passed from CLI
-        for (int v = 0; v < argc; v++) {
-            if (v == 0) { continue; }
-            if (v > 0) {
-                    if (strstr(argv[v], " ") != NULL
-                    || (strcmp(argv[v - 1], "-b") == 0 
-                    || strcmp(argv[v - 1], "--boot-args") == 0)) {
-                        continue;
-                    }
+bool checkForUnrecognisedArguments(int argc, char *argv[]) {
+    bool foundUnrecognisedArg = false;
+    for (int i = 0; i < argc; i++) {
+        if (i == 0) { continue; }
+        if (i > 0) {
+            if (findMatchingArgument(argv[i - 1]) != NULL
+            && findMatchingArgument(argv[i - 1])->type == FLAG_STRING) {
+                continue;
             }
-            if (
-            (strcmp(argv[v], args[i].longOpt) == 0) || // Check if it matches the long argument option
-            ((strncmp(argv[v], args[i].shortOpt, 2) != 0) && // Check if it matches the short argument option
-            (strlen(argv[v]) == 2)) // Make sure there aren't additional characters
-            ) {
-                matchFound = true;
-                continue;
-            } else {
-                if (strcmp(args[i].name, args[sizeof(args) / sizeof(arg_t) - 1].name) == 0 && !matchFound) { // Check if it is the last argument
-                    LOG(LOG_ERROR, "Unrecognised argument %s", argv[v]);
-                    hasUsedUnrecognisedArg = true;
-                }
-                continue;
+            if (findMatchingArgument(argv[i]) == NULL) {
+                LOG(LOG_ERROR, "Unrecognised argument %s", argv[i]);
+                foundUnrecognisedArg = true;
             }
         }
     }
+    return foundUnrecognisedArg;
+}
+
+void parseArguments(int argc, char *argv[]) {
+    for (int i = 0; i < argc; i++) {
+        if (i == 0) { continue; }
+        if (strstr(argv[i], "-") == NULL) { continue; }
+        if (i > 0) {
+            if (findMatchingArgument(argv[i - 1]) != NULL
+            && findMatchingArgument(argv[i - 1])->type == FLAG_STRING) {
+                arg_t *previousArg = findMatchingArgument(argv[i - 1]);
+                if (previousArg->type == FLAG_STRING) {
+                    LOG(LOG_DEBUG, "Setting string value of %s to %s", previousArg->name, argv[i]);
+                    previousArg->stringVal = argv[i];
+                    previousArg->set = true;
+                }
+            }
+            else {
+                arg_t *arg = findMatchingArgument(argv[i]);
+                if (arg == NULL) {
+                    continue;
+                }
+                if (arg->type == FLAG_BOOL) {
+                    LOG(LOG_DEBUG, "Setting bool value of %s to true", arg->name);
+                    arg->boolVal = true;
+                    arg->set = true;
+                }
+                else if (arg->type == FLAG_INT) {
+                    LOG(LOG_DEBUG, "Setting int value of %s to %d", arg->name, arg->intVal);
+                    arg->intVal++;
+                    arg->set = true;
+                }
+            }
+
+        }
+    }
+}
+
+int main(int argc, char *argv[])
+{
+    bool hasUsedUnrecognisedArg = checkForUnrecognisedArguments(argc, argv);
+    bool matchFound = false;
 
     if (hasUsedUnrecognisedArg) {
         // Print the help menu
@@ -119,88 +153,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    for (int i = 0; i < sizeof(args) / sizeof(arg_t); i++)
-    {
-        if (args[i].type == FLAG_BOOL)
-        { // Check if the argument is a boolean
-            for (int j = 0; j < argc; j++)
-            {
-                if (j > 0) {
-                    if (strstr(argv[j], " ") != NULL
-                    || (strcmp(argv[j - 1], "-b") == 0 
-                    || strcmp(argv[j - 1], "--boot-args") == 0)) {
-                        continue;
-                    }
-                }
-                if (strcmp(argv[j], args[i].shortOpt) == 0 || strcmp(argv[j], args[i].longOpt) == 0)
-                {
-                    // Set the boolean value to true if the argument is found
-                    args[i].boolVal = true;
-                    args[i].set = true;
-                }
-            }
-        }
-        else if (args[i].type == FLAG_STRING)
-        { // Check if the argument is a string
-            for (int j = 0; j < argc; j++)
-            {
-                if (j > 0) {
-                    if (strstr(argv[j], " ") != NULL
-                    || (strcmp(argv[j - 1], "-b") == 0 
-                    || strcmp(argv[j - 1], "--boot-args") == 0)) {
-                        continue;
-                    }
-                }
-                if (strcmp(argv[j], args[i].shortOpt) == 0 || strcmp(argv[j], args[i].longOpt) == 0)
-                {
-                    if (j + 1 < argc)
-                    {
-                        size_t argLen = strlen(argv[j + 1]);
-                        char *arg = malloc(argLen + 1);
-                        strcpy(arg, argv[j + 1]);
-                        args[i].stringVal = arg;
-                        args[i].set = true;
-                    }
-                }
-            }
-        }
-        else if (args[i].type == FLAG_INT)
-        { // Check if the argument is an integer
-            for (int j = 0; j < argc; j++)
-            {
-                if (j > 0) {
-                    if (strstr(argv[j], " ") != NULL
-                    || (strcmp(argv[j - 1], "-b") == 0 
-                    || strcmp(argv[j - 1], "--boot-args") == 0)) {
-                        continue;
-                    }
-                }
-                if (strncmp(argv[j], args[i].shortOpt, 2) == 0)
-                { // Check if the argument is a short option
-                    int argLen = strlen(argv[j]);
-                    for (int k = 1; k < argLen; k++)
-                    { // Loop through the short option (e.g. -vvv)
-                        if (argv[j][k] == args[i].shortOpt[1])
-                        {
-                            // Increment the integer value for each time the short option is repeated
-                            args[i].intVal++;
-                            if (!args[i].set) { args[i].set = true; }
-                        } else {
-                            break;
-                        }
-                    }
-                }
-                else if (strcmp(argv[j], args[i].longOpt) == 0)
-                {
-                    if (j + 1 < argc)
-                    {
-                        // Set the value of the integer to the next argument
-                        args[i].intVal = atoi(argv[j + 1]);
-                    }
-                }
-            }
-        }
-    }
+    parseArguments(argc, argv);
     // Check for contradictions
     if (checkForContradictions()) {
         return 1;
