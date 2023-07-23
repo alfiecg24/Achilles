@@ -28,6 +28,7 @@ bool issuePongoCommand(usb_handle_t *handle, char *command)
 	if (!ret)
 		goto bad;
 	ret = sendUSBControlRequest(handle, 0x21, 3, 0, 0, commandBuffer, (uint32_t)len, NULL);
+	sleep(1);
 bad:
 	if (!ret)
 	{
@@ -38,8 +39,9 @@ bad:
 		LOG(LOG_ERROR, "USB error: %d", ret);
 		return ret;
 	}
-	else
+	else {
 		return ret;
+	}
 }
 
 int uploadFileToPongo(usb_handle_t *handle, unsigned char *data, unsigned int dataLength)
@@ -49,18 +51,28 @@ int uploadFileToPongo(usb_handle_t *handle, unsigned char *data, unsigned int da
 	if (ret)
 	{
         int bulkRet = sendUSBBulkUpload(handle, data, dataLength);
+#ifdef ALFIELOADER_LIBUSB
+		if (bulkRet == dataLength)
+		{
+			LOG(LOG_DEBUG, "Uploaded 0x%X bytes to PongoOS", dataLength);
+		} else {
+			LOG(LOG_ERROR, "Failed to upload 0x%X bytes to PongoOS, sent 0x%X bytes", dataLength, bulkRet);
+			ret = false;
+		}
+#else
 		if (bulkRet == kIOReturnSuccess)
 		{
 		    LOG(LOG_DEBUG, "Uploaded 0x%X bytes to PongoOS", dataLength);
 		} else {
             LOG(LOG_ERROR, "Failed to upload 0x%X bytes to PongoOS", dataLength);
         }
+#endif
 	}
 	resetUSBHandle(handle);
 	closeUSBHandle(handle);
 	sleep_ms(100);
 	initUSBHandle(handle, 0x5ac, 0x4141);
-	waitUSBHandle(handle, 0, 0, NULL, NULL);
+	waitUSBHandle(handle, NULL, NULL);
 	sleep(3);
 	return ret;
 }

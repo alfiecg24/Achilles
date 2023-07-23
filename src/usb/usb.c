@@ -1,22 +1,5 @@
 #include <usb/usb.h>
 
-char *getDeviceSerialNumberIOKit(usb_handle_t *handle)
-{
-    CFTypeRef serialNumber = IORegistryEntryCreateCFProperty(handle->service, CFSTR("USB Serial Number"), kCFAllocatorDefault, 0);
-    if (serialNumber == NULL)
-    {
-        return NULL;
-    }
-    if (CFGetTypeID(serialNumber) != CFStringGetTypeID())
-    {
-        LOG(LOG_ERROR, "Bad USB serial number, not a string!");
-        return NULL;
-    }
-    CFStringRef serialNumberString = (CFStringRef)serialNumber;
-    char *serialNumberCString = (char *)CFStringGetCStringPtr(serialNumberString, kCFStringEncodingUTF8);
-    return serialNumberCString;
-}
-
 char *getDeviceSerialNumberWithTransfer(usb_handle_t *handle) {
 	transfer_ret_t transfer_ret;
 	uint8_t buf[UINT8_MAX];
@@ -39,6 +22,161 @@ void sleep_ms(unsigned ms) {
 	ts.tv_sec = ms / 1000;
 	ts.tv_nsec = (ms % 1000) * 1000000L;
 	nanosleep(&ts, NULL);
+}
+
+#ifdef ALFIELOADER_LIBUSB
+
+char *getDeviceSerialNumberBuiltIn(usb_handle_t *handle) {
+    // struct libusb_device_descriptor desc;
+	// int ret = libusb_get_device_descriptor(handle->device, &desc);
+	// if (ret < 0) {
+	// 	LOG(LOG_ERROR, "Failed to get USB device descriptor!");
+	// 	return -1;
+	// }
+	// if (handle != NULL) {
+	// 	unsigned char serialNumber[256];
+	// 	libusb_get_string_descriptor_ascii(handle->device, desc.iSerialNumber, serialNumber, 256);
+	// 	if (serialNumber != NULL) {
+	// 		return serialNumber;
+	// 	}
+	// }
+	// TODO
+	return NULL;
+}
+
+void closeUSBHandle(usb_handle_t *handle) {
+	libusb_release_interface(handle->device, 0);
+	libusb_close(handle->device);
+	libusb_exit(handle->context);
+}
+
+void resetUSBHandle(usb_handle_t *handle) {
+	libusb_reset_device(handle->device);
+}
+
+bool waitUSBHandle(usb_handle_t *handle, usb_check_cb_t usb_check_cb, void *arg) {
+	if (libusb_init(&handle->context) == LIBUSB_SUCCESS) {
+		for (;;) {
+			if ((handle->device = libusb_open_device_with_vid_pid(NULL, handle->vid, handle->pid)) != NULL) {
+				if (libusb_set_configuration(handle->device, 1) == LIBUSB_SUCCESS && libusb_claim_interface(handle->device, 0) == LIBUSB_SUCCESS) {
+					if ((libusb_set_interface_alt_setting(handle->device, 0, 0) == LIBUSB_SUCCESS) && (usb_check_cb == NULL || usb_check_cb(handle, arg))) {
+						handle->usb_interface = 0;
+						return true;
+					}
+					libusb_release_interface(handle->device, 0);
+				}
+				libusb_close(handle->device);
+			}
+			sleep_ms(USB_TIMEOUT);
+		}
+		libusb_exit(handle->context);
+	}
+	return false;
+}
+
+void USBAsyncCallback(struct libusb_transfer *transfer) {
+	*(int *)transfer->user_data = 1;
+}
+
+bool sendUSBControlRequest(const usb_handle_t *handle, uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, void *pData, size_t wLength, transfer_ret_t *transferRet) {
+	int ret = libusb_control_transfer(handle->device, bmRequestType, bRequest, wValue, wIndex, pData, (uint16_t)wLength, USB_TIMEOUT);
+
+	if(transferRet != NULL) {
+		if(ret >= 0) {
+			transferRet->sz = (uint32_t)ret;
+			transferRet->ret = USB_TRANSFER_OK;
+		} else if(ret == LIBUSB_ERROR_PIPE) {
+			transferRet->ret = USB_TRANSFER_STALL;
+		} else {
+			transferRet->ret = USB_TRANSFER_ERROR;
+		}
+	}
+	return true;
+}
+
+bool sendUSBControlRequestAsync(const usb_handle_t *handle, uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, void *pData, size_t wLength, unsigned usbAbortTimeout, transfer_ret_t *transferRet) {
+	struct libusb_transfer *transfer = libusb_alloc_transfer(0);
+	struct timeval tv;
+	int completed = 0;
+	uint8_t *buf;
+
+	if(transfer != NULL) {
+		if((buf = malloc(LIBUSB_CONTROL_SETUP_SIZE + wLength)) != NULL) {
+			if((bmRequestType & LIBUSB_ENDPOINT_DIR_MASK) == LIBUSB_ENDPOINT_OUT) {
+				memcpy(buf + LIBUSB_CONTROL_SETUP_SIZE, pData, wLength);
+			}
+			libusb_fill_control_setup(buf, bmRequestType, bRequest, wValue, wIndex, (uint16_t)wLength);
+			libusb_fill_control_transfer(transfer, handle->device, buf, USBAsyncCallback, &completed, USB_TIMEOUT);
+			if(libusb_submit_transfer(transfer) == LIBUSB_SUCCESS) {
+				tv.tv_sec = usbAbortTimeout / 1000;
+				tv.tv_usec = (usbAbortTimeout % 1000) * 1000;
+				while(completed == 0 && libusb_handle_events_timeout_completed(NULL, &tv, &completed) == LIBUSB_SUCCESS) {
+					libusb_cancel_transfer(transfer);
+				}
+				if(completed != 0) {
+					if((bmRequestType & LIBUSB_ENDPOINT_DIR_MASK) == LIBUSB_ENDPOINT_IN) {
+						memcpy(pData, libusb_control_transfer_get_data(transfer), transfer->actual_length);
+					}
+					if(transferRet != NULL) {
+						transferRet->sz = (uint32_t)transfer->actual_length;
+						if(transfer->status == LIBUSB_TRANSFER_COMPLETED) {
+							transferRet->ret = USB_TRANSFER_OK;
+						} else if(transfer->status == LIBUSB_TRANSFER_STALL) {
+							transferRet->ret = USB_TRANSFER_STALL;
+						} else {
+							transferRet->ret = USB_TRANSFER_ERROR;
+						}
+					}
+				}
+			}
+			free(buf);
+		}
+		libusb_free_transfer(transfer);
+	}
+	return completed != 0;
+}
+
+void initUSBHandle(usb_handle_t *handle, uint16_t vid, uint16_t pid) {
+	handle->vid = vid;
+	handle->pid = pid;
+	handle->device = NULL;
+	handle->context = NULL;
+}
+
+int sendUSBBulkUpload(usb_handle_t *handle, void *buffer, size_t length) {
+	int transferred;
+	int interfaceRet = libusb_claim_interface(handle->device, 0);
+	if (interfaceRet != LIBUSB_SUCCESS) {
+		LOG(LOG_ERROR, "Failed to claim interface");
+		return -1;
+	}
+	int ret = libusb_bulk_transfer(handle->device, 0x2, buffer, length, &transferred, 100);
+	if (ret == LIBUSB_ERROR_PIPE) {
+		LOG(LOG_ERROR, "USB pipe error sending bulk upload");
+	} else if (ret == LIBUSB_ERROR_TIMEOUT) {
+		LOG(LOG_ERROR, "USB timeout sending bulk upload");
+	}
+	return transferred;
+}
+
+#else
+
+
+char *getDeviceSerialNumberBuiltIn(usb_handle_t *handle)
+{
+    CFTypeRef serialNumber = IORegistryEntryCreateCFProperty(handle->service, CFSTR("USB Serial Number"), kCFAllocatorDefault, 0);
+    if (serialNumber == NULL)
+    {
+        return NULL;
+    }
+    if (CFGetTypeID(serialNumber) != CFStringGetTypeID())
+    {
+        LOG(LOG_ERROR, "Bad USB serial number, not a string!");
+        return NULL;
+    }
+    CFStringRef serialNumberString = (CFStringRef)serialNumber;
+    char *serialNumberCString = (char *)CFStringGetCStringPtr(serialNumberString, kCFStringEncodingUTF8);
+    return serialNumberCString;
 }
 
 void cfDictionarySetInt16(CFMutableDictionaryRef dict, const void *key, uint16_t val) {
@@ -131,7 +269,7 @@ bool openUSBInterface(uint8_t usb_interface, uint8_t usb_alt_interface, usb_hand
 	return ret;
 }
 
-bool waitUSBHandle(usb_handle_t *handle, uint8_t usb_interface, uint8_t usb_alt_interface, usb_check_cb_t usb_check_cb, void *arg) {
+bool waitUSBHandle(usb_handle_t *handle, usb_check_cb_t usb_check_cb, void *arg) {
 	CFMutableDictionaryRef matching_dict;
 	io_iterator_t iter;
 	io_service_t serv;
@@ -236,11 +374,15 @@ int sendUSBBulkUpload(usb_handle_t *handle, void *buffer, size_t length) {
 	return (*handle->interface)->WritePipe((handle->interface), 2, buffer, length);
 }
 
+
 void initUSBHandle(usb_handle_t *handle, uint16_t vid, uint16_t pid) {
 	handle->vid = vid;
 	handle->pid = pid;
 	handle->device = NULL;
 }
+
+#endif
+
 
 char *getCPIDFromSerialNumber(char *serial) {
 	if (strstr(serial, "CPID:") != NULL) {

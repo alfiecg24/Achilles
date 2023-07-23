@@ -3,9 +3,13 @@
 
 #include <AlfieLoader.h>
 #include <utils/log.h>
+#ifdef ALFIELOADER_LIBUSB
+#include <libusb-1.0/libusb.h>
+#else
 #include <IOKit/IOKitLib.h>
 #include <IOKit/usb/IOUSBLib.h>
 #include <IOKit/IOCFPlugIn.h>
+#endif
 #include <CoreFoundation/CoreFoundation.h>
 #include <CommonCrypto/CommonCrypto.h>
 
@@ -13,11 +17,16 @@
 
 typedef struct {
 	uint16_t vid, pid;
+#ifdef ALFIELOADER_LIBUSB
+	struct libusb_device_handle *device;
+	int usb_interface;
+	struct libusb_context *context;
+#else
 	io_service_t service;
 	IOUSBDeviceInterface320 **device;
 	CFRunLoopSourceRef async_event_source;
 	IOUSBInterfaceInterface300 **interface;
-	pthread_t thread;
+#endif
 } usb_handle_t;
 
 enum usb_transfer {
@@ -66,7 +75,7 @@ typedef enum transfer_recipient transfer_recipient;
 typedef bool (*usb_check_cb_t)(usb_handle_t *, bool *);
 
 // ******************************************************
-// Function: getDeviceSerialNumberIOKit()
+// Function: getDeviceSerialNumberBuiltIn()
 //
 // Purpose: Get the serial number of the device from the USB handle using IOKit
 //
@@ -76,7 +85,7 @@ typedef bool (*usb_check_cb_t)(usb_handle_t *, bool *);
 // Returns:
 //      char *: the serial number of the device
 // ******************************************************
-char *getDeviceSerialNumberIOKit(usb_handle_t *handle);
+char *getDeviceSerialNumberBuiltIn(usb_handle_t *handle);
 
 // ******************************************************
 // Function: getDeviceSerialNumberTransfer()
@@ -214,7 +223,7 @@ void initUSBHandle(usb_handle_t *handle, uint16_t vid, uint16_t pid);
 // Returns:
 //      bool: true if the handle is available, false otherwise
 // ******************************************************
-bool waitUSBHandle(usb_handle_t *handle, uint8_t usb_interface, uint8_t usb_alt_interface, usb_check_cb_t usb_check_cb, void *arg);
+bool waitUSBHandle(usb_handle_t *handle, usb_check_cb_t usb_check_cb, void *arg);
 
 // ******************************************************
 // Function: resetUSBHandle()
