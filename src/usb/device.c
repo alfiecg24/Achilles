@@ -22,7 +22,7 @@ int findDevice(device_t *device, bool waiting)
     kern_return_t kr = IOServiceGetMatchingServices(kIOMainPortDefault, IOServiceMatching("IOUSBDevice"), &iterator);
     if (kr != KERN_SUCCESS)
     {
-        LOG(LOG_FATAL, "ERROR: Failed to get IOUSBDevice services!");
+        LOG(LOG_ERROR, "Failed to get IOUSBDevice services!");
         return 0;
     }
     // iterate over all devices
@@ -33,22 +33,22 @@ int findDevice(device_t *device, bool waiting)
         CFTypeRef productID = IORegistryEntryCreateCFProperty(service, CFSTR("idProduct"), kCFAllocatorDefault, 0);
         if (vendorID == NULL)
         {
-            LOG(LOG_FATAL, "ERROR: Failed to get USB vendor ID!");
+            LOG(LOG_ERROR, "Failed to get USB vendor ID!");
             return -1;
         }
         if (productID == NULL)
         {
-            LOG(LOG_FATAL, "ERROR: Failed to get USB product ID!");
+            LOG(LOG_ERROR, "Failed to get USB product ID!");
             return -1;
         }
         if (CFGetTypeID(vendorID) != CFNumberGetTypeID())
         {
-            LOG(LOG_FATAL, "ERROR: Bad USB vendor ID, not a number!");
+            LOG(LOG_ERROR, "Bad USB vendor ID, not a number!");
             return -1;
         }
         if (CFGetTypeID(productID) != CFNumberGetTypeID())
         {
-            LOG(LOG_FATAL, "ERROR: Bad USB product ID, not a number!");
+            LOG(LOG_ERROR, "Bad USB product ID, not a number!");
             return -1;
         }
         int vendorIDInt = 0;
@@ -60,7 +60,7 @@ int findDevice(device_t *device, bool waiting)
         handle.service = service;
         if (service == 0)
         {
-            LOG(LOG_FATAL, "ERROR: Failed to get IOUSBDevice service!");
+            LOG(LOG_ERROR, "Failed to get IOUSBDevice service!");
             return -1;
         }
 

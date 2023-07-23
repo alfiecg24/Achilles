@@ -2,7 +2,7 @@
 
 bool isInPongoOS(char *serial) {
     if (serial == NULL) {
-        LOG(LOG_ERROR, "ERROR: failed to get device serial number");
+        LOG(LOG_ERROR, "Failed to get device serial number");
         return false;
     }
     if (strstr(serial, "SRTG:[PongoOS") != NULL) {
@@ -18,7 +18,7 @@ void awaitPongoOS(usb_handle_t *handle) {
         clock_gettime(CLOCK_MONOTONIC, &end);
         double timeTaken = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
         if (timeTaken > 10) {
-            LOG(LOG_ERROR, "ERROR: timed out waiting for PongoOS to boot");
+            LOG(LOG_ERROR, "Timed out waiting for PongoOS to boot");
             return;
         }
         sleep_ms(100);
@@ -43,7 +43,7 @@ bool preparePongoOS(void **pongoBuf, size_t *size)
     shellcodeFile = fopen("src/boot/payloads/checkra1n/shellcode.bin", "rb");
     if (shellcodeFile == NULL)
     {
-        LOG(LOG_ERROR, "ERROR: failed to open shellcode file");
+        LOG(LOG_ERROR, "Failed to open shellcode file");
         return false;
     }
     fseek(shellcodeFile, 0, SEEK_END);
@@ -70,14 +70,14 @@ bool preparePongoOS(void **pongoBuf, size_t *size)
     pongoFile = fopen(pongoPath, "rb");
     if (pongoFile == NULL)
     {
-        LOG(LOG_ERROR, "ERROR: failed to open PongoOS file (%s)", pongoPath);
+        LOG(LOG_ERROR, "Failed to open PongoOS file (%s)", pongoPath);
         return false;
     }
     fseek(pongoFile, 0, SEEK_END);
     pongoSize = ftell(pongoFile);
     rewind(pongoFile);
     if (pongoSize >= 0x7fe00) {
-        LOG(LOG_ERROR, "ERROR: PongoOS is too large, must be less than 0x7fe00 bytes but is 0x%X bytes", pongoSize);
+        LOG(LOG_ERROR, "PongoOS is too large, must be less than 0x7fe00 bytes but is 0x%X bytes", pongoSize);
         return false;
     }
     pongo = malloc(pongoSize);
@@ -89,7 +89,7 @@ bool preparePongoOS(void **pongoBuf, size_t *size)
     LOG(LOG_DEBUG, "Compressing PongoOS");
     pongoSize = LZ4_compress_HC(pongo, pongoCompressed, pongoSize, pongoSize, LZ4HC_CLEVEL_MAX);
     if (pongoSize == 0) {
-        LOG(LOG_ERROR, "ERROR: failed to compress PongoOS");
+        LOG(LOG_ERROR, "Failed to compress PongoOS");
         return false;
     }
 
@@ -121,7 +121,7 @@ bool bootPongoOS(device_t *device)
     transfer_ret_t ret;
     if (!preparePongoOS(&PongoOS, &pongoSize)) { return false; }
     if (PongoOS == NULL) {
-        LOG(LOG_ERROR, "ERROR: failed to get PongoOS");
+        LOG(LOG_ERROR, "Failed to get PongoOS");
         return false;
     }
 

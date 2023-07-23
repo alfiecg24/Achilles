@@ -26,11 +26,6 @@ int AlfieLoaderLog(log_level_t loglevel, bool newline, const char *fname, int li
 	arg_t *debugArg = getArgumentByName("Debug");
 	switch (loglevel)
 	{
-	case LOG_FATAL:
-		snprintf(type, 0x10, "%s", "Fatal");
-		snprintf(colour, 0x10, "%s", RED);
-		snprintf(colour_bold, 0x10, "%s", BRED);
-		break;
 	case LOG_ERROR:
 		snprintf(type, 0x10, "%s", "Error");
 		snprintf(colour, 0x10, "%s", RED);

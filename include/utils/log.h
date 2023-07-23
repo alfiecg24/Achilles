@@ -11,7 +11,6 @@
 
 typedef enum
 {
-	LOG_FATAL = 0,
 	LOG_ERROR = 1,
 	LOG_WARNING = 2,
 	LOG_INFO = 3,

@@ -9,7 +9,7 @@ char *getDeviceSerialNumberIOKit(usb_handle_t *handle)
     }
     if (CFGetTypeID(serialNumber) != CFStringGetTypeID())
     {
-        LOG(LOG_FATAL, "ERROR: Bad USB serial number, not a string!");
+        LOG(LOG_ERROR, "Bad USB serial number, not a string!");
         return NULL;
     }
     CFStringRef serialNumberString = (CFStringRef)serialNumber;
@@ -470,7 +470,7 @@ bool checkm8CheckUSBDevice(usb_handle_t *handle, bool *pwned) {
 		} else if (strstr(usbSerialNumber, "YOLO:") != NULL) {
 
 		} else {
-            LOG(LOG_FATAL, "ERROR: AlfieLoader does not support CPID 0x%X at this time", cpid);
+            LOG(LOG_ERROR, "AlfieLoader does not support CPID 0x%X at this time", cpid);
             return false;
         }
 		

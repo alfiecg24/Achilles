@@ -246,13 +246,13 @@ int main(int argc, char *argv[])
     LOG(LOG_DEBUG, "Running on %s %s, %s", buffer.sysname, buffer.machine, usbBackend);
     if (strcmp(buffer.sysname, "Darwin") != 0)
     {
-        LOG(LOG_FATAL, "ERROR: This tool is only supported on macOS");
+        LOG(LOG_ERROR, "This tool is only supported on macOS");
         return -1;
     }
 
     // Make sure to remove when no longer needed
     if (!getArgumentByName("Exploit")->set && !getArgumentByName("PongoOS")->set && !getArgumentByName("Jailbreak")->set) {
-        LOG(LOG_FATAL, "Exiting as neither -e, -p nor -j were not passed, nothing else to do");
+        LOG(LOG_ERROR, "Exiting as neither -e, -p nor -j were not passed, nothing else to do");
         return 0;
     }
     
@@ -264,7 +264,7 @@ int main(int argc, char *argv[])
         i++;
         if (i == 10)
         {
-            LOG(LOG_FATAL, "ERROR: No iOS device found after 10 seconds - please connect a device.");
+            LOG(LOG_ERROR, "No iOS device found after 10 seconds - please connect a device.");
             return -1;
         }
     }
@@ -272,7 +272,7 @@ int main(int argc, char *argv[])
     if (isSerialNumberPwned(serial) && !isInDownloadMode(serial))
     {
         LOG(LOG_DEBUG, "Serial number: %s", getDeviceSerialNumberIOKit(&device.handle));
-        LOG(LOG_FATAL, "ERROR: This device is already pwned.");
+        LOG(LOG_ERROR, "This device is already pwned.");
         return -1;
     }
 
