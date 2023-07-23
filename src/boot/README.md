@@ -5,4 +5,4 @@ This directory contains the code used after the BootROM has been exploited, whic
 * Sending the data to the device in download mode
 * Ensuring that the environment is booted correctly
 
-ROM patches are written and documented in `rom/`. iBoot patches are written and documented in `iboot/`. Preparation for the AlfieLoader environment is done in `boot.S` and `loaderMain.c`.
+The code in [pongo/](src/boot/pongo) is responsible for preparing and compressing the PongoOS binary, adding shellcode, sending to the device and booting it. `pongo_helper.c` also contains the `jailbreakBoot()` function, which is responsible for booting the device and jailbreaking with palera1n.
