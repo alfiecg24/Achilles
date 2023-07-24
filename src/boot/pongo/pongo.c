@@ -14,7 +14,7 @@ bool isInPongoOS(char *serial) {
 void awaitPongoOS(usb_handle_t *handle) {
     struct timespec start, end;
     clock_gettime(CLOCK_MONOTONIC, &start);
-    while (!isInPongoOS(getDeviceSerialNumberWithTransfer(handle))) {
+    while (!isInPongoOS(getDeviceSerialNumber(handle))) {
         clock_gettime(CLOCK_MONOTONIC, &end);
         double timeTaken = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
         if (timeTaken > 10) {

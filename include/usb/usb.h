@@ -75,19 +75,6 @@ typedef enum transfer_recipient transfer_recipient;
 typedef bool (*usb_check_cb_t)(usb_handle_t *, bool *);
 
 // ******************************************************
-// Function: getDeviceSerialNumberBuiltIn()
-//
-// Purpose: Get the serial number of the device from the USB handle using IOKit
-//
-// Parameters:
-//      usb_handle_t *handle: the USB handle
-//
-// Returns:
-//      char *: the serial number of the device
-// ******************************************************
-char *getDeviceSerialNumberBuiltIn(usb_handle_t *handle);
-
-// ******************************************************
 // Function: getDeviceSerialNumberTransfer()
 //
 // Purpose: Get the serial number of the device directly from the USB handle using USB control requests
@@ -98,7 +85,7 @@ char *getDeviceSerialNumberBuiltIn(usb_handle_t *handle);
 // Returns:
 //      char *: the serial number of the device
 // ******************************************************
-char *getDeviceSerialNumberWithTransfer(usb_handle_t *handle);
+char *getDeviceSerialNumber(usb_handle_t *handle);
 
 // ******************************************************
 // Function: checkm8CheckUSBDevice()

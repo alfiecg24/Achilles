@@ -66,7 +66,7 @@ int findDevice(device_t *device, bool waiting) {
             
             if (vendorID == 0x5ac && productID == 0x1227)
             {
-                *device = initDevice(getDeviceSerialNumberWithTransfer(&handle), MODE_DFU, vendorID, productID);
+                *device = initDevice(getDeviceSerialNumber(&handle), MODE_DFU, vendorID, productID);
                 if (!waiting) {
                     if (isInDownloadMode(device->serialNumber)) {
                         LOG(LOG_DEBUG, "Initialised device in YoloDFU/download mode"); 
@@ -78,19 +78,19 @@ int findDevice(device_t *device, bool waiting) {
             }
             if (vendorID == 0x5ac && productID == 0x1281)
             {
-                *device = initDevice(getDeviceSerialNumberWithTransfer(&handle), MODE_RECOVERY, vendorID, productID);
+                *device = initDevice(getDeviceSerialNumber(&handle), MODE_RECOVERY, vendorID, productID);
                 if (!waiting) { LOG(LOG_DEBUG, "Initialised device in recovery mode"); }
                 return 0;
             }
             if (vendorID == 0x5ac && (productID == 0x12ab || productID == 0x12a8))
             {
-                *device = initDevice(getDeviceSerialNumberWithTransfer(&handle), MODE_NORMAL, vendorID, productID);
+                *device = initDevice(getDeviceSerialNumber(&handle), MODE_NORMAL, vendorID, productID);
                 if (!waiting) { LOG(LOG_DEBUG, "Initialised device in normal mode"); }
                 return 0;
             }
             if (vendorID == 0x5ac && productID == 0x4141)
             {
-                *device = initDevice(getDeviceSerialNumberWithTransfer(&handle), MODE_PONGO, vendorID, productID);
+                *device = initDevice(getDeviceSerialNumber(&handle), MODE_PONGO, vendorID, productID);
                 if (!waiting) { LOG(LOG_DEBUG, "Initialised Pongo USB device"); }
                 return 0;   
             }
@@ -158,7 +158,9 @@ int findDevice(device_t *device, bool waiting)
 
         if (vendorIDInt == 0x5ac && productIDInt == 0x1227)
         {
-            *device = initDevice(service, getDeviceSerialNumberBuiltIn(&handle), MODE_DFU, vendorIDInt, productIDInt);
+            initUSBHandle(&handle, 0x5ac, 0x1227);
+            waitUSBHandle(&handle, NULL, NULL);
+            *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_DFU, vendorIDInt, productIDInt);
             if (!waiting) {
                 if (isInDownloadMode(device->serialNumber)) {
                     LOG(LOG_DEBUG, "Initialised device in YoloDFU/download mode"); 
@@ -166,24 +168,34 @@ int findDevice(device_t *device, bool waiting)
                     LOG(LOG_DEBUG, "Initialised device in DFU mode"); 
                 }
             }
+            closeUSBHandle(&handle);
             return 0;
         }
         if (vendorIDInt == 0x5ac && productIDInt == 0x1281)
         {
-            *device = initDevice(service, getDeviceSerialNumberBuiltIn(&handle), MODE_RECOVERY, vendorIDInt, productIDInt);
+            initUSBHandle(&handle, 0x5ac, 0x1281);
+            waitUSBHandle(&handle, NULL, NULL);
+            *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_RECOVERY, vendorIDInt, productIDInt);
             if (!waiting) { LOG(LOG_DEBUG, "Initialised device in recovery mode"); }
+            closeUSBHandle(&handle);
             return 0;
         }
         if (vendorIDInt == 0x5ac && (productIDInt == 0x12ab || productIDInt == 0x12a8))
         {
-            *device = initDevice(service, getDeviceSerialNumberBuiltIn(&handle), MODE_NORMAL, vendorIDInt, productIDInt);
+            initUSBHandle(&handle, 0x5ac, 0x12a8);
+            waitUSBHandle(&handle, NULL, NULL);
+            *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_NORMAL, vendorIDInt, productIDInt);
             if (!waiting) { LOG(LOG_DEBUG, "Initialised device in normal mode"); }
+            closeUSBHandle(&handle);
             return 0;
         }
         if (vendorIDInt == 0x5ac && productIDInt == 0x4141)
         {
-            *device = initDevice(service, getDeviceSerialNumberBuiltIn(&handle), MODE_PONGO, vendorIDInt, productIDInt);
+            initUSBHandle(&handle, 0x5ac, 0x4141);
+            waitUSBHandle(&handle, NULL, NULL);
+            *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_PONGO, vendorIDInt, productIDInt);
             if (!waiting) { LOG(LOG_DEBUG, "Initialised Pongo USB device"); }
+            closeUSBHandle(&handle);
             return 0;   
         }
     }

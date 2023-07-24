@@ -1,6 +1,6 @@
 #include <usb/usb.h>
 
-char *getDeviceSerialNumberWithTransfer(usb_handle_t *handle) {
+char *getDeviceSerialNumber(usb_handle_t *handle) {
 	transfer_ret_t transfer_ret;
 	uint8_t buf[UINT8_MAX];
 	char *str = NULL;
@@ -25,24 +25,6 @@ void sleep_ms(unsigned ms) {
 }
 
 #ifdef ALFIELOADER_LIBUSB
-
-char *getDeviceSerialNumberBuiltIn(usb_handle_t *handle) {
-    struct libusb_device_descriptor desc;
-	struct libusb_device *dev = libusb_get_device(handle->device);
-	int ret = libusb_get_device_descriptor(dev, &desc);
-	if (ret < 0) {
-		LOG(LOG_ERROR, "Failed to get USB device descriptor!");
-		return NULL;
-	}
-	if (handle != NULL) {
-		char *serialNumber = malloc(256);
-		libusb_get_string_descriptor_ascii(handle->device, desc.iSerialNumber, (unsigned char *)serialNumber, 256);
-		if (serialNumber != NULL) {
-			return serialNumber;
-		}
-	}
-	return NULL;
-}
 
 void closeUSBHandle(usb_handle_t *handle) {
 	libusb_release_interface(handle->device, 0);
@@ -157,24 +139,6 @@ int sendUSBBulkUpload(usb_handle_t *handle, void *buffer, size_t length) {
 }
 
 #else
-
-
-char *getDeviceSerialNumberBuiltIn(usb_handle_t *handle)
-{
-    CFTypeRef serialNumber = IORegistryEntryCreateCFProperty(handle->service, CFSTR("USB Serial Number"), kCFAllocatorDefault, 0);
-    if (serialNumber == NULL)
-    {
-        return NULL;
-    }
-    if (CFGetTypeID(serialNumber) != CFStringGetTypeID())
-    {
-        LOG(LOG_ERROR, "Bad USB serial number, not a string!");
-        return NULL;
-    }
-    CFStringRef serialNumberString = (CFStringRef)serialNumber;
-    char *serialNumberCString = (char *)CFStringGetCStringPtr(serialNumberString, kCFStringEncodingUTF8);
-    return serialNumberCString;
-}
 
 void cfDictionarySetInt16(CFMutableDictionaryRef dict, const void *key, uint16_t val) {
 	CFNumberRef cf_val = CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt16Type, &val);
@@ -404,7 +368,7 @@ size_t config_hole, ttbr0_vrom_off, ttbr0_sram_off, config_large_leak, config_ov
 uint64_t tlbi, nop_gadget, ret_gadget, patch_addr, ttbr0_addr, func_gadget, write_ttbr0, memcpy_addr, aes_crypto_cmd, boot_tramp_end, gUSBSerialNumber, dfu_handle_request, usb_core_do_transfer, dfu_handle_bus_reset, insecure_memory_base, handle_interface_request, usb_create_string_descriptor, usb_serial_number_string_descriptor;
 
 bool checkm8CheckUSBDevice(usb_handle_t *handle, bool *pwned) {
-	char *usbSerialNumber = getDeviceSerialNumberWithTransfer(handle);
+	char *usbSerialNumber = getDeviceSerialNumber(handle);
 	bool ret = false;
 
 	if(usbSerialNumber != NULL) {
