@@ -41,7 +41,6 @@ char *getDeviceSerialNumberBuiltIn(usb_handle_t *handle) {
 			return serialNumber;
 		}
 	}
-	// TODO
 	return NULL;
 }
 
