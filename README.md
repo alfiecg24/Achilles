@@ -59,9 +59,10 @@ SoCs that still need testing are as follows:
 * A8X (iPad Air 2) - regular, PongoOS
 * A7 (iPhone 5S, iPad Air, iPad Mini 2/3) - regular
 
-If you want to test with your device, please do so and them submit an issue or pull request with your results. Make sure to include information about your host machine (OS version, model), device (model, SoC) and iOS version (only necessary if having issues with PongoOS).
+If you want to test with your device, please do so and then submit an issue or pull request with your results. Make sure to include information about your host machine (OS version, model), device (model, SoC) and iOS version (only necessary if having issues with PongoOS).
 
-If anyone else has successes or failures with other devices, please let me know so I can update this list and/or fix any issues you may experience.
+If anyone else has successes or failures with other devices, please let me know so I can update this list and/or try to fix any issues you may experience.
+
 ## Disclaimer
 You may find that there are similarities in here to other projects like this - and that is true. This was just a personal project for me to learn more about the BootROM and iOS bootchain. As a result, I relied a lot on open-source solutions such as [ipwndfu](https://github.com/axi0mX/ipwndfu), [gaster](https://github.com/0x7ff/gaster) and [PongoOS](https://github.com/checkra1n/PongoOS) to help me along the way.
 
