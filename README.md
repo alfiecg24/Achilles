@@ -32,6 +32,11 @@ As part of this, I plan on creating an alternative to PongoOS. While this is a d
 
 This will grant the ability to create a jailbreak for checkm8 devices on the latest versions of iOS, which will definitely be an extremely interesting project indeed, and is something I plan to pursue. Furthermore, I am looking to take a shot at SEP exploitation with blackbird, which will allow for downgrades and dualboots on checkm8 devices, as well as bypassing the SEP mitigations seen in recent major iOS versions.
 
+For improvements in the near future, check the [to-do list](TODO.md) to see what I'm planning to work on in this project in the coming weeks.
+
+## Prerequisites
+In order to jailbreak rootless with [palera1n](https://palera.in), you will need to place the necessary files at `src/kernel/patchfinder/kpf` (the kernel patchfinder binary), `src/userland/ramdisk/ramdisk.dmg` (the ramdisk) and `src/userland/binpack/binpack.dmg` (the binpack/overlay). These are all easily accessible from the palera1n repository, but aren't included here for licensing reasons.
+
 ## Dependencies
 * [libimobiledevice](https://github.com/libimobiledevice/libimobiledevice)
 

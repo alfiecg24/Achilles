@@ -3,3 +3,6 @@
 build/
 bins/
 nocommit-*
+src/kernel/patchfinder/*
+src/userland/ramdisk/*
+src/userland/binpack/*
