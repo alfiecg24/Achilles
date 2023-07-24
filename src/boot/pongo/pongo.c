@@ -62,13 +62,8 @@ bool preparePongoOS(void **pongoBuf, size_t *size)
         pongoPath = malloc(strlen(getArgumentByName("Override Pongo")->stringVal) + 1);
         strcpy(pongoPath, getArgumentByName("Override Pongo")->stringVal);
     } else {
-        if (getArgumentByName("Jailbreak")->set) {
-            pongoPath = malloc(strlen("src/boot/payloads/palera1n/Pongo.bin") + 1);
-            strcpy(pongoPath, "src/boot/payloads/palera1n/Pongo.bin");
-        } else {
-            pongoPath = malloc(strlen("src/boot/payloads/checkra1n/Pongo.bin") + 1);
-            strcpy(pongoPath, "src/boot/payloads/checkra1n/Pongo.bin");
-        }
+        pongoPath = malloc(strlen("src/boot/payloads/checkra1n/Pongo.bin") + 1);
+        strcpy(pongoPath, "src/boot/payloads/checkra1n/Pongo.bin");
     }
     pongoFile = fopen(pongoPath, "rb");
     if (pongoFile == NULL)
