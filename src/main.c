@@ -271,12 +271,9 @@ int main(int argc, char *argv[])
             return -1;
         }
     }
-    waitUSBHandle(&device.handle, NULL, NULL);
-    char *serial = getDeviceSerialNumberWithTransfer(&device.handle);
-    closeUSBHandle(&device.handle);
-    if (isSerialNumberPwned(serial) && !isInDownloadMode(serial))
+    if (isSerialNumberPwned(device.serialNumber) && !isInDownloadMode(device.serialNumber))
     {
-        LOG(LOG_DEBUG, "Serial number: %s", serial);
+        LOG(LOG_DEBUG, "Serial number: %s", device.serialNumber);
         LOG(LOG_ERROR, "This device is already pwned.");
         return -1;
     }
