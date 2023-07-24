@@ -605,9 +605,15 @@ bool checkm8CheckUSBDevice(usb_handle_t *handle, bool *pwned) {
 			handle_interface_request = 0x10000BFFC;
 			usb_create_string_descriptor = 0x10000B1CC;
 			usb_serial_number_string_descriptor = 0x18000082A;
-		} else if (strstr(usbSerialNumber, "YOLO:") != NULL) {
 
-		} else {
+		// These two are only implemented to stop the unsupported message
+		} else if (strstr(usbSerialNumber, "YOLO:") != NULL) {
+			// YoloDFU
+		} else if (handle->vid == 0x5ac && handle->pid == 0x4141) {
+			// Pongo USB Device
+		} 
+		
+		else {
             LOG(LOG_ERROR, "AlfieLoader does not support CPID 0x%X at this time", cpid);
             return false;
         }
