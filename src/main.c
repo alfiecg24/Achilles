@@ -250,10 +250,13 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    // Make sure to remove when no longer needed
-    if (!getArgumentByName("Exploit")->set && !getArgumentByName("PongoOS")->set && !getArgumentByName("Jailbreak")->set) {
-        LOG(LOG_ERROR, "Exiting as neither -e, -p nor -j were not passed, nothing else to do");
-        return 0;
+    if (!getArgumentByName("Exploit")->set
+    && !getArgumentByName("PongoOS")->set
+    && !getArgumentByName("Jailbreak")->set) {
+        LOG(LOG_ERROR, "Exiting as neither -e, -p nor -j were not passed, defaulting to exploit only");
+        arg_t *exploitArg = getArgumentByName("Exploit");
+        exploitArg->boolVal = true;
+        exploitArg->set = true;
     }
     
     int i = 0;
