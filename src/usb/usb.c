@@ -58,6 +58,7 @@ bool waitUSBHandle(usb_handle_t *handle, usb_check_cb_t usb_check_cb, void *arg)
 	if (libusb_init(NULL) == LIBUSB_SUCCESS) {
 		for (;;) {
 			if ((handle->device = libusb_open_device_with_vid_pid(NULL, handle->vid, handle->pid)) != NULL) {
+				LOG(LOG_DEBUG, "Opened device 0x%X, 0x%X", handle->vid, handle->pid);
 				if (libusb_set_configuration(handle->device, 1) == LIBUSB_SUCCESS && (usb_check_cb == NULL || usb_check_cb(handle, arg))) {
 					return true;
 				}

@@ -144,9 +144,6 @@ bool bootPongoOS(device_t *device)
     closeUSBHandle(&device->handle);
     initUSBHandle(&device->handle, 0x05ac, 0x4141);
     LOG(LOG_INFO, "Waiting for PongoOS to boot");
-#ifdef ALFIELOADER_LIBUSB
-    LOG(LOG_INFO, "Please disconnect and reconnect your device if it boots PongoOS but is not recognised by AlfieLoader");
-#endif
     waitUSBHandle(&device->handle, NULL, NULL);
     awaitPongoOS(&device->handle);
     return true;
