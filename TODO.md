@@ -6,5 +6,4 @@
 * Improve the whole verbosity system
 * Add Linux support
 * Add Windows support with libusbk driver
-* Add jailbreak support for device already in PongoOS
 * GitHub Actions support

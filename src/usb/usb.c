@@ -609,7 +609,7 @@ bool checkm8CheckUSBDevice(usb_handle_t *handle, bool *pwned) {
 		// These two are only implemented to stop the unsupported message
 		} else if (strstr(usbSerialNumber, "YOLO:") != NULL) {
 			// YoloDFU
-		} else if (handle->vid == 0x5ac && handle->pid == 0x4141) {
+		} else if ((handle->vid == 0x5ac && handle->pid == 0x4141) || (strstr(usbSerialNumber, "SRTG:[PongoOS") != NULL)) {
 			// Pongo USB Device
 		} 
 		
