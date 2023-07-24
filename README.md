@@ -10,6 +10,8 @@ AlfieLoader is a project that aims to provide a easy way to harness the power of
 
 This project is nowhere near the maturity of the original versions of these projects, but was only created as a personal project to learn more about the BootROM and iOS bootchain. As such, I am in no way denouncing the above projects, and would in fact recommend using them over AlfieLoader at the moment, as they are much more mature and stable.
 
+AlfieLoader has support for both IOKit and libusb as a USB backend. To compile with IOKit, ensure you are on a Mac and run `make`. For libusb, run `make libusb` to produce a binary that can run on Linux and possibly Windows (though this is untested for both of these platforms).
+
 ## Why is it called AlfieLoader?
 I wanted to get started with this project as soon as possible in the beginning, and did not want to spend hours contemplating different names. I subsequently decided to name it AlfieLoader, as my name is Alfie. While it may change in the future, it will remain as is until further notice.
 
@@ -64,7 +66,7 @@ SoCs that still need testing are as follows:
 * A8X (iPad Air 2) - regular, PongoOS
 * A7 (iPhone 5S, iPad Air, iPad Mini 2/3) - regular
 
-If you want to test with your device, please do so and then submit an issue or pull request with your results. Make sure to include information about your host machine (OS version, model), device (model, SoC) and iOS version (only necessary if having issues with PongoOS).
+If you want to test with your device, please do so and then submit an issue or pull request with your results. Make sure to include information about your host machine (OS version, model, USB backend), device (model, SoC) and iOS version (only necessary if having issues with PongoOS).
 
 If anyone else has successes or failures with other devices, please let me know so I can update this list and/or try to fix any issues you may experience.
 
