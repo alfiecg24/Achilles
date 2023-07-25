@@ -5,3 +5,4 @@
 * Add Linux support
 * Add Windows support with libusbk driver
 * GitHub Actions support
+* Remove dependency on libimobiledevice

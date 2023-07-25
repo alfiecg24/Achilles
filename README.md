@@ -41,8 +41,14 @@ In order to jailbreak rootless with [palera1n](https://palera.in), you will need
 
 ## Dependencies
 * [libimobiledevice](https://github.com/libimobiledevice/libimobiledevice)
+* gobjcopy
 
-You will need to specify the version of your libimobiledevice installation in the `Makefile`, in the `FRAMEWORKS` arguments. The default version is `1.0.6`. This will hopefully be resolved in the future so that the project can be built by simply running `make`.
+The easiest ways to install these dependencies on macOS are as follows:
+`brew install libimobiledevice`
+`brew install binutils`
+`cp /path/to/homebrew/opt/binutils/bin/gobjcopy /usr/local/bin/gobjcopy`
+
+You have to copy `gobjcopy` to `/usr/local/bin` as it the binutils installation is symlinked by default (as it can cause conflicts with built-in binaries from Apple).
 
 ## Documentation
 I have made an effort to document the code as much as possible, and in all header files you will find a description of a function's purpose, parameters and return value for each function exported in the header. Hopefully this can help anyone who wants to learn more about the BootROM and iOS bootchain understand what is going on a bit better.
