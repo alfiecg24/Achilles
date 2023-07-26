@@ -51,7 +51,7 @@ int uploadFileToPongo(usb_handle_t *handle, unsigned char *data, unsigned int da
 	if (ret)
 	{
         int bulkRet = sendUSBBulkUpload(handle, data, dataLength);
-#ifdef ALFIELOADER_LIBUSB
+#ifdef ACHILLES_LIBUSB
 		if (bulkRet == dataLength)
 		{
 			LOG(LOG_DEBUG, "Uploaded 0x%X bytes to PongoOS", dataLength);

@@ -13,7 +13,7 @@ void step(int time, bool endWithNewline, char *text) {
 	}
 }
 
-int AlfieLoaderLog(log_level_t loglevel, bool newline, const char *fname, int lineno, const char *fxname, const char *__restrict format, ...)
+int AchillesLog(log_level_t loglevel, bool newline, const char *fname, int lineno, const char *fxname, const char *__restrict format, ...)
 {
 	int ret = 0;
 	pthread_mutex_t log_mutex;

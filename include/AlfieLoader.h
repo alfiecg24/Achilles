@@ -1,5 +1,5 @@
-#ifndef ALFIELOADER_H
-#define ALFIELOADER_H
+#ifndef ACHILLES_H
+#define ACHILLES_H
 
 #include <stdio.h>
 #include <unistd.h>
@@ -7,13 +7,13 @@
 #include <stdbool.h>
 #include <sys/utsname.h>
 
-#define NAME "AlfieLoader"
+#define NAME "Achilles"
 #define VERSION "0.1.0"
 #define CREDITS "Alfie"
 #define RELEASE_TYPE "Development"
 
-#define LOG(logLevel, ...) AlfieLoaderLog(logLevel, true, __FILE__, __LINE__, __func__, __VA_ARGS__)
-#define LOG_NO_NEWLINE(logLevel, ...) AlfieLoaderLog(logLevel, false, __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define LOG(logLevel, ...) AchillesLog(logLevel, true, __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define LOG_NO_NEWLINE(logLevel, ...) AchillesLog(logLevel, false, __FILE__, __LINE__, __func__, __VA_ARGS__)
 
 #define MAX_ARG_LEN 0x100
 
@@ -64,4 +64,4 @@ extern uint64_t tlbi, nop_gadget, ret_gadget, patch_addr, ttbr0_addr, func_gadge
 // ******************************************************
 arg_t *getArgumentByName(char *name);
 
-#endif // ALFIELOADER_H
+#endif // ACHILLES_H

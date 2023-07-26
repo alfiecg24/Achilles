@@ -1,9 +1,9 @@
 #ifndef USB_UTILS_H
 #define USB_UTILS_H
 
-#include <AlfieLoader.h>
+#include <Achilles.h>
 #include <utils/log.h>
-#ifdef ALFIELOADER_LIBUSB
+#ifdef ACHILLES_LIBUSB
 #include <libusb-1.0/libusb.h>
 #else
 #include <IOKit/IOKitLib.h>
@@ -17,7 +17,7 @@
 
 typedef struct {
 	uint16_t vid, pid;
-#ifdef ALFIELOADER_LIBUSB
+#ifdef ACHILLES_LIBUSB
 	struct libusb_device_handle *device;
 	int usb_interface;
 	struct libusb_context *context;

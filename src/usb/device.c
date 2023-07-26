@@ -1,6 +1,6 @@
 #include <usb/device.h>
 
-#ifdef ALFIELOADER_LIBUSB
+#ifdef ACHILLES_LIBUSB
 device_t initDevice(char *serialNumber, DeviceMode mode, int vid, int pid)
 {
     device_t dev;
@@ -30,7 +30,7 @@ device_t initDevice(io_service_t device, char *serialNumber, DeviceMode mode, in
 }
 #endif
 
-#ifdef ALFIELOADER_LIBUSB
+#ifdef ACHILLES_LIBUSB
 
 
 

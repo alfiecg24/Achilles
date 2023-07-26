@@ -1,4 +1,4 @@
-#include <AlfieLoader.h>
+#include <Achilles.h>
 #include <string.h>
 #include <exploit/exploit.h>
 
@@ -235,7 +235,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-#ifdef ALFIELOADER_LIBUSB
+#ifdef ACHILLES_LIBUSB
     char *usbBackend = "libusb";
 #else
     char *usbBackend = "IOKit";

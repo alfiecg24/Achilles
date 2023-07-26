@@ -1,7 +1,7 @@
 #ifndef LOG_H
 #define LOG_H
 
-#include <AlfieLoader.h>
+#include <Achilles.h>
 #include <time.h>
 #include <stdarg.h>
 #include <stddef.h>
@@ -33,7 +33,7 @@ extern arg_t args[];
 void step(int time, bool endWithNewline, char *text);
 
 // ******************************************************
-// Function: AlfieLoaderLog()
+// Function: AchillesLog()
 //
 // Purpose: Log a message to stdout formatted with ANSI colour codes
 //
@@ -48,6 +48,6 @@ void step(int time, bool endWithNewline, char *text);
 //
 // mostly taken from https://github.com/palera1n/palera1n-c - thanks!
 // ******************************************************
-int AlfieLoaderLog(log_level_t loglevel, bool newline, const char *fname, int lineno, const char *fxname, const char *__restrict format, ...);
+int AchillesLog(log_level_t loglevel, bool newline, const char *fname, int lineno, const char *fxname, const char *__restrict format, ...);
 
 #endif // LOG_H

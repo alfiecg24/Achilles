@@ -24,7 +24,7 @@ void sleep_ms(unsigned ms) {
 	nanosleep(&ts, NULL);
 }
 
-#ifdef ALFIELOADER_LIBUSB
+#ifdef ACHILLES_LIBUSB
 
 void closeUSBHandle(usb_handle_t *handle) {
 	libusb_release_interface(handle->device, 0);
@@ -579,7 +579,7 @@ bool checkm8CheckUSBDevice(usb_handle_t *handle, bool *pwned) {
 		} 
 		
 		else {
-            LOG(LOG_ERROR, "AlfieLoader does not support CPID 0x%X at this time", cpid);
+            LOG(LOG_ERROR, "Achilles does not support CPID 0x%X at this time", cpid);
             return false;
         }
 		
