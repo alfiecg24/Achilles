@@ -243,6 +243,7 @@ int main(int argc, char *argv[])
 
     struct utsname buffer;
     uname(&buffer);
+    LOG(LOG_DEBUG, "%s v%s, %s build", NAME, VERSION, RELEASE_TYPE);
     LOG(LOG_DEBUG, "Running on %s %s, %s", buffer.sysname, buffer.machine, usbBackend);
     if (strcmp(buffer.sysname, "Darwin") != 0)
     {

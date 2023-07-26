@@ -35,14 +35,17 @@ For improvements planned for this project, check the [to-do list](TODO.md) to se
 ## Known issues
 Entering recovery mode programmatically can be rather hit or miss, so if you device continuously fails to enter recovery mode, enter it manually and then run Achilles. This is a known issue and I am working on a fix for it, however the error seems to be related to libimobiledevice, so may be difficult to debug.
 
+There also seems to be an issue with the libusb build of Achilles, when booting PongoOS, where a segmentation fault will occasionally occur when the USB handle is opened again after the device enters download mode. I have not figured out how to deterministically trigger this issue, and as such cannot fix it at this time. As a work-around, use the IOKit build or just simple place the device back into DFU from download mode and run the program again.
+
 ## Dependencies
 * [libimobiledevice](https://github.com/libimobiledevice/libimobiledevice)
 * gobjcopy
 
 The easiest ways to install these dependencies on macOS are as follows:
-`brew install libimobiledevice`
-`brew install binutils`
-`ln -s /path/to/homebrew/opt/binutils/bin/gobjcopy /usr/local/bin/gobjcopy`
+* `brew install libimobiledevice`
+
+* `brew install binutils`
+* `ln -s /path/to/homebrew/opt/binutils/bin/gobjcopy /usr/local/bin/gobjcopy`
 
 You have to symlink `gobjcopy` to `/usr/local/bin` as the binutils installation is not symlinked by default (as it can cause conflicts with built-in binaries from Apple).
 
