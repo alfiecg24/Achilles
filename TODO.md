@@ -6,3 +6,4 @@
 * Add Windows support with libusbk driver
 * GitHub Actions support
 * Remove dependency on libimobiledevice
+* Use custom ramdisk and binpack for jailbreak
