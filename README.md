@@ -46,7 +46,7 @@ In order to jailbreak rootless with [palera1n](https://palera.in), you will need
 The easiest ways to install these dependencies on macOS are as follows:
 `brew install libimobiledevice`
 `brew install binutils`
-`cp /path/to/homebrew/opt/binutils/bin/gobjcopy /usr/local/bin/gobjcopy`
+`ln -s /path/to/homebrew/opt/binutils/bin/gobjcopy /usr/local/bin/gobjcopy`
 
 You have to copy `gobjcopy` to `/usr/local/bin` as it the binutils installation is symlinked by default (as it can cause conflicts with built-in binaries from Apple).
 
