@@ -8,7 +8,7 @@ AlfieLoader is a project that aims to provide a easy way to harness the power of
 * Booting PongoOS as a drop-in replacement for checkra1n 1337
 * Jailbreaking rootless with palera1n
 
-This project is nowhere near the maturity of the original versions of these projects, but was only created as a personal project to learn more about the BootROM and iOS bootchain. As such, I am in no way denouncing the above projects, and would in fact recommend using them over AlfieLoader at the moment, as they are much more mature and stable.
+This project is nowhere near the maturity of the original versions of these projects, but was only created as a personal project to learn more about the BootROM and iOS bootchain. As such, I am in no way denouncing the above projects, and would in fact recommend using them over AlfieLoader at the moment, as they are much more mature and stable. The project is still much in development, and so I do not recommend using it unless you know what you are doing.
 
 AlfieLoader has support for both IOKit and libusb as a USB backend. To compile with IOKit, ensure you are on a Mac and run `make`. For libusb, run `make libusb`. At the moment, macOS is the only supported operating system, but I plan to add support for Linux and Windows in the future - however, I do not have a Windows or Linux machine to test on, so this may take a while. If you want to help with this, please submit a pull request.
 
