@@ -78,7 +78,7 @@ int uploadFileToPongo(usb_handle_t *handle, unsigned char *data, unsigned int da
 }
 
 void jailbreakBoot(usb_handle_t *handle) {
-	LOG(LOG_INFO, "Setting up jailbroken iOS");
+	LOG(LOG_VERBOSE, "Setting up jailbroken iOS");
 
 	// Lock fuses
 	issuePongoCommand(handle, "fuse lock");
@@ -89,7 +89,7 @@ void jailbreakBoot(usb_handle_t *handle) {
 	sleep(1);
 
 	// Open kernel patchfinder and upload it to PongoOS
-	LOG(LOG_INFO, "Sending kernel patchfinder");
+	LOG(LOG_VERBOSE, "Sending kernel patchfinder");
 	FILE *kpf = fopen("src/kernel/patchfinder/kpf", "rb");
 	if (kpf == NULL) {
 		LOG(LOG_ERROR, "Failed to open kernel patchfinder file - please make sure src/kernel/patchfinder/kpf exists");
@@ -112,12 +112,12 @@ void jailbreakBoot(usb_handle_t *handle) {
 	issuePongoCommand(handle, "modload");
 	sleep(2);
 	
-	LOG(LOG_INFO, "Sending ramdisk and overlay");
+	LOG(LOG_VERBOSE, "Sending ramdisk and overlay");
 
 	// Open ramdisk.dmg and upload it to PongoOS
-	FILE *ramdisk = fopen("src/userland/ramdisk/ramdisk.dmg", "rb");
+	FILE *ramdisk = fopen("src/userland/jbinit/ramdisk.dmg", "rb");
 	if (ramdisk == NULL) {
-		LOG(LOG_ERROR, "Failed to open ramdisk file - please make sure src/userland/ramdisk/ramdisk.dmg exists");
+		LOG(LOG_ERROR, "Failed to open ramdisk file - please make sure src/userland/jbinit/ramdisk.dmg exists");
 		return;
 	}
 	fseek(ramdisk, 0, SEEK_END);
@@ -137,9 +137,9 @@ void jailbreakBoot(usb_handle_t *handle) {
 	issuePongoCommand(handle, "ramdisk");
 
 	// Open binpack.dmg and upload it to PongoOS
-	FILE *overlay = fopen("src/userland/binpack/binpack.dmg", "rb");
+	FILE *overlay = fopen("src/userland/jbinit/binpack.dmg", "rb");
 	if (overlay == NULL) {
-		LOG(LOG_ERROR, "Failed to open binpack file - please make sure src/userland/binpack/binpack.dmg exists");
+		LOG(LOG_ERROR, "Failed to open binpack file - please make sure src/userland/jbinit/binpack.dmg exists");
 		return;
 	}
 	fseek(overlay, 0, SEEK_END);
@@ -204,7 +204,7 @@ void jailbreakBoot(usb_handle_t *handle) {
 	}
 
 
-	LOG(LOG_INFO, "Booting iOS");
+	LOG(LOG_INFO, "Booting jailbroken iOS");
 
 	// Patch and boot XNU
 	issuePongoCommand(handle, "bootx");

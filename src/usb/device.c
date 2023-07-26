@@ -158,7 +158,7 @@ int findDevice(device_t *device, bool waiting)
 
         if (vendorIDInt == 0x5ac && productIDInt == 0x1227)
         {
-            initUSBHandle(&handle, 0x5ac, 0x1227);
+            initUSBHandle(&handle, vendorIDInt, productIDInt);
             waitUSBHandle(&handle, NULL, NULL);
             *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_DFU, vendorIDInt, productIDInt);
             if (!waiting) {
@@ -173,7 +173,7 @@ int findDevice(device_t *device, bool waiting)
         }
         if (vendorIDInt == 0x5ac && productIDInt == 0x1281)
         {
-            initUSBHandle(&handle, 0x5ac, 0x1281);
+            initUSBHandle(&handle, vendorIDInt, productIDInt);
             waitUSBHandle(&handle, NULL, NULL);
             *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_RECOVERY, vendorIDInt, productIDInt);
             if (!waiting) { LOG(LOG_DEBUG, "Initialised device in recovery mode"); }
@@ -182,7 +182,7 @@ int findDevice(device_t *device, bool waiting)
         }
         if (vendorIDInt == 0x5ac && (productIDInt == 0x12ab || productIDInt == 0x12a8))
         {
-            initUSBHandle(&handle, 0x5ac, 0x12a8);
+            initUSBHandle(&handle, vendorIDInt, productIDInt);
             waitUSBHandle(&handle, NULL, NULL);
             *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_NORMAL, vendorIDInt, productIDInt);
             if (!waiting) { LOG(LOG_DEBUG, "Initialised device in normal mode"); }
@@ -191,7 +191,7 @@ int findDevice(device_t *device, bool waiting)
         }
         if (vendorIDInt == 0x5ac && productIDInt == 0x4141)
         {
-            initUSBHandle(&handle, 0x5ac, 0x4141);
+            initUSBHandle(&handle, vendorIDInt, productIDInt);
             waitUSBHandle(&handle, NULL, NULL);
             *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_PONGO, vendorIDInt, productIDInt);
             if (!waiting) { LOG(LOG_DEBUG, "Initialised Pongo USB device"); }

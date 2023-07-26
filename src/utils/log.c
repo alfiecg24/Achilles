@@ -54,9 +54,12 @@ int AlfieLoaderLog(log_level_t loglevel, bool newline, const char *fname, int li
 		snprintf(colour, 0x10, "%s", MAG);
 		snprintf(colour_bold, 0x10, "%s", BMAG);
 		break;
-	default:
+	default: // LOG_VERBOSE
+		if (!getArgumentByName("Verbosity")->set || (getArgumentByName("Verbosity")->set && getArgumentByName("Verbosity")->intVal < 1)) {
+			return 0;
+		}
 		assert(loglevel >= 0);
-		snprintf(type, 0x10, "%s", "Message");
+		snprintf(type, 0x10, "%s", "Verbose");
 		snprintf(colour, 0x10, "%s", WHT);
 		snprintf(colour_bold, 0x10, "%s", BWHT);
 		break;

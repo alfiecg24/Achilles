@@ -15,7 +15,8 @@ typedef enum
 	LOG_WARNING = 2,
 	LOG_INFO = 3,
 	LOG_SUCCESS = 4,
-	LOG_DEBUG = 5
+	LOG_DEBUG = 5,
+	LOG_VERBOSE = 6
 } log_level_t;
 
 extern arg_t args[];
