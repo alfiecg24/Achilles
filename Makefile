@@ -11,8 +11,16 @@ dirs:
 	@mkdir -p build
 
 payloads:
+	@mkdir -p include/exploit/payloads/gaster/headers
 	@cd src/exploit/payloads/gaster && make
 	@cd ../../../../
+	@cp -R src/exploit/payloads/gaster/headers/* include/exploit/payloads/gaster/headers
+	@$(RM) -r src/exploit/payloads/gaster/headers
+	@mkdir -p include/boot/payloads/checkra1n/headers
+	@cd src/boot/payloads/checkra1n && make
+	@cd ../../../../
+	@cp -R src/boot/payloads/checkra1n/*.h include/boot/payloads/checkra1n/headers
+	@$(RM) -r src/boot/payloads/checkra1n/*.h
 	
 clean:
 	@rm -rf build
@@ -24,3 +32,5 @@ libusb:
 
 Achilles: $(SOURCES)
 	@$(CC) $(FRAMEWORKS) $(CFLAGS) -o $(OUTPUT) $(SOURCES)
+	@$(RM) -r include/exploit/payloads/gaster
+	@$(RM) -r include/boot/payloads

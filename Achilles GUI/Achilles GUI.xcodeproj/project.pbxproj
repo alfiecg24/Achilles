@@ -1,0 +1,386 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		319DC79E2A8D57EA0096B6B4 /* Achilles_GUIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 319DC79D2A8D57EA0096B6B4 /* Achilles_GUIApp.swift */; };
+		319DC7A02A8D57EA0096B6B4 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 319DC79F2A8D57EA0096B6B4 /* MainView.swift */; };
+		319DC7A22A8D57EC0096B6B4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 319DC7A12A8D57EC0096B6B4 /* Assets.xcassets */; };
+		319DC7A52A8D57EC0096B6B4 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 319DC7A42A8D57EC0096B6B4 /* Preview Assets.xcassets */; };
+		319DC7AF2A8D59750096B6B4 /* Scene++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 319DC7AE2A8D59750096B6B4 /* Scene++.swift */; };
+		319DC7B22A8D5DD70096B6B4 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 319DC7B12A8D5DD70096B6B4 /* SettingsView.swift */; };
+		319DC7B42A8D5E540096B6B4 /* View++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 319DC7B32A8D5E540096B6B4 /* View++.swift */; };
+		319DC7B62A8D601E0096B6B4 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 319DC7B52A8D601E0096B6B4 /* HomeView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		319DC79A2A8D57EA0096B6B4 /* Achilles GUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Achilles GUI.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		319DC79D2A8D57EA0096B6B4 /* Achilles_GUIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Achilles_GUIApp.swift; sourceTree = "<group>"; };
+		319DC79F2A8D57EA0096B6B4 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		319DC7A12A8D57EC0096B6B4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		319DC7A42A8D57EC0096B6B4 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		319DC7A62A8D57EC0096B6B4 /* Achilles_GUI.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Achilles_GUI.entitlements; sourceTree = "<group>"; };
+		319DC7AC2A8D58330096B6B4 /* Achilles-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Achilles-Bridging-Header.h"; sourceTree = "<group>"; };
+		319DC7AE2A8D59750096B6B4 /* Scene++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Scene++.swift"; sourceTree = "<group>"; };
+		319DC7B12A8D5DD70096B6B4 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		319DC7B32A8D5E540096B6B4 /* View++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View++.swift"; sourceTree = "<group>"; };
+		319DC7B52A8D601E0096B6B4 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		319DC7972A8D57EA0096B6B4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		319DC7912A8D57EA0096B6B4 = {
+			isa = PBXGroup;
+			children = (
+				319DC79C2A8D57EA0096B6B4 /* Achilles GUI */,
+				319DC79B2A8D57EA0096B6B4 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		319DC79B2A8D57EA0096B6B4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				319DC79A2A8D57EA0096B6B4 /* Achilles GUI.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		319DC79C2A8D57EA0096B6B4 /* Achilles GUI */ = {
+			isa = PBXGroup;
+			children = (
+				319DC7B02A8D5DA80096B6B4 /* Views */,
+				319DC7AD2A8D596E0096B6B4 /* Extensions */,
+				319DC79D2A8D57EA0096B6B4 /* Achilles_GUIApp.swift */,
+				319DC7A12A8D57EC0096B6B4 /* Assets.xcassets */,
+				319DC7A62A8D57EC0096B6B4 /* Achilles_GUI.entitlements */,
+				319DC7A32A8D57EC0096B6B4 /* Preview Content */,
+				319DC7AC2A8D58330096B6B4 /* Achilles-Bridging-Header.h */,
+			);
+			path = "Achilles GUI";
+			sourceTree = "<group>";
+		};
+		319DC7A32A8D57EC0096B6B4 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				319DC7A42A8D57EC0096B6B4 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		319DC7AD2A8D596E0096B6B4 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				319DC7AE2A8D59750096B6B4 /* Scene++.swift */,
+				319DC7B32A8D5E540096B6B4 /* View++.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		319DC7B02A8D5DA80096B6B4 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				319DC79F2A8D57EA0096B6B4 /* MainView.swift */,
+				319DC7B12A8D5DD70096B6B4 /* SettingsView.swift */,
+				319DC7B52A8D601E0096B6B4 /* HomeView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		319DC7992A8D57EA0096B6B4 /* Achilles GUI */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 319DC7A92A8D57EC0096B6B4 /* Build configuration list for PBXNativeTarget "Achilles GUI" */;
+			buildPhases = (
+				319DC7962A8D57EA0096B6B4 /* Sources */,
+				319DC7972A8D57EA0096B6B4 /* Frameworks */,
+				319DC7982A8D57EA0096B6B4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Achilles GUI";
+			productName = "Achilles GUI";
+			productReference = 319DC79A2A8D57EA0096B6B4 /* Achilles GUI.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		319DC7922A8D57EA0096B6B4 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					319DC7992A8D57EA0096B6B4 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = 319DC7952A8D57EA0096B6B4 /* Build configuration list for PBXProject "Achilles GUI" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 319DC7912A8D57EA0096B6B4;
+			productRefGroup = 319DC79B2A8D57EA0096B6B4 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				319DC7992A8D57EA0096B6B4 /* Achilles GUI */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		319DC7982A8D57EA0096B6B4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				319DC7A52A8D57EC0096B6B4 /* Preview Assets.xcassets in Resources */,
+				319DC7A22A8D57EC0096B6B4 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		319DC7962A8D57EA0096B6B4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				319DC7A02A8D57EA0096B6B4 /* MainView.swift in Sources */,
+				319DC7B22A8D5DD70096B6B4 /* SettingsView.swift in Sources */,
+				319DC7B42A8D5E540096B6B4 /* View++.swift in Sources */,
+				319DC7B62A8D601E0096B6B4 /* HomeView.swift in Sources */,
+				319DC79E2A8D57EA0096B6B4 /* Achilles_GUIApp.swift in Sources */,
+				319DC7AF2A8D59750096B6B4 /* Scene++.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		319DC7A72A8D57EC0096B6B4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.4;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		319DC7A82A8D57EC0096B6B4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.4;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		319DC7AA2A8D57EC0096B6B4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Achilles GUI/Achilles_GUI.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Achilles GUI/Preview Content\"";
+				DEVELOPMENT_TEAM = 76V43E9CWT;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = "../include/**";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.Alfie.Achilles-GUI";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "Achilles GUI/Achilles-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		319DC7AB2A8D57EC0096B6B4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Achilles GUI/Achilles_GUI.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Achilles GUI/Preview Content\"";
+				DEVELOPMENT_TEAM = 76V43E9CWT;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = "../include/**";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.Alfie.Achilles-GUI";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "Achilles GUI/Achilles-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		319DC7952A8D57EA0096B6B4 /* Build configuration list for PBXProject "Achilles GUI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				319DC7A72A8D57EC0096B6B4 /* Debug */,
+				319DC7A82A8D57EC0096B6B4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		319DC7A92A8D57EC0096B6B4 /* Build configuration list for PBXNativeTarget "Achilles GUI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				319DC7AA2A8D57EC0096B6B4 /* Debug */,
+				319DC7AB2A8D57EC0096B6B4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 319DC7922A8D57EA0096B6B4 /* Project object */;
+}

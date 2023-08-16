@@ -26,12 +26,18 @@ void awaitPongoOS(usb_handle_t *handle) {
     return;
 }
 
+// FOR COMPILATION //
+
+#include <boot/payloads/checkra1n/headers/shellcode.h>
+#include <boot/payloads/checkra1n/headers/Pongo.h>
+
+// // // // // // //
+
 // HUGE thanks to @mineekdev for their openra1n project,
 // which was the template for this code.
 
 bool preparePongoOS(void **pongoBuf, size_t *size)
 {
-    FILE *shellcodeFile, *pongoFile;
     size_t shellcodeSize, pongoSize;
     void *shellcode, *pongo;
 
@@ -39,48 +45,40 @@ bool preparePongoOS(void **pongoBuf, size_t *size)
     // LZ4-compressed Pongo is actually an LZ4 decompressor
     // that decompresses the Pongo image into memory.
     // It is, in effect, a self-extracting payload.
-    // Get shellcode
-    shellcodeFile = fopen("src/boot/payloads/checkra1n/shellcode.bin", "rb");
-    if (shellcodeFile == NULL)
-    {
-        LOG(LOG_ERROR, "Failed to open shellcode file");
-        return false;
-    }
-    fseek(shellcodeFile, 0, SEEK_END);
-    shellcodeSize = ftell(shellcodeFile);
-    rewind(shellcodeFile);
 
+    shellcodeSize = shellcode_bin_len;
     shellcode = malloc(shellcodeSize);
-    fread(shellcode, shellcodeSize, 1, shellcodeFile);
-    fclose(shellcodeFile);
+    memcpy(shellcode, shellcode_bin, shellcodeSize);
 
 
     // Get PongoOS
     char *pongoPath;
     if (getArgumentByName("Override Pongo") != NULL
     && getArgumentByName("Override Pongo")->set) {
+        FILE *pongoFile;
         pongoPath = malloc(strlen(getArgumentByName("Override Pongo")->stringVal) + 1);
         strcpy(pongoPath, getArgumentByName("Override Pongo")->stringVal);
+        pongoFile = fopen(pongoPath, "rb");
+        if (pongoFile == NULL)
+        {
+            LOG(LOG_ERROR, "Failed to open PongoOS file (%s)", pongoPath);
+            return false;
+        }
+        fseek(pongoFile, 0, SEEK_END);
+        pongoSize = ftell(pongoFile);
+        rewind(pongoFile);
+        if (pongoSize >= 0x7fe00) {
+            LOG(LOG_ERROR, "PongoOS is too large, must be less than 0x7fe00 bytes but is 0x%X bytes", pongoSize);
+            return false;
+        }
+        pongo = malloc(pongoSize);
+        fread(pongo, pongoSize, 1, pongoFile);
+        fclose(pongoFile);
     } else {
-        pongoPath = malloc(strlen("src/boot/payloads/checkra1n/Pongo.bin") + 1);
-        strcpy(pongoPath, "src/boot/payloads/checkra1n/Pongo.bin");
+        pongoSize = Pongo_bin_len;
+        pongo = malloc(pongoSize);
+        memcpy(pongo, Pongo_bin, pongoSize);
     }
-    pongoFile = fopen(pongoPath, "rb");
-    if (pongoFile == NULL)
-    {
-        LOG(LOG_ERROR, "Failed to open PongoOS file (%s)", pongoPath);
-        return false;
-    }
-    fseek(pongoFile, 0, SEEK_END);
-    pongoSize = ftell(pongoFile);
-    rewind(pongoFile);
-    if (pongoSize >= 0x7fe00) {
-        LOG(LOG_ERROR, "PongoOS is too large, must be less than 0x7fe00 bytes but is 0x%X bytes", pongoSize);
-        return false;
-    }
-    pongo = malloc(pongoSize);
-    fread(pongo, pongoSize, 1, pongoFile);
-    fclose(pongoFile);
 
     // Compress PongoOS
     char *pongoCompressed = malloc(pongoSize);
