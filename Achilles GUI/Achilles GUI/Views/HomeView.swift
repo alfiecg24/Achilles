@@ -11,6 +11,7 @@ struct HomeView: View {
     @State private var showingSettings = false
     @State private var settingsAreValid = true
     @Binding var index: Int
+    @ObservedObject var settings: AchillesSettings
     var body: some View {
         VStack(alignment: .leading) {
             HStack {

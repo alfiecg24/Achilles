@@ -26,9 +26,10 @@ clean:
 	@rm -rf build
 
 libusb:
-	@cd src/exploit/payloads/gaster && make
-	@cd ../../../../
+	@cd . && make payloads
 	@$(CC) $(FRAMEWORKS) $(CFLAGS) -lusb-1.0 -DACHILLES_LIBUSB -o $(OUTPUT) $(SOURCES)
+	@$(RM) -r include/exploit/payloads/gaster
+	@$(RM) -r include/boot/payloads
 
 Achilles: $(SOURCES)
 	@$(CC) $(FRAMEWORKS) $(CFLAGS) -o $(OUTPUT) $(SOURCES)

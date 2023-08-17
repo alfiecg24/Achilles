@@ -39,6 +39,8 @@ Entering recovery mode programmatically can be rather hit or miss, so if you dev
 
 There also seems to be an issue with the libusb build of Achilles, when booting PongoOS, where a segmentation fault will occasionally occur when the USB handle is opened again after the device enters download mode. I have not figured out how to deterministically trigger this issue, and as such cannot fix it at this time. As a work-around, use the IOKit build or just simple place the device back into DFU from download mode and run the program again.
 
+Finally, these success rate of the exploit on libusb seems to be lower. The exploit can sometimes fail, and will quite frequently hang while trying to stall the endpoint while spraying the heap. The cause of this is not known, but if you would like to avoid this, use the IOKit build.
+
 ## Dependencies
 * [libimobiledevice](https://github.com/libimobiledevice/libimobiledevice)
 * gobjcopy

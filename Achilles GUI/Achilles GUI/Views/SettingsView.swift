@@ -22,28 +22,32 @@ import SwiftUI
  -k, --override-pongo: Use a custom Pongo.bin file
 */
 
-struct AchillesSettings {
-    var verbosity: Bool
-    var debug: Bool
-    var quick: Bool
-    var exploit: Bool
-    var pongo: Bool
-    var jailbreak: Bool
-    var verboseBoot: Bool
-    var serial: Bool
-    var bootArguments: String
+class AchillesSettings: ObservableObject {
+    @Published var verbosity: Bool = false
+    @Published var debug: Bool = false
+    @Published var quick: Bool = true
+    
+    @Published var exploit: Bool = false
+    @Published var pongo: Bool = false
+    @Published var jailbreak: Bool = true
+    
+    @Published var verboseBoot: Bool = true
+    @Published var serial: Bool = false
+    @Published var bootArguments: String = ""
+    
+    @Published var showLogWindow: Bool = false
 }
 
 struct SettingsView: View {
     @Binding var index: Int
-    @Binding var settings: AchillesSettings
+    @ObservedObject var settings: AchillesSettings
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
                 VStack(alignment: .leading) {
-                    Text("\(NAME) v\(VERSION), \(RELEASE_TYPE)")
-                        .font(.title3)
-                        .foregroundColor(.secondary)
+//                    Text("\(NAME) v\(VERSION), \(RELEASE_TYPE)")
+//                        .font(.title3)
+//                        .foregroundColor(.secondary)
                     Section(content: {
                         Toggle(isOn: $settings.verbosity, label: {
                             Text("Verbose logging")
@@ -57,7 +61,7 @@ struct SettingsView: View {
                     }, header: {
                         Text("General")
                             .foregroundColor(.secondary)
-                            .padding(.top, 10)
+                            .padding(.top, 7)
                     })
                     Section(content: {
                         Toggle(isOn: $settings.exploit, label: {
@@ -75,7 +79,7 @@ struct SettingsView: View {
                     }, header: {
                         Text("Exploit type")
                             .foregroundColor(.secondary)
-                        .padding(.top, 10)
+                            .padding(.top, 7)
                     })
                     Section(content: {
                         Toggle(isOn: $settings.verboseBoot, label: {
@@ -91,8 +95,16 @@ struct SettingsView: View {
                     }, header: {
                         Text("PongoOS boot options")
                             .foregroundColor(.secondary)
-                        
-                            .padding(.top, 10)
+                            .padding(.top, 7)
+                    })
+                    Section(content: {
+                        Toggle(isOn: $settings.showLogWindow, label: {
+                            Text("Show log window")
+                        })
+                    }, header: {
+                        Text("App settings")
+                            .foregroundColor(.secondary)
+                            .padding(.top, 7)
                     })
                 }
                 Spacer()

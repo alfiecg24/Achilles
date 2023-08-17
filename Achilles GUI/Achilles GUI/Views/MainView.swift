@@ -9,16 +9,18 @@ import SwiftUI
 
 struct MainView: View {
     @State private var index = 0
-    @State var settings = AchillesSettings(verbosity: false, debug: false, quick: false, exploit: false, pongo: false, jailbreak: true, verboseBoot: true, serial: false, bootArguments: "")
+    @StateObject var settings = AchillesSettings()
     var body: some View {
         ZStack {
             switch index {
             case 0:
-                HomeView(index: $index)
+                HomeView(index: $index, settings: settings)
             case 1:
-                SettingsView(index: $index, settings: $settings)
+                SettingsView(index: $index, settings: settings)
+            case 2:
+                RunnerView(settings: settings)
             default:
-                HomeView(index: $index)
+                HomeView(index: $index, settings: settings)
             }
         }
     }

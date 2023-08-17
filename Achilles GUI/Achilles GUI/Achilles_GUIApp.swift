@@ -12,7 +12,6 @@ struct Achilles_GUIApp: App {
     var body: some Scene {
         WindowGroup {
             MainView()
-                .frame(width: 650, height: 400)
         }
     }
 }

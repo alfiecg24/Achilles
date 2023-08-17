@@ -1,5 +1,4 @@
 #include <Achilles.h>
-#include <string.h>
 #include <exploit/exploit.h>
 
 arg_t args[] = {

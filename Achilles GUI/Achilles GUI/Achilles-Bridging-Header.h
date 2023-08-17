@@ -9,6 +9,6 @@
 #define Achilles_Bridging_Header_h
 
 #include <Achilles.h>
-
+#include <exploit/exploit.h>
 
 #endif /* Achilles_Bridging_Header_h */
