@@ -89,24 +89,25 @@ void jailbreakBoot(usb_handle_t *handle) {
 	sleep(1);
 
 	// Open kernel patchfinder and upload it to PongoOS
+	// TODO: custom kernel patchfinder argument
+	#include <kernel/patchfinder/kpf.h>
 	LOG(LOG_VERBOSE, "Sending kernel patchfinder");
-	FILE *kpf = fopen("src/kernel/patchfinder/kpf", "rb");
-	if (kpf == NULL) {
-		LOG(LOG_ERROR, "Failed to open kernel patchfinder file - please make sure src/kernel/patchfinder/kpf exists");
-		return;
-	}
-	fseek(kpf, 0, SEEK_END);
-	unsigned int kpfLength = ftell(kpf);
-	fseek(kpf, 0, SEEK_SET);
-	unsigned char *kpfData = malloc(kpfLength);
-	if (kpfData == NULL) {
-		LOG(LOG_ERROR, "Failed to allocate memory for kpf");
-		return;
-	}
-	fread(kpfData, kpfLength, 1, kpf);
-	fclose(kpf);
-	uploadFileToPongo(handle, (unsigned char *)kpfData, kpfLength);
-	free(kpfData);
+	// FILE *kpf = fopen("src/kernel/patchfinder/kpf", "rb");
+	// if (kpf == NULL) {
+	// 	LOG(LOG_ERROR, "Failed to open kernel patchfinder file - please make sure src/kernel/patchfinder/kpf exists");
+	// 	return;
+	// }
+	// fseek(kpf, 0, SEEK_END);
+	// unsigned int kpfLength = ftell(kpf);
+	// fseek(kpf, 0, SEEK_SET);
+	// unsigned char *kpfData = malloc(kpfLength);
+	// if (kpfData == NULL) {
+	// 	LOG(LOG_ERROR, "Failed to allocate memory for kpf");
+	// 	return;
+	// }
+	// fread(kpfData, kpfLength, 1, kpf);
+	// fclose(kpf);
+	uploadFileToPongo(handle, kpf, kpf_len);
 
 	// Load the kernel patchfinder module
 	issuePongoCommand(handle, "modload");
@@ -115,45 +116,49 @@ void jailbreakBoot(usb_handle_t *handle) {
 	LOG(LOG_VERBOSE, "Sending ramdisk and overlay");
 
 	// Open ramdisk.dmg and upload it to PongoOS
-	FILE *ramdisk = fopen("src/userland/jbinit/ramdisk.dmg", "rb");
-	if (ramdisk == NULL) {
-		LOG(LOG_ERROR, "Failed to open ramdisk file - please make sure src/userland/jbinit/ramdisk.dmg exists");
-		return;
-	}
-	fseek(ramdisk, 0, SEEK_END);
-	unsigned int ramdiskLength = ftell(ramdisk);
-	fseek(ramdisk, 0, SEEK_SET);
-	unsigned char *ramdiskData = malloc(ramdiskLength);
-	if (ramdiskData == NULL) {
-		LOG(LOG_ERROR, "Failed to allocate memory for ramdisk");
-		return;
-	}
-	fread(ramdiskData, ramdiskLength, 1, ramdisk);
-	fclose(ramdisk);
-	uploadFileToPongo(handle, (unsigned char *)ramdiskData, ramdiskLength);
-	free(ramdiskData);
+	// TODO: custom ramdisk argument
+	#include <userland/jbinit/ramdisk.h>
+	// FILE *ramdisk = fopen("src/userland/jbinit/ramdisk.dmg", "rb");
+	// if (ramdisk == NULL) {
+	// 	LOG(LOG_ERROR, "Failed to open ramdisk file - please make sure src/userland/jbinit/ramdisk.dmg exists");
+	// 	return;
+	// }
+	// fseek(ramdisk, 0, SEEK_END);
+	// unsigned int ramdiskLength = ftell(ramdisk);
+	// fseek(ramdisk, 0, SEEK_SET);
+	// unsigned char *ramdiskData = malloc(ramdiskLength);
+	// if (ramdiskData == NULL) {
+	// 	LOG(LOG_ERROR, "Failed to allocate memory for ramdisk");
+	// 	return;
+	// }
+	// fread(ramdiskData, ramdiskLength, 1, ramdisk);
+	// fclose(ramdisk);
+	uploadFileToPongo(handle, ramdisk_dmg, ramdisk_dmg_len);
+	// free(ramdiskData);
 
 	// Mount the ramdisk
 	issuePongoCommand(handle, "ramdisk");
 
 	// Open binpack.dmg and upload it to PongoOS
-	FILE *overlay = fopen("src/userland/jbinit/binpack.dmg", "rb");
-	if (overlay == NULL) {
-		LOG(LOG_ERROR, "Failed to open binpack file - please make sure src/userland/jbinit/binpack.dmg exists");
-		return;
-	}
-	fseek(overlay, 0, SEEK_END);
-	unsigned int overlayLength = ftell(overlay);
-	fseek(overlay, 0, SEEK_SET);
-	unsigned char *overlayData = malloc(overlayLength);
-	if (overlayData == NULL) {
-		LOG(LOG_ERROR, "Failed to allocate memory for binpack");
-		return;
-	}
-	fread(overlayData, overlayLength, 1, overlay);
-	fclose(overlay);
-	uploadFileToPongo(handle, (unsigned char *)overlayData, overlayLength);
-	free(overlayData);
+	// TODO: custom binpack argument
+	#include <userland/jbinit/binpack.h>
+	// FILE *overlay = fopen("src/userland/jbinit/binpack.dmg", "rb");
+	// if (overlay == NULL) {
+	// 	LOG(LOG_ERROR, "Failed to open binpack file - please make sure src/userland/jbinit/binpack.dmg exists");
+	// 	return;
+	// }
+	// fseek(overlay, 0, SEEK_END);
+	// unsigned int overlayLength = ftell(overlay);
+	// fseek(overlay, 0, SEEK_SET);
+	// unsigned char *overlayData = malloc(overlayLength);
+	// if (overlayData == NULL) {
+	// 	LOG(LOG_ERROR, "Failed to allocate memory for binpack");
+	// 	return;
+	// }
+	// fread(overlayData, overlayLength, 1, overlay);
+	// fclose(overlay);
+	uploadFileToPongo(handle, binpack_dmg, binpack_dmg_len);
+	// free(overlayData);
 
 	// Mount the binpack
 	issuePongoCommand(handle, "overlay");

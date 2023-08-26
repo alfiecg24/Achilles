@@ -20,7 +20,20 @@ payloads:
 	@cd src/boot/payloads/checkra1n && make
 	@cd ../../../../
 	@cp -R src/boot/payloads/checkra1n/*.h include/boot/payloads/checkra1n/headers
-	@$(RM) -r src/boot/payloads/checkra1n/*.h
+	@$(RM) src/boot/payloads/checkra1n/*.h
+	@cd src/kernel/patchfinder && make
+	@cd ../../../
+	@mkdir -p include/kernel/patchfinder
+	@cp src/kernel/patchfinder/kpf.h include/kernel/patchfinder/kpf.h
+	@$(RM) -r src/kernel/patchfinder/kpf.h
+	@cd src/userland/jbinit && make
+	@cd ../../../
+	@mkdir -p include/userland/jbinit
+	@cp src/userland/jbinit/binpack.h include/userland/jbinit/binpack.h
+	@cp src/userland/jbinit/ramdisk.h include/userland/jbinit/ramdisk.h
+	@$(RM) -r src/userland/jbinit/binpack.h
+	@$(RM) -r src/userland/jbinit/ramdisk.h
+
 	
 clean:
 	@rm -rf build
@@ -30,8 +43,12 @@ libusb:
 	@$(CC) $(FRAMEWORKS) $(CFLAGS) -lusb-1.0 -DACHILLES_LIBUSB -o $(OUTPUT) $(SOURCES)
 	@$(RM) -r include/exploit/payloads/gaster
 	@$(RM) -r include/boot/payloads
+	@$(RM) -r include/kernel/patchfinder
+	@$(RM) -r include/userland/jbinit
 
 Achilles: $(SOURCES)
 	@$(CC) $(FRAMEWORKS) $(CFLAGS) -o $(OUTPUT) $(SOURCES)
 	@$(RM) -r include/exploit/payloads/gaster
 	@$(RM) -r include/boot/payloads
+	@$(RM) -r include/kernel/patchfinder
+	@$(RM) -r include/userland/jbinit
