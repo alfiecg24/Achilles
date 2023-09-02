@@ -5,13 +5,10 @@ FRAMEWORKS=-framework IOKit -framework CoreFoundation -limobiledevice-1.0
 OUTPUT=build/Achilles
 CFLAGS=-Iinclude -Wunused
 
-all: dirs submodules pongo payloads Achilles
+all: dirs pongo payloads Achilles
 
 dirs:
 	@mkdir -p build
-
-submodules:
-	@git submodule update --init --recursive
 
 pongo:
 	@cd src/PongoOS && make
@@ -41,7 +38,6 @@ clean:
 	@cd src/PongoOS && make clean
 
 libusb:
-	@cd . && make submodules
 	@cd . && make payloads
 	@cd . && make pongo
 	@$(CC) $(FRAMEWORKS) $(CFLAGS) -lusb-1.0 -DACHILLES_LIBUSB -o $(OUTPUT) $(SOURCES)

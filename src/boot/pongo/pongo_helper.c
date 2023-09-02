@@ -107,7 +107,7 @@ void jailbreakBoot(usb_handle_t *handle) {
 	// }
 	// fread(kpfData, kpfLength, 1, kpf);
 	// fclose(kpf);
-	uploadFileToPongo(handle, kpf, kpf_len);
+	uploadFileToPongo(handle, build_checkra1n_kpf_pongo, build_checkra1n_kpf_pongo_len);
 
 	// Load the kernel patchfinder module
 	issuePongoCommand(handle, "modload");
