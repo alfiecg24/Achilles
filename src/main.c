@@ -6,7 +6,6 @@ arg_t args[] = {
     {"Verbosity", "-v", "--verbosity", "Verbosity level, maximum of 2", "-vv, --verbosity 2", false, FLAG_INT, 0},
     {"Debug", "-d", "--debug", "Enable debug logging", NULL, false, FLAG_BOOL, false},
     {"Help", "-h", "--help", "Show this help message", NULL, false, FLAG_BOOL, false},
-    {"Version", "-V", "--version", "Show version information", NULL, false, FLAG_BOOL, false},
     {"Quick mode", "-q", "--quick", "Don't ask for confirmation during the program", NULL, false, FLAG_BOOL, false},
     {"Exploit", "-e", "--exploit", "Exploit with checkm8 and exit", NULL, false, FLAG_BOOL, false},
     {"PongoOS", "-p", "--pongo", "Boot to PongoOS and exit" , NULL, false, FLAG_BOOL, false},
@@ -14,7 +13,10 @@ arg_t args[] = {
     {"Verbose boot", "-V", "--verbose-boot", "Boot device with verbose boot", NULL, false, FLAG_BOOL, false},
     {"Serial output", "-s", "--serial", "Enable serial output from the device when booting", NULL, false, FLAG_BOOL, false},
     {"Boot arguments", "-b", "--boot-args", "Boot arguments to pass to PongoOS", NULL, false, FLAG_STRING, NULL},
-    {"Override Pongo", "-k", "--override-pongo", "Use a custom Pongo.bin file", NULL, false, FLAG_STRING, NULL} // TODO: Implement this
+    {"Override Pongo", "-k", "--override-pongo", "Use a custom Pongo.bin file", NULL, false, FLAG_STRING, NULL},
+    {"Custom kernel patchfinder", "-K", "--custom-kpf", "Use a custom kernel patchfinder file", NULL, false, FLAG_STRING, NULL},
+    {"Custom ramdisk", "-R", "--custom-ramdisk", "Use a custom ramdisk file", NULL, false, FLAG_STRING, NULL},
+    {"Custom overlay", "-O", "--custom-overlay", "Use a custom overlay file", NULL, false, FLAG_STRING, NULL}
     };
 
 arg_t *getArgumentByName(char *name)
@@ -58,12 +60,6 @@ void printHelp()
     }
 }
 
-void printVersion()
-{
-    // Print version information
-    printf("%s %s - %s\n", NAME, VERSION, RELEASE_TYPE);
-}
-
 bool checkForContradictions() {
     if (getArgumentByName("PongoOS")->boolVal && getArgumentByName("Jailbreak")->boolVal) {
         LOG(LOG_ERROR, "Cannot use both -p and -j");
@@ -83,6 +79,10 @@ bool checkForContradictions() {
     }
     if (getArgumentByName("Verbose boot")->boolVal && getArgumentByName("Serial output")->boolVal) {
         LOG(LOG_ERROR, "Cannot use -V and -s together");
+        return true;
+    }
+    if (!getArgumentByName("Jailbreak")->boolVal && (getArgumentByName("Custom kernel patchfinder")->set || getArgumentByName("Custom ramdisk")->set || getArgumentByName("Custom overlay")->set)) {
+        LOG(LOG_ERROR, "Cannot use -K, -R or -O without -j");
         return true;
     }
     return false;
@@ -200,9 +200,7 @@ int main(int argc, char *argv[])
         verbosityArg->intVal = 3;
     }
     
-    // TODO: make this char *argList to prevent possible overflowing?
-    char argList[1024];
-    memset(argList, 0, sizeof(argList));
+    char *argList = malloc(sizeof(args));
     for (int i = 0; i < sizeof(args) / sizeof(arg_t); i++)
     {
         if (args[i].type == FLAG_BOOL && args[i].set)
@@ -225,12 +223,6 @@ int main(int argc, char *argv[])
     if (getArgumentByName("Help")->boolVal)
     {
         printHelp();
-        return 0;
-    }
-
-    if (getArgumentByName("Version")->boolVal)
-    {
-        printVersion();
         return 0;
     }
 
