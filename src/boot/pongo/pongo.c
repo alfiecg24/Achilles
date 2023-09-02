@@ -29,7 +29,7 @@ void awaitPongoOS(usb_handle_t *handle) {
 // FOR COMPILATION //
 
 #include <boot/payloads/checkra1n/headers/shellcode.h>
-#include <boot/payloads/checkra1n/headers/Pongo.h>
+#include <boot/pongo/headers/Pongo.h>
 
 // // // // // // //
 
