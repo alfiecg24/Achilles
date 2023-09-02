@@ -27,11 +27,6 @@ payloads:
 	@cd ../../../../
 	@cp -R src/boot/payloads/checkra1n/*.h include/boot/payloads/checkra1n/headers
 	@$(RM) src/boot/payloads/checkra1n/*.h
-	@cd src/kernel/patchfinder && make
-	@cd ../../../
-	@mkdir -p include/kernel/patchfinder
-	@cp src/kernel/patchfinder/kpf.h include/kernel/patchfinder/kpf.h
-	@$(RM) -r src/kernel/patchfinder/kpf.h
 	@cd src/userland/jbinit && make
 	@cd ../../../
 	@mkdir -p include/userland/jbinit
