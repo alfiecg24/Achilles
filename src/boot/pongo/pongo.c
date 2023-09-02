@@ -75,9 +75,9 @@ bool preparePongoOS(void **pongoBuf, size_t *size)
         fread(pongo, pongoSize, 1, pongoFile);
         fclose(pongoFile);
     } else {
-        pongoSize = Pongo_bin_len;
+        pongoSize = build_Pongo_bin_len;
         pongo = malloc(pongoSize);
-        memcpy(pongo, Pongo_bin, pongoSize);
+        memcpy(pongo, build_Pongo_bin, pongoSize);
     }
 
     // Compress PongoOS

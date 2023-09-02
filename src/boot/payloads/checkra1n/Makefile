@@ -3,7 +3,6 @@
 CC ?= clang
 
 payloads:
-	@xxd -iC Pongo.bin > Pongo.h
 	@xxd -iC shellcode.bin > shellcode.h
 	@xxd -iC yolo_s8000.bin > yolo_s8000.h
 	@xxd -iC yolo_s8001.bin > yolo_s8001.h
