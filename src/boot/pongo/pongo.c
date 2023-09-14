@@ -30,6 +30,7 @@ void awaitPongoOS(usb_handle_t *handle) {
 
 #include <boot/payloads/checkra1n/headers/shellcode.h>
 #include <boot/pongo/headers/Pongo.h>
+#include <boot/pongo/headers/Pongo-palera1n.h>
 
 // // // // // // //
 
@@ -75,9 +76,15 @@ bool preparePongoOS(void **pongoBuf, size_t *size)
         fread(pongo, pongoSize, 1, pongoFile);
         fclose(pongoFile);
     } else {
-        pongoSize = build_Pongo_bin_len;
-        pongo = malloc(pongoSize);
-        memcpy(pongo, build_Pongo_bin, pongoSize);
+        if (getArgumentByName("Jailbreak")->set) {
+            pongoSize = Pongo_palera1n_bin_len;
+            pongo = malloc(pongoSize);
+            memcpy(pongo, Pongo_palera1n_bin, pongoSize);
+        } else {
+            pongoSize = build_Pongo_bin_len;
+            pongo = malloc(pongoSize);
+            memcpy(pongo, build_Pongo_bin, pongoSize);
+        }
     }
 
     // Compress PongoOS

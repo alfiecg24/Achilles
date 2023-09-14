@@ -11,7 +11,7 @@ dirs:
 	@mkdir -p build
 
 pongo:
-	@cd src/PongoOS && make
+	@cd src/PongoOS && make clean && make
 
 payloads:
 	@mkdir -p include/exploit/payloads/gaster/headers
@@ -31,6 +31,18 @@ payloads:
 	@cp src/userland/jbinit/ramdisk.h include/userland/jbinit/ramdisk.h
 	@$(RM) -r src/userland/jbinit/binpack.h
 	@$(RM) -r src/userland/jbinit/ramdisk.h
+	@mkdir -p include/boot/pongo/headers
+	@cd src/boot/pongo && xxd -iC Pongo-palera1n.bin > Pongo-palera1n.h
+	@cp src/boot/pongo/Pongo-palera1n.h include/boot/pongo/headers/Pongo-palera1n.h
+	@$(RM) src/boot/pongo/Pongo-palera1n.h
+	@mkdir -p include/kernel/patchfinder
+	@cd src/PongoOS/build && xxd -iC checkra1n-kpf-pongo > kpf.h
+	@cp src/PongoOS/build/kpf.h include/kernel/patchfinder/kpf.h
+	@$(RM) src/PongoOS/build/kpf.h
+	@mkdir -p include/kernel/patchfinder
+	@cd src/kernel/patchfinder && xxd -iC kpf-palera1n > kpf-palera1n.h
+	@cp src/kernel/patchfinder/kpf-palera1n.h include/kernel/patchfinder/kpf-palera1n.h
+	@$(RM) src/kernel/patchfinder/kpf-palera1n.h
 
 	
 clean:

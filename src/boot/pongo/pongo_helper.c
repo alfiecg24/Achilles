@@ -109,9 +109,15 @@ void jailbreakBoot(usb_handle_t *handle) {
 		fclose(kpf);
 		uploadFileToPongo(handle, kpfData, kpfLength);
 	} else {
-		#include <kernel/patchfinder/kpf.h>
-		LOG(LOG_VERBOSE, "Sending kernel patchfinder");
-		uploadFileToPongo(handle, build_checkra1n_kpf_pongo, build_checkra1n_kpf_pongo_len);
+		if (getArgumentByName("Jailbreak")->set) {
+			#include <kernel/patchfinder/kpf-palera1n.h>
+			LOG(LOG_VERBOSE, "Sending kernel patchfinder");
+			uploadFileToPongo(handle, kpf_palera1n, kpf_palera1n_len);
+		} else {
+			#include <kernel/patchfinder/kpf.h>
+			LOG(LOG_VERBOSE, "Sending kernel patchfinder");
+			uploadFileToPongo(handle, checkra1n_kpf_pongo, checkra1n_kpf_pongo_len);
+		}
 	}
 
 	// Load the kernel patchfinder module
