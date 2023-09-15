@@ -249,10 +249,11 @@ bool waitUSBHandle(usb_handle_t *handle, usb_check_cb_t usb_check_cb, void *arg)
 				}
 			}
 			IOObjectRelease(iter);
-			if(ret) {
+			IOObjectRelease(serv);
+			if (ret) {
 				break;
 			}
-			sleep_ms(USB_TIMEOUT);
+			sleep_ms(100);
 		}
 	}
 	return ret;

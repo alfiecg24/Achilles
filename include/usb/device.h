@@ -15,6 +15,7 @@ enum DeviceMode {
     MODE_NORMAL,
     MODE_RECOVERY,
     MODE_DFU,
+    MODE_YOLO,
     MODE_PONGO
 };
 

@@ -167,14 +167,15 @@ int findUSBDevice(device_t *device, bool waiting)
         {
             initUSBHandle(&handle, vendorIDInt, productIDInt);
             waitUSBHandle(&handle, NULL, NULL);
-            *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_DFU, vendorIDInt, productIDInt);
-            if (!waiting) {
-                if (isInDownloadMode(device->serialNumber)) {
-                    LOG(LOG_DEBUG, "Initialised device in YoloDFU/download mode"); 
-                } else {
-                    LOG(LOG_DEBUG, "Initialised device in DFU mode"); 
-                }
+            
+            if (isInDownloadMode(device->serialNumber)) {
+                if (!waiting) { LOG(LOG_DEBUG, "Initialised device in YoloDFU/download mode"); }
+                *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_YOLO, vendorIDInt, productIDInt);
+            } else {
+                if (!waiting) { LOG(LOG_DEBUG, "Initialised device in DFU mode"); }
+                *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_DFU, vendorIDInt, productIDInt);
             }
+            
             closeUSBHandle(&handle);
             ret = 0;
             goto done;
