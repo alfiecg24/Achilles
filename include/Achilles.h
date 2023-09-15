@@ -9,7 +9,6 @@
 
 #define NAME "Achilles"
 #define VERSION "0.1.0"
-#define RELEASE_TYPE "Development"
 
 #define LOG(logLevel, ...) AchillesLog(logLevel, true, __FILE__, __LINE__, __func__, __VA_ARGS__)
 #define LOG_NO_NEWLINE(logLevel, ...) AchillesLog(logLevel, false, __FILE__, __LINE__, __func__, __VA_ARGS__)
