@@ -234,12 +234,12 @@ int main(int argc, char *argv[])
 
     struct utsname buffer;
     uname(&buffer);
-    LOG(LOG_DEBUG, "%s v%s, running on %s %s, %s", NAME, VERSION, buffer.sysname, buffer.machine, usbBackend);
     if (strcmp(buffer.sysname, "Darwin") != 0)
     {
         LOG(LOG_ERROR, "This tool is only supported on macOS");
         return -1;
     }
+    LOG(LOG_DEBUG, "%s v%s, running on %s %s, %s", NAME, VERSION, buffer.sysname, buffer.machine, usbBackend);
 
     if (!getArgumentByName("Exploit")->set
     && !getArgumentByName("PongoOS")->set
