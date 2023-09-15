@@ -8,12 +8,15 @@ CFLAGS=-Iinclude -Wunused
 all: dirs pongo payloads Achilles
 
 dirs:
+	@echo "Creating directories"
 	@mkdir -p build
 
 pongo:
+	@echo "Building PongoOS"
 	@cd src/PongoOS && make clean && make
 
 payloads:
+	@echo "Building payloads"
 	@mkdir -p include/exploit/payloads/gaster/headers
 	@cd src/exploit/payloads/gaster && make
 	@cd ../../../../
@@ -50,8 +53,10 @@ clean:
 	@cd src/PongoOS && make clean
 
 libusb:
-	@cd . && make payloads
+	@cd . && make dirs
 	@cd . && make pongo
+	@cd . && make payloads
+	@echo "Building Achilles for libusb"
 	@$(CC) $(FRAMEWORKS) $(CFLAGS) -lusb-1.0 -DACHILLES_LIBUSB -o $(OUTPUT) $(SOURCES)
 	@$(RM) -r include/exploit/payloads/gaster
 	@$(RM) -r include/boot/payloads
@@ -60,6 +65,7 @@ libusb:
 	@$(RM) -r include/boot/pongo/headers
 
 Achilles: $(SOURCES)
+	@echo "Building Achilles for IOKit"
 	@$(CC) $(FRAMEWORKS) $(CFLAGS) -o $(OUTPUT) $(SOURCES)
 	@$(RM) -r include/exploit/payloads/gaster
 	@$(RM) -r include/boot/payloads
