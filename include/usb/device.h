@@ -6,6 +6,10 @@
 #include <exploit/dfu.h>
 #include <utils/log.h>
 #include <IOKit/IOKitLib.h>
+#include <libimobiledevice/libimobiledevice.h>
+#include <libimobiledevice/lockdown.h>
+#include <libimobiledevice/diagnostics_relay.h>
+#include <exploit/recovery.h>
 
 enum DeviceMode {
     MODE_NORMAL,
@@ -22,6 +26,19 @@ typedef struct
     char *serialNumber;
     DeviceMode mode;
 } device_t;
+
+// ******************************************************
+// Function: findUSBDevice()
+//
+// Purpose: Find a USB device
+//
+// Parameters:
+//      device_t *device: the device struct to return
+//
+// Returns:
+//      int: 0 if the device was found, 1 otherwise
+// ******************************************************
+int findUSBDevice(device_t *device, bool waiting);
 
 // ******************************************************
 // Function: findDevice()

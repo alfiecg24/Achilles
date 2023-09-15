@@ -34,7 +34,7 @@ device_t initDevice(io_service_t device, char *serialNumber, DeviceMode mode, in
 
 
 
-int findDevice(device_t *device, bool waiting) {
+int findUSBDevice(device_t *device, bool waiting) {
     // get all USB devices
     libusb_device **list;
     libusb_context *context = NULL;
@@ -107,15 +107,17 @@ int findDevice(device_t *device, bool waiting) {
 
 #else
 
-int findDevice(device_t *device, bool waiting)
+int findUSBDevice(device_t *device, bool waiting)
 {
     // get all USB devices
     io_iterator_t iterator;
+    int ret;
     kern_return_t kr = IOServiceGetMatchingServices(kIOMainPortDefault, IOServiceMatching("IOUSBDevice"), &iterator);
     if (kr != KERN_SUCCESS)
     {
         LOG(LOG_ERROR, "Failed to get IOUSBDevice services!");
-        return 0;
+        ret = -1;
+        goto done;
     }
     // iterate over all devices
     io_service_t service = 0;
@@ -126,22 +128,26 @@ int findDevice(device_t *device, bool waiting)
         if (vendorID == NULL)
         {
             LOG(LOG_ERROR, "Failed to get USB vendor ID!");
-            return -1;
+            ret = -1;
+            goto done;
         }
         if (productID == NULL)
         {
             LOG(LOG_ERROR, "Failed to get USB product ID!");
-            return -1;
+            ret = -1;
+            goto done;
         }
         if (CFGetTypeID(vendorID) != CFNumberGetTypeID())
         {
             LOG(LOG_ERROR, "Bad USB vendor ID, not a number!");
-            return -1;
+            ret = -1;
+            goto done;
         }
         if (CFGetTypeID(productID) != CFNumberGetTypeID())
         {
             LOG(LOG_ERROR, "Bad USB product ID, not a number!");
-            return -1;
+            ret = -1;
+            goto done;
         }
         int vendorIDInt = 0;
         int productIDInt = 0;
@@ -153,7 +159,8 @@ int findDevice(device_t *device, bool waiting)
         if (service == 0)
         {
             LOG(LOG_ERROR, "Failed to get IOUSBDevice service!");
-            return -1;
+            ret = -1;
+            goto done;
         }
 
         if (vendorIDInt == 0x5ac && productIDInt == 0x1227)
@@ -169,7 +176,8 @@ int findDevice(device_t *device, bool waiting)
                 }
             }
             closeUSBHandle(&handle);
-            return 0;
+            ret = 0;
+            goto done;
         }
         if (vendorIDInt == 0x5ac && productIDInt == 0x1281)
         {
@@ -178,7 +186,8 @@ int findDevice(device_t *device, bool waiting)
             *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_RECOVERY, vendorIDInt, productIDInt);
             if (!waiting) { LOG(LOG_DEBUG, "Initialised device in recovery mode"); }
             closeUSBHandle(&handle);
-            return 0;
+            ret = 0;
+            goto done;
         }
         if (vendorIDInt == 0x5ac && (productIDInt == 0x12ab || productIDInt == 0x12a8))
         {
@@ -187,7 +196,8 @@ int findDevice(device_t *device, bool waiting)
             *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_NORMAL, vendorIDInt, productIDInt);
             if (!waiting) { LOG(LOG_DEBUG, "Initialised device in normal mode"); }
             closeUSBHandle(&handle);
-            return 0;
+            ret = 0;
+            goto done;
         }
         if (vendorIDInt == 0x5ac && productIDInt == 0x4141)
         {
@@ -196,18 +206,106 @@ int findDevice(device_t *device, bool waiting)
             *device = initDevice(service, getDeviceSerialNumber(&handle), MODE_PONGO, vendorIDInt, productIDInt);
             if (!waiting) { LOG(LOG_DEBUG, "Initialised Pongo USB device"); }
             closeUSBHandle(&handle);
-            return 0;   
+            ret = 0;
+            goto done;  
         }
     }
-    return -1;
+done:
+    if (iterator) { IOServiceClose(iterator); }
+    return ret;
 }
 
 #endif
 
+bool getRecoveryDeviceIntoDFU(device_t *device) {
+    waitUSBHandle(&device->handle, NULL, NULL);
+    bool ret = sendRecoveryModeCommand(&device->handle, "setenv auto-boot true");
+    if (!ret) {
+        LOG(LOG_ERROR, "Failed to send auto-boot true");
+    }
+    ret = sendRecoveryModeCommand(&device->handle, "saveenv");
+    if (!ret) {
+        LOG(LOG_ERROR, "Failed to send saveenv");
+    }
+    LOG(LOG_DEBUG, "Sent auto-boot true and saveenv");
+    LOG_NO_NEWLINE(LOG_INFO, "Press Enter when you are ready to enter DFU mode");
+    getchar();
+    DFUHelper();
+    if (waitForDeviceInMode(device, MODE_DFU, 30) != 0) {
+        LOG(LOG_ERROR, "Could not find device in DFU mode after 30 seconds", device->serialNumber);
+        return false;
+    }
+    LOG(LOG_SUCCESS, "Device entered DFU mode successfully!");
+    return true;
+}
+
+int findDevice(device_t *device, bool waiting) {
+    idevice_t idevice = NULL;
+    char **deviceIDs;
+    int count;
+    idevice_error_t listRet = idevice_get_device_list(&deviceIDs, &count);
+    if (listRet != IDEVICE_E_SUCCESS)
+    {
+        LOG(LOG_ERROR, "Failed to get device list");
+        return -1;
+    }
+    if (count == 0)
+    {
+        LOG(LOG_DEBUG, "No devices in normal mode found, looking for recovery/DFU devices");
+        if (findUSBDevice(device, waiting) != 0) {
+            return -1;
+        }
+        if (device->mode == MODE_RECOVERY) {
+            if (!getRecoveryDeviceIntoDFU(device)) { return -1; }
+        }
+        return 0;
+    }
+    if (count > 1)
+    {
+        LOG(LOG_ERROR, "More than one device found, Achilles currently does not support multiple device connections at once.");
+        return -1;
+    }
+    char *udid = deviceIDs[0];
+	lockdownd_client_t lockdown = NULL;
+	if (idevice_new(&idevice, udid) != IDEVICE_E_SUCCESS) {
+		LOG(LOG_ERROR, "Could not connect to device");
+		return -1;
+	}
+    LOG(LOG_SUCCESS, "Found device in normal mode, entering recovery mode");
+    lockdownd_error_t ldret = lockdownd_client_new(idevice, &lockdown, "Achilles");
+    if (ldret != LOCKDOWN_E_SUCCESS) {
+        LOG(LOG_ERROR, "Could not connect to lockdownd: %s", lockdownd_strerror(ldret));
+        return -1;
+    }
+    ldret = lockdownd_enter_recovery(lockdown);
+    if (ldret == LOCKDOWN_E_SESSION_INACTIVE) {
+        lockdownd_client_free(lockdown);
+        lockdown = NULL;
+        ldret = lockdownd_client_new_with_handshake(idevice, &lockdown, "Achilles");
+        if (ldret != LOCKDOWN_E_SUCCESS) {
+            LOG(LOG_ERROR, "Could not connect to lockdownd: %s", lockdownd_strerror(ldret));
+            return -1;
+        }
+        ldret = lockdownd_enter_recovery(lockdown);
+    }
+    if (ldret != LOCKDOWN_E_SUCCESS) {
+        LOG(LOG_ERROR, "Could not trigger entering recovery mode: %s", lockdownd_strerror(ldret));
+        return -1;
+    }
+    lockdownd_client_free(lockdown);
+    idevice_free(idevice);
+    sleep(5);
+    waitForDeviceInMode(device, MODE_RECOVERY, 10);
+    
+    if (!getRecoveryDeviceIntoDFU(device)) { return -1; }
+    
+	return 0;
+}
+
 int waitForDeviceInMode(device_t *device, DeviceMode mode, int timeout) {
     int i = 0;
     while (1) {
-        if (findDevice(device, true) == 0 && device->mode == mode) {
+        if (findUSBDevice(device, true) == 0 && device->mode == mode) {
             return 0;
         }
         if (i >= timeout) {
