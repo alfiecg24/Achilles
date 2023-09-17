@@ -52,6 +52,12 @@ Options:
 * `-R, --custom-ramdisk RAMDISK_PATH` - Uses a custom ramdisk file instead of the one included in the program.
 * `-O, --custom-overlay OVERLAY_PATH` - Uses a custom overlay file instead of the one included in the program.
 
+If compiled with `make DEBUG=-DDEBUG`, Achilles features two extra arguments:
+```sh
+-o, --custom-overwrite: Use a custom overwrite file
+-P, --custom-payload: Use a custom payload file
+```
+By using these, you are on your own and I cannot guarantee that the exploit will work as expected, and as such will not offer any support. If you are booting YoloDFU using a custom overwrite and payload, you will need to pass `-p` as well, so that the program knows not to send certain transfers that will cause the YoloDFU payload to not work. You can see this inside the `checkm8SendPayload()` function in `src/exploit/exploit.c`.
 ## Dependencies
 * [libimobiledevice](https://github.com/libimobiledevice/libimobiledevice)
 * gobjcopy

@@ -1,9 +1,10 @@
-.PHONY: all dirs pongo payloads libusb Achilles clean
+.PHONY: all clean
 CC=gcc
 SOURCES=src/main.c src/exploit/*.c src/usb/*.c src/utils/*.c src/exploit/payloads/*.c src/boot/pongo/*.c src/boot/lz4/*.c
 FRAMEWORKS=-framework IOKit -framework CoreFoundation -limobiledevice-1.0
 OUTPUT=build/Achilles
 CFLAGS=-Iinclude -Wunused
+DEBUG=
 
 all: dirs pongo payloads Achilles
 
@@ -53,11 +54,11 @@ clean:
 	@cd src/PongoOS && make clean
 
 libusb:
-	@cd . && make dirs
-	@cd . && make pongo
-	@cd . && make payloads
+	@make dirs
+	@make pongo
+	@make payloads
 	@echo "Building Achilles for libusb"
-	@$(CC) $(FRAMEWORKS) $(CFLAGS) -lusb-1.0 -DACHILLES_LIBUSB -o $(OUTPUT) $(SOURCES)
+	@$(CC) $(FRAMEWORKS) $(CFLAGS) $(DEBUG) -lusb-1.0 -DACHILLES_LIBUSB -o $(OUTPUT) $(SOURCES)
 	@$(RM) -r include/exploit/payloads/gaster
 	@$(RM) -r include/boot/payloads
 	@$(RM) -r include/kernel/patchfinder
@@ -66,7 +67,8 @@ libusb:
 
 Achilles: $(SOURCES)
 	@echo "Building Achilles for IOKit"
-	@$(CC) $(FRAMEWORKS) $(CFLAGS) -o $(OUTPUT) $(SOURCES)
+	@make payloads
+	@$(CC) $(FRAMEWORKS) $(CFLAGS) $(DEBUG) -o $(OUTPUT) $(SOURCES)
 	@$(RM) -r include/exploit/payloads/gaster
 	@$(RM) -r include/boot/payloads
 	@$(RM) -r include/kernel/patchfinder

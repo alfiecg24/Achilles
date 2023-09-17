@@ -16,7 +16,13 @@ arg_t args[] = {
     {"Override Pongo", "-k", "--override-pongo", "Use a custom Pongo.bin file", NULL, false, FLAG_STRING, NULL},
     {"Custom kernel patchfinder", "-K", "--custom-kpf", "Use a custom kernel patchfinder file", NULL, false, FLAG_STRING, NULL},
     {"Custom ramdisk", "-R", "--custom-ramdisk", "Use a custom ramdisk file", NULL, false, FLAG_STRING, NULL},
+    #ifdef DEBUG
+    {"Custom overlay", "-O", "--custom-overlay", "Use a custom overlay file", NULL, false, FLAG_STRING, NULL},
+    {"Custom overwrite", "-o", "--custom-overwrite", "Use a custom overwrite file", NULL, false, FLAG_STRING, NULL},
+    {"Custom payload", "-P", "--custom-payload", "Use a custom payload file", NULL, false, FLAG_STRING, NULL}
+    #else
     {"Custom overlay", "-O", "--custom-overlay", "Use a custom overlay file", NULL, false, FLAG_STRING, NULL}
+    #endif
     };
 
 arg_t *getArgumentByName(char *name)
