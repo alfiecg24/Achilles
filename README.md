@@ -16,6 +16,42 @@ Achilles has support for both IOKit and libusb as a USB backend. To compile with
 
 Jailbreaking with palera1n is experimental and Achilles does not support certain options that the palera1n program provides support for (such as `--force-revert`), but so far has worked fine for my device.
 
+## Usage
+
+```sh
+➜  ~ Achilles -h
+Usage: Achilles [options]
+Options:
+	-v, --verbosity: Verbosity level, maximum of 2 (e.g. -vv, --verbosity 2)
+	-d, --debug: Enable debug logging
+	-h, --help: Show this help message
+	-q, --quick: Don't ask for confirmation during the program
+	-e, --exploit: Exploit with checkm8 and exit
+	-p, --pongo: Boot to PongoOS and exit
+	-j, --jailbreak: Jailbreak rootless using palera1n kpf, ramdisk and overlay
+	-V, --verbose-boot: Boot device with verbose boot
+	-s, --serial: Enable serial output from the device when booting
+	-b, --boot-args: Boot arguments to pass to PongoOS
+	-k, --override-pongo: Use a custom Pongo.bin file
+	-K, --custom-kpf: Use a custom kernel patchfinder file
+	-R, --custom-ramdisk: Use a custom ramdisk file
+	-O, --custom-overlay: Use a custom overlay file
+```
+
+* `-v, --verbosity VERBOSITY` - Sets the verbosity level of the program. This can be set to 0, 1 or 2, with 0 being no verbose output, 1 being verbose output and 2 being verbose output with extra information (function name, file). This can also be set by using `-v` or `-vv` instead of `--verbosity 1` or `--verbosity 2` respectively.
+* `-d, --debug` - Enables debug logging, which will print out extra information about the program's execution. This is useful if you are editing the code yourself and are trying to debug an issue.
+* `-q, --quick` - Disables confirmation prompts during the program, such as the prompt to enter recovery mode or to start the exploit.
+* `-e, --exploit` - Runs the checkm8 exploit and then exits. This is used if you want to use the exploit to patch signature checks on a checkm8 device.
+* `-p, --pongo` - Boots to the PongoOS environment only.
+* `-j, --jailbreak` - Boots to the PongoOS environment and then jailbreaks rootless using palera1n.
+* `-V, --verbose-boot` - Boots the device with verbose boot. This is useful if you want to see the boot logs of the device, but also just looks pretty cool.
+* `-s, --serial` - Enables serial output from the device when booting. This is useful if you are debugging PongoOS/YoloDFU mode and need extra output, and also enables verbose logs during the boot process.
+* `-b, --boot-args BOOT_ARGS` - Passes boot arguments to PongoOS. This is useful if you want to boot with a custom boot argument, such as `wdt=-1` to disable the watchdog timer.
+* `-k, --override-pongo PONGO_PATH` - Uses a custom Pongo.bin file instead of the one included in the program.
+* `-K, --custom-kpf KPF_PATH` - Uses a custom kernel patchfinder file instead of the one included in the program.
+* `-R, --custom-ramdisk RAMDISK_PATH` - Uses a custom ramdisk file instead of the one included in the program.
+* `-O, --custom-overlay OVERLAY_PATH` - Uses a custom overlay file instead of the one included in the program.
+
 ## Dependencies
 * [libimobiledevice](https://github.com/libimobiledevice/libimobiledevice)
 * gobjcopy
