@@ -14,7 +14,7 @@ dirs:
 
 pongo:
 	@echo "Building PongoOS"
-	@cd src/PongoOS && make clean && make
+	@cd src/PongoOS && make
 
 payloads:
 	@echo "Building payloads"
@@ -48,7 +48,6 @@ payloads:
 	@cp src/kernel/patchfinder/kpf-palera1n.h include/kernel/patchfinder/kpf-palera1n.h
 	@$(RM) src/kernel/patchfinder/kpf-palera1n.h
 
-	
 clean:
 	@rm -rf build
 	@cd src/PongoOS && make clean
@@ -59,18 +58,8 @@ libusb:
 	@make payloads
 	@echo "Building Achilles for libusb"
 	@$(CC) $(FRAMEWORKS) $(CFLAGS) $(DEBUG) -lusb-1.0 -DACHILLES_LIBUSB -o $(OUTPUT) $(SOURCES)
-	@$(RM) -r include/exploit/payloads/gaster
-	@$(RM) -r include/boot/payloads
-	@$(RM) -r include/kernel/patchfinder
-	@$(RM) -r include/userland/jbinit
-	@$(RM) -r include/boot/pongo/headers
 
 Achilles: $(SOURCES)
 	@echo "Building Achilles for IOKit"
 	@make payloads
 	@$(CC) $(FRAMEWORKS) $(CFLAGS) $(DEBUG) -o $(OUTPUT) $(SOURCES)
-	@$(RM) -r include/exploit/payloads/gaster
-	@$(RM) -r include/boot/payloads
-	@$(RM) -r include/kernel/patchfinder
-	@$(RM) -r include/userland/jbinit
-	@$(RM) -r include/boot/pongo/headers

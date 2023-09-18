@@ -4,3 +4,6 @@ build/
 bins/
 nocommit-*
 xcuserdata
+headers/
+include/kernel/patchfinder/
+include/userland/jbinit
