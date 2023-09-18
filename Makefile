@@ -1,9 +1,12 @@
-.PHONY: all clean
+.PHONY: all clean tests
 CC=gcc
 SOURCES=src/main.c src/exploit/*.c src/usb/*.c src/utils/*.c src/exploit/payloads/*.c src/boot/pongo/*.c src/boot/lz4/*.c
+TESTS_MAIN=tests/main.c
 FRAMEWORKS=-framework IOKit -framework CoreFoundation -limobiledevice-1.0
 OUTPUT=build/Achilles
+TEST_OUTPUT=tests/build/Achilles-tests
 CFLAGS=-Iinclude -Wunused
+TEST_FLAGS=-DTESTS -e_tests
 DEBUG=
 
 all: dirs pongo payloads Achilles
@@ -59,7 +62,15 @@ libusb:
 	@echo "Building Achilles for libusb"
 	@$(CC) $(FRAMEWORKS) $(CFLAGS) $(DEBUG) -lusb-1.0 -DACHILLES_LIBUSB -o $(OUTPUT) $(SOURCES)
 
+tests:
+	@mkdir -p tests/build
+	@make payloads
+	@echo "Building Achilles tests for IOKit"
+	@$(CC) $(FRAMEWORKS) $(CFLAGS) $(DEBUG) $(TEST_FLAGS) -o $(TEST_OUTPUT)-IOKit $(TESTS_MAIN) $(SOURCES)
+	@echo "Building Achilles tests for libusb"
+	@$(CC) $(FRAMEWORKS) $(CFLAGS) $(DEBUG) $(TEST_FLAGS) -lusb-1.0 -DACHILLES_LIBUSB -o $(TEST_OUTPUT)-libusb $(TESTS_MAIN) $(SOURCES)
+
 Achilles: $(SOURCES)
 	@echo "Building Achilles for IOKit"
 	@make payloads
-	@$(CC) $(FRAMEWORKS) $(CFLAGS) $(DEBUG) -o $(OUTPUT) $(SOURCES)
+	@$(CC) $(FRAMEWORKS) $(CFLAGS) $(DEBUG)-o $(OUTPUT) $(SOURCES)

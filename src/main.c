@@ -23,7 +23,7 @@ arg_t args[] = {
     #else
     {"Custom overlay", "-O", "--custom-overlay", "Use a custom overlay file", NULL, false, FLAG_STRING, NULL}
     #endif
-    };
+};
 
 arg_t *getArgumentByName(char *name)
 {
