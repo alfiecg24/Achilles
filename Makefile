@@ -73,4 +73,4 @@ tests:
 Achilles: $(SOURCES)
 	@echo "Building Achilles for IOKit"
 	@make payloads
-	@$(CC) $(FRAMEWORKS) $(CFLAGS) $(DEBUG)-o $(OUTPUT) $(SOURCES)
+	@$(CC) $(FRAMEWORKS) $(CFLAGS) $(DEBUG) -o $(OUTPUT) $(SOURCES)
