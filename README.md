@@ -75,12 +75,12 @@ The regular gaster exploit should support A7-11 as well as T2, and booting Pongo
 * iPhone X (A11) - regular exploit, PongoOS
 * iPad Pro 10.5" (A10X) - regular exploit, PongoOS
 * iPad Pro 12.9" (A10X) - regular exploit, PongoOS
+* iPhone 7 (A10) - regular exploit, PongoOS
 * iPad Pro 9.7" (A9X) - regular exploit, PongoOS
 * iPhone 6 (A8) - regular exploit, PongoOS
 
 SoCs that still need testing are as follows:
 * T2 (Macs) - regular exploit
-* A10 (iPhone 7 (Plus), iPad 6) - regular exploit, PongoOS
 * A9 (iPhone 6S (Plus), iPhone SE, iPad 5) - regular exploit, PongoOS
 * A8X (iPad Air 2) - regular exploit, PongoOS
 * A7 (iPhone 5S, iPad Air, iPad Mini 2/3) - regular exploit
