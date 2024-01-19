@@ -8,9 +8,8 @@ void sleep_ms(unsigned ms) {
 }
 
 void close_usb_handle(usb_handle_t *handle) {
-	libusb_release_interface(handle->device, 0);
 	libusb_close(handle->device);
-	libusb_exit(handle->context);
+	libusb_exit(NULL);
 }
 
 void reset_usb_handle(usb_handle_t *handle) {
@@ -18,11 +17,10 @@ void reset_usb_handle(usb_handle_t *handle) {
 }
 
 bool wait_usb_handle(usb_handle_t *handle) {
-	if (libusb_init(NULL) == LIBUSB_SUCCESS) {
-		for (;;) {
-			if ((handle->device = libusb_open_device_with_vid_pid(NULL, handle->vid, handle->pid)) != NULL) {
-				LOG(LOG_INFO, "Opened device 0x%X, 0x%X", handle->vid, handle->pid);
-				if (libusb_set_configuration(handle->device, 1) == LIBUSB_SUCCESS) {
+	if(libusb_init(NULL) == LIBUSB_SUCCESS) {
+		for(;;) {
+			if((handle->device = libusb_open_device_with_vid_pid(NULL, handle->vid, handle->pid)) != NULL) {
+				if(libusb_set_configuration(handle->device, 1) == LIBUSB_SUCCESS) {
 					return true;
 				}
 				libusb_close(handle->device);
@@ -31,6 +29,10 @@ bool wait_usb_handle(usb_handle_t *handle) {
 		}
 	}
 	return false;
+}
+
+void usb_async_callback(struct libusb_transfer *transfer) {
+	*(int *)transfer->user_data = 1;
 }
 
 bool send_usb_control_request(const usb_handle_t *handle, uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, void *pData, size_t wLength, transfer_ret_t *transferRet) {
@@ -47,10 +49,6 @@ bool send_usb_control_request(const usb_handle_t *handle, uint8_t bmRequestType,
 		}
 	}
 	return true;
-}
-
-void usb_async_callback(struct libusb_transfer *transfer) {
-	*(int *)transfer->user_data = 1;
 }
 
 bool send_usb_control_request_async(const usb_handle_t *handle, uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, void *pData, size_t wLength, unsigned usbAbortTimeout, transfer_ret_t *transferRet) {
@@ -99,7 +97,6 @@ void init_usb_handle(usb_handle_t *handle, uint16_t vid, uint16_t pid) {
 	handle->vid = vid;
 	handle->pid = pid;
 	handle->device = NULL;
-	handle->context = NULL;
 }
 
 bool send_usb_bulk_upload(usb_handle_t *handle, void *buffer, size_t length) {

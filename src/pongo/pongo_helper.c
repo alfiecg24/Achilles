@@ -88,6 +88,7 @@ bool upload_file_to_pongo(usb_handle_t *handle, const char *path) {
     bool ret = false;
     transfer_ret_t transferRet;
     ret = send_usb_control_request(handle, 0x21, DFU_DNLOAD, 0, 0, (unsigned char *)&length, 4, &transferRet);
+    LOG(LOG_INFO, "About to send 0x%lx bytes.", length);
     if (transferRet.ret == USB_TRANSFER_OK) {
         ret = send_usb_bulk_upload(handle, buffer, length);
     }
