@@ -8,7 +8,6 @@ Work-in-progress rewrite of Achilles, with a focus on clean code and portability
 
 # To-do
 * Fix payload generation for T8011
-* Fix having to replug device after sending PongoOS
 * Fix PongoOS crash after sending kernel patchfinder
 
 This is currently unfinished and untested, so use at your own risk. If in doubt, use the `main` branch.
