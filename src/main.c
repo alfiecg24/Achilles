@@ -47,8 +47,8 @@ void print_usage(char *executablePath) {
 }
 
 bool check_for_argument_conflicts(struct AchillesArgs args, char *argv0) {
-    if (args.jailbreak && !(args.ramdiskPath && args.overlayPath && args.kpfPath)) {
-        LOG(LOG_ERROR, "-j requires -R, -K and -O.");
+    if (args.jailbreak && !args.kpfPath) {
+        LOG(LOG_ERROR, "-j requires -K.");
         print_usage(argv0);
         return false;
     }
