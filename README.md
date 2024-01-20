@@ -5,6 +5,7 @@ Work-in-progress rewrite of Achilles, with a focus on clean code and portability
 # Features
 * Patch signature checks with gaster payloads
 * Boot PongoOS on supported devices
+* Jailbreak with supplied kernel patchfinder, ramdisk and overlay
 
 # To-do
 * Fix payload generation for T8011
