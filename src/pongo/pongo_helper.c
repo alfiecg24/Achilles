@@ -218,7 +218,34 @@ bool pongo_jailbreak(usb_handle_t *handle) {
     }
 
     // Set boot arguments
-    char *bootArgs = args.ramdiskPath ? "xargs rootdev=md0" : args.verboseBoot ? "xargs -v" : "xargs";
+    char *bootArgs = "xargs";
+    if (args.jailbreak && args.ramdiskPath) {
+        char *newBootArgs = malloc(strlen(bootArgs) + 12);
+        if (newBootArgs == NULL) {
+            LOG(LOG_ERROR, "Failed to allocate memory for boot arguments.");
+            return false;
+        }
+        snprintf(newBootArgs, strlen(bootArgs) + 12, "%s rootdev=md0", bootArgs);
+        bootArgs = newBootArgs;
+    }
+    if (args.verboseBoot) {
+        char *newBootArgs = malloc(strlen(bootArgs) + 4);
+        if (newBootArgs == NULL) {
+            LOG(LOG_ERROR, "Failed to allocate memory for boot arguments.");
+            return false;
+        }
+        snprintf(newBootArgs, strlen(bootArgs) + 4, "%s -v", bootArgs);
+        bootArgs = newBootArgs;
+    }
+    if (args.serialOutput) {
+        char *newBootArgs = malloc(strlen(bootArgs) + 10);
+        if (newBootArgs == NULL) {
+            LOG(LOG_ERROR, "Failed to allocate memory for boot arguments.");
+            return false;
+        }
+        snprintf(newBootArgs, strlen(bootArgs) + 10, "%s serial=3", bootArgs);
+        bootArgs = newBootArgs;
+    }
     if (args.bootArgs) {
         char *newBootArgs = malloc(strlen(args.bootArgs) + strlen(bootArgs) + 2);
         if (newBootArgs == NULL) {
@@ -228,7 +255,7 @@ bool pongo_jailbreak(usb_handle_t *handle) {
         snprintf(newBootArgs, strlen(args.bootArgs) + strlen(bootArgs) + 2, "%s %s", bootArgs, args.bootArgs);
         bootArgs = newBootArgs;
     }
-    if (args.bootArgs || args.ramdiskPath || args.verboseBoot) {
+    if (args.bootArgs || args.ramdiskPath || args.verboseBoot || args.serialOutput) {
         issue_pongo_command(handle, bootArgs);
     }
 

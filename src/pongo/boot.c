@@ -12,6 +12,7 @@ void wait_for_device_to_enter_yolo_dfu(usb_handle_t *handle) {
     }
     while (!dfu_serial_number_is_in_yolo_dfu(serialNumber)) {
         wait_usb_handle(handle);
+        free(serialNumber);
         serialNumber = get_usb_device_serial_number(handle);
         close_usb_handle(handle);
         if (serialNumber == NULL) {
@@ -51,10 +52,12 @@ bool send_pongo_to_yolo_dfu(usb_handle_t *handle) {
             close_usb_handle(handle);
             init_usb_handle(handle, 0x5AC, 0x4141);
             wait_usb_handle(handle);
+            free(pongoData);
             LOG(LOG_SUCCESS, "Device is now in PongoOS!");
             ret = true;
         }
         else {
+            free(pongoData);
             LOG(LOG_ERROR, "Device is not in Yolo DFU mode!");
         }
     }
