@@ -60,7 +60,7 @@ bad:
 }
 
 int issue_pongo_command(usb_handle_t *handle, char *command) {
-    return issue_pongo_command_internal(handle, command, 100);
+    return issue_pongo_command_internal(handle, command, 0);
 }
 
 int issue_pongo_command_delayed(usb_handle_t *handle, char *command) {
