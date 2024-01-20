@@ -17,6 +17,9 @@ bool argument_exists(int argc, char *argv[], const char *flag)
 {
     for (int i = 0; i < argc; i++) {
         if (!strcmp(argv[i], flag)) {
+            if (!strcmp(flag, "-v") && (i - 1 > 0) && !strcmp(argv[i - 1], "-b")) { // -v is a valid boot argument
+                return false;
+            }
             return true;
         }
     }
