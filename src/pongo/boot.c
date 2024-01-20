@@ -1,5 +1,5 @@
 #include <pongo/boot.h>
-#include <pongo/pongo.h> // This can only be included in the boot.c file, not the boot.h file.
+#include <pongo/pongo_helper.h>
 
 void wait_for_device_to_enter_yolo_dfu(usb_handle_t *handle) {
     char *serialNumber = NULL;
@@ -25,8 +25,12 @@ void wait_for_device_to_enter_yolo_dfu(usb_handle_t *handle) {
 }
 
 bool send_pongo_to_yolo_dfu(usb_handle_t *handle) {
-    unsigned char *pongoData = (unsigned char *)pongo_bin;
-    size_t pongoSize = pongo_bin_len;
+    unsigned char *pongoData = NULL;
+    size_t pongoSize = 0;
+    if (!prepare_pongo(&pongoData, &pongoSize) || pongoData == NULL || pongoSize == 0) {
+        LOG(LOG_ERROR, "Failed to prepare PongoOS.");
+        return false;
+    }
     bool ret = false;
     if (wait_usb_handle(handle)) {
         if (dfu_serial_number_is_in_yolo_dfu(get_usb_device_serial_number(handle))) {

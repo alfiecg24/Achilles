@@ -1,4 +1,81 @@
 #include <pongo/pongo_helper.h>
+#include <pongo/shellcode.h>
+#include <pongo/pongo.h>
+#include <pongo/lz4/lz4hc.h>
+
+// All credits go to @mineekdev for their openra1n project,
+// which provided the template for this code.
+
+bool prepare_pongo(unsigned char **pongoBuf, size_t *size)
+{
+    size_t shellcodeSize, pongoSize;
+    void *shellcode, *pongo;
+
+    // The shellcode that is appended to the beginning of the
+    // LZ4-compressed Pongo is actually an LZ4 decompressor
+    // that decompresses the Pongo image into memory.
+    // It is, in effect, a self-extracting payload.
+
+    shellcodeSize = decompressor_shellcode_len;
+    shellcode = malloc(shellcodeSize);
+    memcpy(shellcode, decompressor_shellcode, shellcodeSize);
+
+
+    // Get PongoOS
+    char *pongoPath;
+    if (args.pongoPath) {
+        FILE *pongoFile;
+        pongoFile = fopen(args.pongoPath, "rb");
+        if (pongoFile == NULL)
+        {
+            LOG(LOG_ERROR, "Failed to open PongoOS file (%s)", pongoPath);
+            return false;
+        }
+        fseek(pongoFile, 0, SEEK_END);
+        pongoSize = ftell(pongoFile);
+        rewind(pongoFile);
+        if (pongoSize >= 0x7fe00) {
+            LOG(LOG_ERROR, "PongoOS is too large, must be less than 0x7fe00 bytes but is 0x%X bytes", pongoSize);
+            return false;
+        }
+        pongo = malloc(pongoSize);
+        fread(pongo, pongoSize, 1, pongoFile);
+        fclose(pongoFile);
+    } else {
+        pongoSize = pongo_bin_len;
+        pongo = malloc(pongoSize);
+        memcpy(pongo, pongo_bin, pongoSize);
+    }
+
+    // Compress PongoOS
+    char *pongoCompressed = malloc(pongoSize);
+    LOG(LOG_VERBOSE, "Compressing PongoOS");
+    pongoSize = LZ4_compress_HC(pongo, pongoCompressed, pongoSize, pongoSize, LZ4HC_CLEVEL_MAX);
+    if (pongoSize == 0) {
+        LOG(LOG_ERROR, "Failed to compress PongoOS");
+        return false;
+    }
+
+    // Add shellcode to PongoOS
+    LOG(LOG_VERBOSE, "Adding shellcode to PongoOS");
+    void *tmp = malloc(pongoSize + shellcodeSize);
+    memcpy(tmp, shellcode, shellcodeSize);
+    memcpy(tmp + shellcodeSize, pongoCompressed, pongoSize);
+    free(pongo);
+    pongo = tmp;
+    pongoSize += shellcodeSize;
+    free(shellcode);
+
+    // Write size of compressed Pongo into data for decompressor
+    uint32_t *pongoSizeInData = (uint32_t *)(pongo + 0x1fc);
+    *pongoSizeInData = pongoSize - shellcodeSize;
+
+    // Update parameters
+    *pongoBuf = pongo;
+    *size = pongoSize;
+
+    return true;
+}
 
 int issue_pongo_command_internal(usb_handle_t *handle, char *command, unsigned waitTime)
 {

@@ -87,21 +87,21 @@ bool check_custom_paths(struct AchillesArgs args) {
 
     if (args.kpfPath) {
         if (stat(args.kpfPath, &st) != 0) {
-            LOG(LOG_ERROR, "kernel patchfinder at %s does not exist", args.kpfPath);
+            LOG(LOG_ERROR, "Kernel patchfinder at %s does not exist", args.kpfPath);
             return false;
         }
     }
 
     if (args.ramdiskPath) {
         if (stat(args.ramdiskPath, &st) != 0) {
-            LOG(LOG_ERROR, "ramdisk at %s does not exist.", args.ramdiskPath);
+            LOG(LOG_ERROR, "Ramdisk at %s does not exist.", args.ramdiskPath);
             return false;
         }
     }
 
     if (args.overlayPath) {
         if (stat(args.overlayPath, &st) != 0) {
-            LOG(LOG_ERROR, "overlay at %s does not exist.", args.overlayPath);
+            LOG(LOG_ERROR, "Overlay at %s does not exist.", args.overlayPath);
             return false;
         }
     }
