@@ -1,7 +1,7 @@
 #ifndef USB_H
 #define USB_H
 
-#include <CoreFoundation/CoreFoundation.h>
+#include <fcntl.h>
 
 #include <Achilles.h>
 #include <utils/log.h>
