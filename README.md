@@ -46,7 +46,7 @@ Achilles requires the following dependencies:
 
 To build, run `make` in the root directory. This will output the final product to `build/Achilles`.
 
-To install to `/usr/local/bin`, run `sudo make install`.
+To install to `/usr/local/bin`, run `make install` (you will be prompted for your password).
 
 # Credits
 * [checkra1n](https://checkra.in) - YoloDFU payloads and PongoOS

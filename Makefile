@@ -12,7 +12,7 @@ Achilles: $(SOURCES)
 
 install: Achilles
 	@mkdir -p /usr/local/bin
-	@cp $(OUTPUT) /usr/local/bin/Achilles
+	@sudo cp $(OUTPUT) /usr/local/bin/Achilles
 
 clean:
 	@rm -rf build
