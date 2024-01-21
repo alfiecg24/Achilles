@@ -16,7 +16,6 @@ Achilles is a checkm8 utility for macOS (subject to change) that offers a select
 ```
 ➜  ~ Achilles -h  
 Options:
-        -u <UDID> - specify a device UDID
         -d - enable debug logging
         -v - enable verbose logging
         -q - enable quiet logging (removes all logging except for errors)
@@ -26,7 +25,8 @@ Options:
         -V - enable verbose boot
         -S - enable serial output
 
-        -b - additional boot arguments
+        -u <UDID> - specify a device UDID
+        -b <arguments> - additional boot arguments
         -k <Pongo.bin> - override PongoOS image
         -K <kpf> - override kernel patchfinder
         -R <ramdisk.dmg> - ramdisk to boot
@@ -35,7 +35,7 @@ Options:
         -h - print this help message
 Examples:
         Achilles -p
-        Achilles -j -R ramdisk.dmg -O overlay.dmg
+        Achilles -j -K kpf -R ramdisk.dmg -O overlay.dmg
         Achilles -s
 ```
 
@@ -45,6 +45,8 @@ Achilles requires the following dependencies:
 * libusb
 
 To build, run `make` in the root directory. This will output the final product to `build/Achilles`.
+
+To install to `/usr/local/bin`, run `sudo make install`.
 
 # Credits
 * [checkra1n](https://checkra.in) - YoloDFU payloads and PongoOS

@@ -28,7 +28,6 @@ bool argument_exists(int argc, char *argv[], const char *flag)
 
 void print_usage(char *executablePath) {
     printf("Options:\n");
-    printf("\t-u <UDID> - specify a device UDID\n");
     printf("\t-d - enable debug logging\n");
     printf("\t-v - enable verbose logging\n");
     printf("\t-q - enable quiet logging (removes all logging except for errors)\n");
@@ -37,7 +36,8 @@ void print_usage(char *executablePath) {
     printf("\t-j - jailbreak the device (requires -K)\n");
     printf("\t-V - enable verbose boot\n");
     printf("\t-S - enable serial output\n\n");
-    printf("\t-b - additional boot arguments\n");
+    printf("\t-u <UDID> - specify a device UDID\n");
+    printf("\t-b <arguments> - additional boot arguments\n");
     printf("\t-k <Pongo.bin> - override PongoOS image\n");
     printf("\t-K <kpf> - override kernel patchfinder\n");
     printf("\t-R <ramdisk.dmg> - ramdisk to boot\n");
@@ -45,7 +45,7 @@ void print_usage(char *executablePath) {
     printf("\t-h - print this help message\n");
     printf("Examples:\n");
     printf("\t%s -p\n", executablePath);
-    printf("\t%s -j -R ramdisk.dmg -O overlay.dmg\n", executablePath);
+    printf("\t%s -j -K kpf -R ramdisk.dmg -O overlay.dmg\n", executablePath);
     printf("\t%s -s\n", executablePath);
     exit(-1);
 }

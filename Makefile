@@ -10,5 +10,9 @@ Achilles: $(SOURCES)
 	@mkdir -p build
 	$(CC) $(CFLAGS) -o $(OUTPUT) $(SOURCES)
 
+install: Achilles
+	@mkdir -p /usr/local/bin
+	@cp $(OUTPUT) /usr/local/bin/Achilles
+
 clean:
 	@rm -rf build
