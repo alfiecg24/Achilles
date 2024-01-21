@@ -22,7 +22,7 @@ bool wait_for_device_to_enter_yolo_dfu(usb_handle_t *handle) {
         }
         sleep_ms(100);
         totalTime += 100;
-        if (totalTime >= 10000) {
+        if (totalTime >= 15000) {
             LOG(LOG_ERROR, "Device failed to enter Yolo DFU mode.");
             return false;
         }
