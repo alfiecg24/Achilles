@@ -2,6 +2,8 @@
 
 Achilles is a checkm8 utility for macOS (subject to change) that offers a selection of tools for vulnerable devices.
 
+If you want to read more about the checkm8 exploit, check out my [blog post](https://alfiecg.uk/2023/07/21/A-comprehensive-write-up-of-the-checkm8-BootROM-exploit.html).
+
 # Features
 * Patch signature checks with gaster payloads
 * Boot PongoOS on supported devices
