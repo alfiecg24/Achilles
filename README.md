@@ -1,8 +1,6 @@
-# Achilles-v2
+# Achilles
 
-Work-in-progress rewrite of Achilles, with a focus on clean code and portability. A proper release announcement will be made when it's ready.
-
-This is currently unfinished and untested, so use at your own risk. If in doubt, use the `main` branch.
+Achilles is a checkm8 utility for macOS (subject to change) that offers a selection of tools for vulnerable devices.
 
 # Features
 * Patch signature checks with gaster payloads
@@ -14,9 +12,43 @@ This is currently unfinished and untested, so use at your own risk. If in doubt,
 * iPhone X, A11
 * iPad Pro 10.5", A10X
 
+# Usage
+```
+➜  ~ Achilles -h  
+Options:
+        -u <UDID> - specify a device UDID
+        -d - enable debug logging
+        -v - enable verbose logging
+        -q - enable quiet logging (removes all logging except for errors)
+        -s - remove signature checks
+        -p - boot to PongoOS and exit
+        -j - jailbreak the device (requires -K)
+        -V - enable verbose boot
+        -S - enable serial output
+
+        -b - additional boot arguments
+        -k <Pongo.bin> - override PongoOS image
+        -K <kpf> - override kernel patchfinder
+        -R <ramdisk.dmg> - ramdisk to boot
+        -O <overlay.dmg> - overlay to boot
+
+        -h - print this help message
+Examples:
+        Achilles -p
+        Achilles -j -R ramdisk.dmg -O overlay.dmg
+        Achilles -s
+```
+
+# Building
+Achilles requires the following dependencies:
+* libimobiledevice
+* libusb
+
+To build, run `make` in the root directory. This will output the final product to `build/Achilles`.
+
 # Credits
 * [checkra1n](https://checkra.in) - YoloDFU payloads and PongoOS
 * [0x7ff](https://github.com/0x7FF) - gaster
 * [Mineek](https://github.com/Mineek) - openra1n
 * [axi0mX](https://github.com/axi0mX) - checkm8 exploit
-* [palera1n](https://palera.in) - DFU helper
+* [palera1n](https://palera.in) - DFU helper, libimobiledevice code
