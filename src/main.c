@@ -143,9 +143,7 @@ int main(int argc, char *argv[]) {
 
     LOG(LOG_SUCCESS, "Achilles v2 we out here!!");
 
-    usb_handle_t handle;
-    init_usb_handle(&handle, 0x5AC, 0x1227);
-    checkm8(&handle, (args.bootToPongo || args.jailbreak) ? MODE_PONGOOS : MODE_CHECKM8);
+    checkm8((args.bootToPongo || args.jailbreak) ? MODE_PONGOOS : MODE_CHECKM8);
 
     return 0;
 }

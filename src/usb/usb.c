@@ -16,7 +16,13 @@ void reset_usb_handle(usb_handle_t *handle) {
 	libusb_reset_device(handle->device);
 }
 
+extern bool stopThreads;
+
 bool wait_usb_handle(usb_handle_t *handle) {
+	if (stopThreads) { 
+		LOG(LOG_ERROR, "Thread stopped.");
+		return false;
+	}
 	if(libusb_init(NULL) == LIBUSB_SUCCESS) {
 		for(;;) {
 			if((handle->device = libusb_open_device_with_vid_pid(NULL, handle->vid, handle->pid)) != NULL) {

@@ -141,7 +141,7 @@ int issue_pongo_command(usb_handle_t *handle, char *command) {
 }
 
 int issue_pongo_command_delayed(usb_handle_t *handle, char *command) {
-    return issue_pongo_command_internal(handle, command, 500);
+    return issue_pongo_command_internal(handle, command, 750);
 }
 
 bool upload_file_to_pongo(usb_handle_t *handle, const char *path) {
@@ -188,7 +188,6 @@ bool upload_file_to_pongo(usb_handle_t *handle, const char *path) {
 }
 
 bool pongo_jailbreak(usb_handle_t *handle) {
-
     issue_pongo_command(handle, "fuse lock");
     issue_pongo_command_delayed(handle, "sep auto");
 

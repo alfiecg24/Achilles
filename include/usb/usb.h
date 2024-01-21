@@ -7,7 +7,7 @@
 #include <utils/log.h>
 #include <libusb-1.0/libusb.h>
 
-#define USB_TIMEOUT 5
+#define USB_TIMEOUT 10
 
 typedef struct {
 	uint16_t vid, pid;
