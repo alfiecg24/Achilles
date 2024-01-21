@@ -45,6 +45,7 @@ bool send_usb_bulk_upload(usb_handle_t *handle, void *buffer, size_t length);
 
 void init_usb_handle(usb_handle_t *handle, uint16_t vid, uint16_t pid);
 bool wait_usb_handle(usb_handle_t *handle);
+bool wait_usb_handle_with_timeout(usb_handle_t *handle, unsigned timeout);
 void reset_usb_handle(usb_handle_t *handle);
 void close_usb_handle(usb_handle_t *handle);
 

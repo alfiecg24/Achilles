@@ -13,6 +13,7 @@ void close_usb_handle(usb_handle_t *handle) {
 }
 
 void reset_usb_handle(usb_handle_t *handle) {
+	wait_usb_handle_with_timeout(handle, 500);
 	libusb_reset_device(handle->device);
 }
 
@@ -32,6 +33,26 @@ bool wait_usb_handle(usb_handle_t *handle) {
 				libusb_close(handle->device);
 			}
 			sleep_ms(USB_TIMEOUT);
+		}
+	}
+	return false;
+}
+
+bool wait_usb_handle_with_timeout(usb_handle_t *handle, unsigned timeout) {
+	unsigned totalTime = 0;
+	if(libusb_init(NULL) == LIBUSB_SUCCESS) {
+		for(;;) {
+			if((handle->device = libusb_open_device_with_vid_pid(NULL, handle->vid, handle->pid)) != NULL) {
+				if(libusb_set_configuration(handle->device, 1) == LIBUSB_SUCCESS) {
+					return true;
+				}
+				libusb_close(handle->device);
+			}
+			sleep_ms(USB_TIMEOUT);
+			totalTime += USB_TIMEOUT;
+			if (totalTime >= timeout) {
+				return false;
+			}
 		}
 	}
 	return false;
