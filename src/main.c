@@ -28,6 +28,7 @@ bool argument_exists(int argc, char *argv[], const char *flag)
 
 void print_usage(char *executablePath) {
     printf("Options:\n");
+    printf("\t-u <UDID> - specify a device UDID\n");
     printf("\t-d - enable debug logging\n");
     printf("\t-v - enable verbose logging\n");
     printf("\t-q - enable quiet logging (removes all logging except for errors)\n");
@@ -113,6 +114,8 @@ int main(int argc, char *argv[]) {
     if (argc < 2) {
         print_usage(argv[0]);
     }
+
+    args.deviceUDID = get_argument_value(argc, argv, "-u");
     
     args.debug = argument_exists(argc, argv, "-d");
     args.verbose = argument_exists(argc, argv, "-v");
@@ -142,7 +145,6 @@ int main(int argc, char *argv[]) {
     }
 
     LOG(LOG_SUCCESS, "Achilles v2 we out here!!");
-
     checkm8((args.bootToPongo || args.jailbreak) ? MODE_PONGOOS : MODE_CHECKM8);
 
     return 0;

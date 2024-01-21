@@ -13,9 +13,9 @@ This is currently unfinished and untested, so use at your own risk. If in doubt,
 * Fix payload generation for T8011
 
 # Tested devices
-* iPhone 7, iOS 14.4
-* iPhone X, iOS 16.6.1
-* 
+* iPhone 7, A10
+* iPhone X, A11
+* iPad Pro 10.5", A10X
 
 # Credits
 * [checkra1n](https://checkra.in) - YoloDFU payloads and PongoOS
