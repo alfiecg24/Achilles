@@ -12,10 +12,8 @@ void close_usb_handle(usb_handle_t *handle) {
 	libusb_exit(NULL);
 }
 
-bool reset_usb_handle(usb_handle_t *handle) {
-	if (!wait_usb_handle_with_timeout(handle, 500)) { return false; }
+void reset_usb_handle(usb_handle_t *handle) {
 	libusb_reset_device(handle->device);
-	return true;
 }
 
 extern bool stopThreads;

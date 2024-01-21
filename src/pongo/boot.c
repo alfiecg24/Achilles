@@ -56,6 +56,7 @@ bool send_pongo_to_yolo_dfu(usb_handle_t *handle) {
             }
             send_usb_control_request_no_data(handle, 0x21, DFU_CLRSTATUS, 0, 0, 0, NULL);
             close_usb_handle(handle);
+            sleep_ms(100);
             init_usb_handle(handle, 0x5AC, 0x4141);
             wait_usb_handle(handle);
             free(pongoData);

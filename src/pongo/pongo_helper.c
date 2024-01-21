@@ -187,6 +187,16 @@ bool upload_file_to_pongo(usb_handle_t *handle, const char *path) {
     return ret;
 }
 
+char *append_boot_arguments(const char *base, const char *extra) {
+    char *newBootArgs = malloc(strlen(base) + strlen(extra) + 1);
+    if (newBootArgs == NULL) {
+        LOG(LOG_ERROR, "Failed to allocate memory for boot arguments.");
+        return NULL;
+    }
+    sprintf(newBootArgs, "%s %s", base, extra);
+    return newBootArgs;
+}
+
 bool pongo_jailbreak(usb_handle_t *handle) {
     issue_pongo_command(handle, "fuse lock");
     issue_pongo_command_delayed(handle, "sep auto");
@@ -219,39 +229,23 @@ bool pongo_jailbreak(usb_handle_t *handle) {
     // Set boot arguments
     char *bootArgs = "xargs";
     if (args.jailbreak && args.ramdiskPath) {
-        char *newBootArgs = malloc(strlen(bootArgs) + 13);
-        if (newBootArgs == NULL) {
-            LOG(LOG_ERROR, "Failed to allocate memory for boot arguments.");
-            return false;
-        }
-        snprintf(newBootArgs, strlen(bootArgs) + 13, "%s rootdev=md0", bootArgs);
+        char *newBootArgs = append_boot_arguments(bootArgs, "rootdev=md0");
+        if (newBootArgs == NULL) return false;
         bootArgs = newBootArgs;
     }
     if (args.verboseBoot) {
-        char *newBootArgs = malloc(strlen(bootArgs) + 4);
-        if (newBootArgs == NULL) {
-            LOG(LOG_ERROR, "Failed to allocate memory for boot arguments.");
-            return false;
-        }
-        snprintf(newBootArgs, strlen(bootArgs) + 4, "%s -v", bootArgs);
+        char *newBootArgs = append_boot_arguments(bootArgs, "-v");
+        if (newBootArgs == NULL) return false;
         bootArgs = newBootArgs;
     }
     if (args.serialOutput) {
-        char *newBootArgs = malloc(strlen(bootArgs) + 10);
-        if (newBootArgs == NULL) {
-            LOG(LOG_ERROR, "Failed to allocate memory for boot arguments.");
-            return false;
-        }
-        snprintf(newBootArgs, strlen(bootArgs) + 10, "%s serial=3", bootArgs);
+        char *newBootArgs = append_boot_arguments(bootArgs, "serial=3");
+        if (newBootArgs == NULL) return false;
         bootArgs = newBootArgs;
     }
     if (args.bootArgs) {
-        char *newBootArgs = malloc(strlen(args.bootArgs) + strlen(bootArgs) + 2);
-        if (newBootArgs == NULL) {
-            LOG(LOG_ERROR, "Failed to allocate memory for boot arguments.");
-            return false;
-        }
-        snprintf(newBootArgs, strlen(args.bootArgs) + strlen(bootArgs) + 2, "%s %s", bootArgs, args.bootArgs);
+        char *newBootArgs = append_boot_arguments(bootArgs, args.bootArgs);
+        if (newBootArgs == NULL) return false;
         bootArgs = newBootArgs;
     }
     if (args.bootArgs || args.ramdiskPath || args.verboseBoot || args.serialOutput) {
