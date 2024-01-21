@@ -219,12 +219,12 @@ bool pongo_jailbreak(usb_handle_t *handle) {
     // Set boot arguments
     char *bootArgs = "xargs";
     if (args.jailbreak && args.ramdiskPath) {
-        char *newBootArgs = malloc(strlen(bootArgs) + 12);
+        char *newBootArgs = malloc(strlen(bootArgs) + 13);
         if (newBootArgs == NULL) {
             LOG(LOG_ERROR, "Failed to allocate memory for boot arguments.");
             return false;
         }
-        snprintf(newBootArgs, strlen(bootArgs) + 12, "%s rootdev=md0", bootArgs);
+        snprintf(newBootArgs, strlen(bootArgs) + 13, "%s rootdev=md0", bootArgs);
         bootArgs = newBootArgs;
     }
     if (args.verboseBoot) {
