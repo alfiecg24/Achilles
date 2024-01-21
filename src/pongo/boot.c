@@ -1,15 +1,16 @@
 #include <pongo/boot.h>
 #include <pongo/pongo_helper.h>
 
-void wait_for_device_to_enter_yolo_dfu(usb_handle_t *handle) {
+bool wait_for_device_to_enter_yolo_dfu(usb_handle_t *handle) {
     char *serialNumber = NULL;
     wait_usb_handle(handle);
     serialNumber = get_usb_device_serial_number(handle);
     if (serialNumber == NULL) {
         LOG(LOG_ERROR, "Failed to get device serial number.");
         close_usb_handle(handle);
-        return;
+        return false;
     }
+    unsigned totalTime = 0;
     while (!dfu_serial_number_is_in_yolo_dfu(serialNumber)) {
         wait_usb_handle(handle);
         free(serialNumber);
@@ -17,12 +18,17 @@ void wait_for_device_to_enter_yolo_dfu(usb_handle_t *handle) {
         close_usb_handle(handle);
         if (serialNumber == NULL) {
             LOG(LOG_ERROR, "Failed to get device serial number.");
-            return;
+            return false;
         }
         sleep_ms(100);
+        totalTime += 100;
+        if (totalTime >= 10000) {
+            LOG(LOG_ERROR, "Device failed to enter Yolo DFU mode.");
+            return false;
+        }
     }
     close_usb_handle(handle);
-    return;
+    return true;
 }
 
 bool send_pongo_to_yolo_dfu(usb_handle_t *handle) {

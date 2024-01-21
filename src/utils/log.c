@@ -1,16 +1,17 @@
 #include <utils/log.h>
 
-void step(int time, bool endWithNewline, char *text) {
-	for (int i = 0; i <= time; i++) {
-		printf(BCYN "\r\033[K%s (%d)" CRESET, text, time - i);
-		fflush(stdout);
-		sleep(1);
-	}
-	if (endWithNewline) {
-		printf(CYN "\r%s (%d)\n" CRESET, text, 0);
-	} else {
-		printf(CYN "\r%s (%d)" CRESET, text, 0);
-	}
+extern bool dfu_device_found;
+
+void step(int time, int time2, char *text) {
+	// TODO: make this use LOG
+    for (int i = time2; i < time; i++) {
+		if (dfu_device_found) { return; }
+		printf(BCYN "\r\033[K%s (%d)" CRESET, text, time - i + time2);
+        fflush(stdout);
+        sleep(1);
+    }
+    printf(CYN "\r%s (%d)" CRESET, text, time2);
+	if (time2 == 0) puts("");
 }
 
 int AchillesLog(log_level_t loglevel, bool newline, const char *fname, int lineno, const char *fxname, const char *__restrict format, ...)

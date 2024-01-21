@@ -22,3 +22,4 @@ This is currently unfinished and untested, so use at your own risk. If in doubt,
 * [0x7ff](https://github.com/0x7FF) - gaster
 * [Mineek](https://github.com/Mineek) - openra1n
 * [axi0mX](https://github.com/axi0mX) - checkm8 exploit
+* [palera1n](https://palera.in) - DFU helper
