@@ -33,7 +33,7 @@ void print_usage(char *executablePath) {
     printf("\t-q - enable quiet logging (removes all logging except for errors)\n");
     printf("\t-s - remove signature checks\n");
     printf("\t-p - boot to PongoOS and exit\n");
-    printf("\t-j - jailbreak the device (requires -R and -O)\n");
+    printf("\t-j - jailbreak the device (requires -K)\n");
     printf("\t-V - enable verbose boot\n");
     printf("\t-S - enable serial output\n\n");
     printf("\t-b - additional boot arguments\n");
