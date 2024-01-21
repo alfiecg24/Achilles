@@ -144,7 +144,6 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    LOG(LOG_SUCCESS, "Achilles v2 we out here!!");
     checkm8((args.bootToPongo || args.jailbreak) ? MODE_PONGOOS : MODE_CHECKM8);
 
     return 0;
