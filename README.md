@@ -9,9 +9,6 @@ This is currently unfinished and untested, so use at your own risk. If in doubt,
 * Boot PongoOS on supported devices
 * Jailbreak with supplied kernel patchfinder, ramdisk and overlay
 
-# To-do
-* Fix payload generation for T8011
-
 # Tested devices
 * iPhone 7, A10
 * iPhone X, A11
