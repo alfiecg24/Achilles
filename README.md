@@ -51,8 +51,8 @@ To build, run `make` in the root directory. This will output the final product t
 To install to `/usr/local/bin`, run `make install` (you will be prompted for your password).
 
 # Credits
-* [checkra1n](https://checkra.in) - YoloDFU payloads and PongoOS
-* [0x7ff](https://github.com/0x7FF) - gaster
-* [Mineek](https://github.com/Mineek) - openra1n
-* [axi0mX](https://github.com/axi0mX) - checkm8 exploit
-* [palera1n](https://palera.in) - DFU helper, libimobiledevice code
+* [checkra1n](https://checkra.in) - YoloDFU payloads and PongoOS ([license](https://github.com/checkra1n/PongoOS/tree/master/LICENSE.md))
+* [0x7ff](https://github.com/0x7FF) - gaster ([license](https://github.com/0x7ff/gaster/tree/main/LICENSE))
+* [Mineek](https://github.com/Mineek) - openra1n (unlicensed)
+* [axi0mX](https://github.com/axi0mX) - checkm8 exploit ([license](https://github.com/axi0mX/ipwndfu/tree/master/LICENSE))
+* [palera1n](https://palera.in) - DFU helper, libimobiledevice code ([license](https://github.com/palera1n/palera1n/tree/main/LICENSE))
