@@ -29,6 +29,4 @@ struct AchillesArgs {
     char *overlayPath;
 };
 
-struct AchillesArgs args;
-
 #endif // ACHILLES_H

@@ -1,14 +1,15 @@
 .PHONY: all
 CC=gcc
-SOURCES=$(wildcard src/*.c) $(wildcard src/utils/*.c) $(wildcard src/exploit/*.c) $(wildcard src/usb/*.c) $(wildcard src/pongo/*.c) $(wildcard src/pongo/lz4/*.c)
+SOURCES=$(wildcard src/*.c) $(wildcard src/usb/*.c) $(wildcard src/utils/*.c) $(wildcard src/exploit/*.c) $(wildcard src/pongo/*.c) $(wildcard src/pongo/lz4/*.c)
 OUTPUT=build/Achilles
-CFLAGS=-Iinclude -Wunused -lusb-1.0 -limobiledevice-1.0
+LIBS=-limobiledevice-1.0 -lusb-1.0 -lcrypto
+CFLAGS=-Iinclude -Wall
 
 all: Achilles
 
 Achilles: $(SOURCES)
 	@mkdir -p build
-	$(CC) $(CFLAGS) -o $(OUTPUT) $(SOURCES)
+	$(CC) $(SOURCES) $(LIBS) $(CFLAGS) -o $(OUTPUT)
 
 install: Achilles
 	@mkdir -p /usr/local/bin

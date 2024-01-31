@@ -50,6 +50,8 @@ void print_usage(char *executablePath) {
     exit(-1);
 }
 
+struct AchillesArgs args;
+
 bool check_for_argument_conflicts(struct AchillesArgs args, char *argv0) {
     if (args.jailbreak && !args.kpfPath) {
         LOG(LOG_ERROR, "-j requires -K.");
@@ -76,6 +78,8 @@ bool check_for_argument_conflicts(struct AchillesArgs args, char *argv0) {
     }
     return true;
 }
+
+struct AchillesArgs args;
 
 bool check_custom_paths(struct AchillesArgs args) {
     struct stat st;

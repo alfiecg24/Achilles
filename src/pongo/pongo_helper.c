@@ -3,6 +3,8 @@
 #include <pongo/pongo.h>
 #include <pongo/lz4/lz4hc.h>
 
+extern struct AchillesArgs args;
+
 // All credits go to @mineekdev for their openra1n project,
 // which provided the template for this code.
 
@@ -22,13 +24,12 @@ bool prepare_pongo(unsigned char **pongoBuf, size_t *size)
 
 
     // Get PongoOS
-    char *pongoPath;
     if (args.pongoPath) {
         FILE *pongoFile;
         pongoFile = fopen(args.pongoPath, "rb");
         if (pongoFile == NULL)
         {
-            LOG(LOG_ERROR, "Failed to open PongoOS file (%s)", pongoPath);
+            LOG(LOG_ERROR, "Failed to open PongoOS file (%s)", args.pongoPath);
             return false;
         }
         fseek(pongoFile, 0, SEEK_END);

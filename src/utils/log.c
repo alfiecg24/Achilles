@@ -1,6 +1,7 @@
 #include <utils/log.h>
 
 extern bool dfu_device_found;
+extern struct AchillesArgs args;
 
 void step(int time, int time2, char *text) {
 	// TODO: make this use LOG
