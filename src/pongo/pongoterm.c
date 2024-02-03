@@ -68,7 +68,7 @@ void pongoterm(void) {
 
         // Check if it's sending a file
         if (strncmp(command, "/send", 5) == 0) {
-            // NULL the last character
+            // NULL the last character (newline)
             command[strlen(command) - 1] = 0;
             if (strlen(command) < 7) {
                 printf("Usage: /send FILE\n");
@@ -92,6 +92,10 @@ void pongoterm(void) {
         // Check if it's a command to boot (we shouldn't fetch output after this)
         else if (strncmp(command, "boot", 4) == 0) {
             issue_pongo_command(handle, command, buffer);
+            return;
+        }
+
+        else if (strncmp(command, "exit", 4) == 0) {
             return;
         }
         
