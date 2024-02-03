@@ -14,7 +14,8 @@
 #define CMD_LENGTH_MAX 512
 
 bool prepare_pongo(unsigned char **pongoBuf, size_t *size);
-int issue_pongo_command(usb_handle_t *handle, char *command);
+int issue_pongo_command(usb_handle_t *handle, char *command, char *outBuffer);
+bool upload_file_to_pongo(usb_handle_t *handle, const char *path);
 bool pongo_jailbreak(usb_handle_t *handle);
 
 #endif // PONGO_HELPER_H

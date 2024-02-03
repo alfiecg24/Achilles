@@ -22,6 +22,7 @@ struct AchillesArgs {
     bool jailbreak;
     bool verboseBoot;
     bool serialOutput;
+    bool pongoterm;
     char *bootArgs;
     char *pongoPath;
     char *kpfPath;

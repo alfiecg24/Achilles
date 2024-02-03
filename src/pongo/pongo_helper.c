@@ -2,6 +2,7 @@
 #include <pongo/shellcode.h>
 #include <pongo/pongo.h>
 #include <pongo/lz4/lz4hc.h>
+#include <sys/_types/_null.h>
 
 extern struct AchillesArgs args;
 
@@ -78,7 +79,7 @@ bool prepare_pongo(unsigned char **pongoBuf, size_t *size)
     return true;
 }
 
-int issue_pongo_command_internal(usb_handle_t *handle, char *command, unsigned waitTime)
+int issue_pongo_command(usb_handle_t *handle, char *command, char *outBuffer)
 {
     bool ret;
     uint8_t inProgress = 1;
@@ -100,13 +101,12 @@ int issue_pongo_command_internal(usb_handle_t *handle, char *command, unsigned w
 	ret = send_usb_control_request_no_data(handle, 0x21, 4, 1, 0, 0, NULL);
 	if (!ret)
 		goto bad;
-	ret = send_usb_control_request(handle, 0x21, 3, 0, 0, commandBuffer, (uint32_t)length, NULL);
-    sleep_ms(waitTime);
+	ret = send_usb_control_request_no_timeout(handle, 0x21, 3, 0, 0, commandBuffer, (uint32_t)length, NULL);
 fetch_output:
     while (inProgress) {
-        ret = send_usb_control_request(handle, 0xA1, 2, 0, 0, &inProgress, (uint32_t)sizeof(inProgress), NULL);
+        ret = send_usb_control_request_no_timeout(handle, 0xA1, 2, 0, 0, &inProgress, (uint32_t)sizeof(inProgress), NULL);
         if (ret) {
-            ret = send_usb_control_request(handle, 0xA1, 1, 0, 0, stdoutBuffer + outPosition, 0x1000, &transferRet);
+            ret = send_usb_control_request_no_timeout(handle, 0xA1, 1, 0, 0, stdoutBuffer + outPosition, 0x1000, &transferRet);
             outLength = transferRet.sz;
             if (transferRet.ret == USB_TRANSFER_OK) {
                 outPosition += outLength;
@@ -133,16 +133,11 @@ bad:
         }
 	}
 	else {
+        if (outBuffer) {
+            memcpy(outBuffer, stdoutBuffer, outPosition);
+        }
 		return ret;
 	}
-}
-
-int issue_pongo_command(usb_handle_t *handle, char *command) {
-    return issue_pongo_command_internal(handle, command, 0);
-}
-
-int issue_pongo_command_delayed(usb_handle_t *handle, char *command) {
-    return issue_pongo_command_internal(handle, command, 750);
 }
 
 bool upload_file_to_pongo(usb_handle_t *handle, const char *path) {
@@ -199,15 +194,15 @@ char *append_boot_arguments(const char *base, const char *extra) {
 }
 
 bool pongo_jailbreak(usb_handle_t *handle) {
-    issue_pongo_command(handle, "fuse lock");
-    issue_pongo_command_delayed(handle, "sep auto");
+    issue_pongo_command(handle, "fuse lock", NULL);
+    issue_pongo_command(handle, "sep auto", NULL);
 
     // Upload kernel patchfinder
     if (!upload_file_to_pongo(handle, args.kpfPath)) {
         LOG(LOG_ERROR, "Failed to upload kernel patchfinder.");
         return false;
     }
-    issue_pongo_command_delayed(handle, "modload");
+    issue_pongo_command(handle, "modload", NULL);
 
     // Upload ramdisk
     if (args.ramdiskPath) {
@@ -215,7 +210,7 @@ bool pongo_jailbreak(usb_handle_t *handle) {
             LOG(LOG_ERROR, "Failed to upload ramdisk.");
             return false;
         }
-        issue_pongo_command(handle, "ramdisk");
+        issue_pongo_command(handle, "ramdisk", NULL);
     }
 
     // Upload overlay
@@ -224,7 +219,7 @@ bool pongo_jailbreak(usb_handle_t *handle) {
             LOG(LOG_ERROR, "Failed to upload overlay.");
             return false;
         }
-        issue_pongo_command(handle, "overlay");
+        issue_pongo_command(handle, "overlay", NULL);
     }
 
     // Set boot arguments
@@ -250,16 +245,16 @@ bool pongo_jailbreak(usb_handle_t *handle) {
         bootArgs = newBootArgs;
     }
     if (args.bootArgs || args.ramdiskPath || args.verboseBoot || args.serialOutput) {
-        issue_pongo_command(handle, bootArgs);
+        issue_pongo_command(handle, bootArgs, NULL);
     }
 
     // Extra fix for verbose boot
     if (strstr(bootArgs, "-v")) {
-        issue_pongo_command(handle, "xfb");
+        issue_pongo_command(handle, "xfb", NULL);
     }
 
     // Boot
-    issue_pongo_command(handle, "bootx");
+    issue_pongo_command(handle, "bootx", NULL);
 
     // Done
     return true;

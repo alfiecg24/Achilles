@@ -61,6 +61,22 @@ void usb_async_callback(struct libusb_transfer *transfer) {
 	*(int *)transfer->user_data = 1;
 }
 
+bool send_usb_control_request_no_timeout(const usb_handle_t *handle, uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, void *pData, size_t wLength, transfer_ret_t *transferRet) {
+	int ret = libusb_control_transfer(handle->device, bmRequestType, bRequest, wValue, wIndex, pData, (uint16_t)wLength, 0);
+
+	if(transferRet != NULL) {
+		if(ret >= 0) {
+			transferRet->sz = (uint32_t)ret;
+			transferRet->ret = USB_TRANSFER_OK;
+		} else if(ret == LIBUSB_ERROR_PIPE) {
+			transferRet->ret = USB_TRANSFER_STALL;
+		} else {
+			transferRet->ret = USB_TRANSFER_ERROR;
+		}
+	}
+	return true;
+}
+
 bool send_usb_control_request(const usb_handle_t *handle, uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, void *pData, size_t wLength, transfer_ret_t *transferRet) {
 	int ret = libusb_control_transfer(handle->device, bmRequestType, bRequest, wValue, wIndex, pData, (uint16_t)wLength, USB_TIMEOUT);
 

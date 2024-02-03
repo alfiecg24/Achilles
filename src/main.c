@@ -1,5 +1,6 @@
 #include <Achilles.h>
 #include <exploit/exploit.h>
+#include <pongo/pongoterm.h>
 
 char *get_argument_value(int argc, char *argv[], const char *flag)
 {
@@ -35,7 +36,8 @@ void print_usage(char *executablePath) {
     printf("\t-p - boot to PongoOS and exit\n");
     printf("\t-j - jailbreak the device (requires -K)\n");
     printf("\t-V - enable verbose boot\n");
-    printf("\t-S - enable serial output\n\n");
+    printf("\t-S - enable serial output\n");
+    printf("\t-T - start a PongoOS shell\n\n");
     printf("\t-u <UDID> - specify a device UDID\n");
     printf("\t-b <arguments> - additional boot arguments\n");
     printf("\t-k <Pongo.bin> - override PongoOS image\n");
@@ -65,7 +67,7 @@ bool check_for_argument_conflicts(struct AchillesArgs args, char *argv0) {
         return false;
     }
 
-    if (!args.disableSignatureChecks && !args.bootToPongo && !args.jailbreak) {
+    if (!args.disableSignatureChecks && !args.bootToPongo && !args.jailbreak && !args.pongoterm) {
         LOG(LOG_ERROR, "You must specify either -s, -p, or -j.");
         print_usage(argv0);
         return false;
@@ -130,6 +132,7 @@ int main(int argc, char *argv[]) {
     args.verboseBoot = argument_exists(argc, argv, "-V");
     args.serialOutput = argument_exists(argc, argv, "-S");
     args.bootArgs = get_argument_value(argc, argv, "-b");
+    args.pongoterm = argument_exists(argc, argv, "-T");
 
     args.pongoPath = get_argument_value(argc, argv, "-k");
     args.kpfPath = get_argument_value(argc, argv, "-K");
@@ -148,7 +151,11 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    checkm8((args.bootToPongo || args.jailbreak) ? MODE_PONGOOS : MODE_CHECKM8);
+    if (args.pongoterm) {
+        pongoterm();
+    } else {
+        checkm8((args.bootToPongo || args.jailbreak) ? MODE_PONGOOS : MODE_CHECKM8);
+    }
 
     return 0;
 }
